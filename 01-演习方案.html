@@ -91,7 +91,7 @@
   <tr><td>持久化 / 自启动 / 刷机 / Root / Xposed / ADB 恢复</td><td>与「不刷机、不动刀」约束冲突;会命中 blockapp 日检与 L4 违规锁。基线文档 §十四已逐条证伪。</td></tr>
   <tr><td>ARP/DHCP 欺骗、TCP RST、DNS 劫持、策略包伪造</td><td>过不了响应签名 + md5 转存前后校验;且属中间人攻击面。基线文档 §十四 1/3/4。</td></tr>
   <tr><td>任何指向第三方/公网的「放行测试」</td><td>演习只度量「40.90:9011 是否可达」这一布尔量;URL 里的域名串仅作为字符串样本,不解析不访问。</td></tr>
-  <tr><td>结果用于真实逃逸课堂管控</td><td>演习结论仅用于:管理端白名单配置、厂商漏洞报告、本地检测规则。</td></tr>
+  <tr><td>结果用于真实逃逸课堂管控</td><td>演习结论仅用于授权环境内的学习与自有配置自查。</td></tr>
 </table>
 <div class="callout red"><strong>判定规则:</strong>所有用例的观测对象是「服务器是否收到请求 + 设备浏览器表现」,二者必须成对取证。任何单侧观察(只截屏、只看日志)不计为证据。</div>
 </div>
@@ -257,7 +257,7 @@
 <div class="card">
 <ul>
   <li><strong>快速启动:</strong><code>node server/lab-server.mjs</code>(或 <code>start.cmd</code>)→ 本机 <code>http://127.0.0.1:9011/</code> 冒烟 → 设备浏览器开 <code>http://SVCDOM@192.168.40.90:9011/</code>(N2 形态)开始。</li>
-  <li><strong>配套文件:</strong>README.md(运行手册)/ server/lab-server.mjs / pages/ 各用例页 / records/result.csv(模板)/ docs/detection-pairing.md。</li>
+  <li><strong>配套文件:</strong>README.md(运行手册)/ server/lab-server.mjs / pages/ 各用例页 / records/result.csv(模板)。</li>
   <li><strong>参照文档:</strong>资料库《EBMD MDM 过滤器行为模型 —— 实测知识与证据(2026-09-08)》(nodeId Q9Ct3IxpiDMiYNJvl7gTZC);exploits 仓库 README(仅方法引用)。</li>
   <li><strong>风险缓解:</strong>演习端口与生产隔离;日志可整目录删除;演习页无任何对外请求;本机不下载/执行仓库任何载荷。</li>
 </ul>

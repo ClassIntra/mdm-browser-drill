@@ -45,7 +45,7 @@ mdm-browser-drill/
 ├── server/probe-variants.mjs DP 变体 URL 在 WHATWG URL 下的规范化验证脚本
 ├── pages/                    探针页（index 总控台 + nav/sub/dom/ab/dp/dp2/dp3）
 ├── records/                  两轮原始留痕：access.log / observe.csv / server.log
-└── docs/                     文章、防御侧配对建议、CI 适配方案
+└── docs/                     文章、CI 适配方案
 ```
 
 ## 复现
@@ -67,4 +67,4 @@ curl -s http://127.0.0.1:9011/api/ping    # 返回 {"ok":1,...} 即正常
 
 ## 授权与边界
 
-全部实验在自有受管设备、自有靶机与授权网段内完成，探测目标只指向实验者自己的服务器地址；不下载、不执行外部载荷，不触碰厂商云端。结论用于管理端策略修复工单、厂商沟通与本地检测规则（见 [`docs/detection-pairing.md`](docs/detection-pairing.md)）。请勿将本套件用于未授权网络。
+全部实验在自有受管设备、自有靶机与授权网段内完成，探测目标只指向实验者自己的服务器地址；不下载、不执行外部载荷，不触碰厂商云端。本套件仅用于授权环境内的技术学习与自有配置自查。请勿将本套件用于未授权网络。

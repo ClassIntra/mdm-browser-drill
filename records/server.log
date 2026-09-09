@@ -1,4 +1,4 @@
 [lab] listening on 0.0.0.0:9011
-[lab] access log: C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records\access.log
-[lab] observe csv: C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records\observe.csv
+[lab] access log: C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records\access.log
+[lab] observe csv: C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records\observe.csv
 [lab] alt listening on 0.0.0.0:18081 (port-independence, N3)

@@ -76,7 +76,7 @@
 [2026-09-08T12:55:01.593Z] 192.168.40.27 "GET /" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C8hPro-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046295 Mobile Safari/537.36 
 [2026-09-08T12:55:02.269Z] 192.168.40.27 "GET /ab.html?mode=A&pad=8" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C8hPro-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046295 Mobile Safari/537.36 
 [2026-09-08T12:55:10.430Z] 192.168.40.27 "GET /" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C8hPro-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046295 Mobile Safari/537.36 
-[2026-09-08T13:10:52.322Z] server start port=9011 root=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
+[2026-09-08T13:10:52.322Z] server start port=9011 root=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
 [2026-09-08T13:10:59.601Z] 127.0.0.1 "GET /api/ping" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-08T13:10:59.823Z] 127.0.0.1 "GET /" 200 UA=curl/8.0.1 REF=http://x/ SF=-/-/- 
 [2026-09-08T13:11:10.122Z] 127.0.0.1 "GET /" 200 UA=curl/8.0.1 REF=http://spark.changyan.com@192.168.40.90:9011/ SF=same-origin/document/navigate 
@@ -199,13 +199,13 @@
 [2026-09-08T13:41:40.063Z] 192.168.40.27 "GET /case-dom.html" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C8hPro-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046295 Mobile Safari/537.36 REF=http://192.168.40.90:9011/?=485670 SF=-/-/- 
 [2026-09-08T13:41:41.741Z] 192.168.40.27 "GET /api/observe?case=DN11&result=blocked&note=dom=192.168.40.90.nip.io" 204 UA=Mozilla/5.0 (Linux; Android 9; CB-C8hPro-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046295 Mobile Safari/537.36 REF=http://192.168.40.90:9011/case-dom.html SF=-/-/- OBSERVE case=DN11 result=blocked
 [2026-09-08T13:41:42.648Z] 192.168.40.27 "GET /api/observe?case=DN13&result=blocked&note=dom=192.168.40.90.sslip.io" 204 UA=Mozilla/5.0 (Linux; Android 9; CB-C8hPro-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046295 Mobile Safari/537.36 REF=http://192.168.40.90:9011/case-dom.html SF=-/-/- OBSERVE case=DN13 result=blocked
-[2026-09-09T00:27:34.190Z] server start port=9011 root=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
+[2026-09-09T00:27:34.190Z] server start port=9011 root=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
 [2026-09-09T00:28:01.285Z] 127.0.0.1 "GET /" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:28:33.824Z] 127.0.0.1 "OPTIONS /api/ping" 204 UA=curl/8.0.1 REF=- SF=-/-/- PREFLIGHT
 [2026-09-09T00:28:34.004Z] 127.0.0.1 "POST /api/ping" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:28:34.207Z] 127.0.0.1 "GET /redir?case=SELFTEST" 302 UA=curl/8.0.1 REF=- SF=-/-/- REDIR -> http://192.168.40.90:9011/case-dp.html?case=SELFTEST&hit=1
 [2026-09-09T00:29:09.683Z] 127.0.0.1 "GET /" 200 UA=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML  like Gecko) Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0 REF=- SF=none/document/navigate 
-[2026-09-09T00:29:55.071Z] server start port=9011 root=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
+[2026-09-09T00:29:55.071Z] server start port=9011 root=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
 [2026-09-09T00:31:16.422Z] 127.0.0.1 "GET /case-dp.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:31:53.605Z] 127.0.0.1 "GET /case-dp.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:31:53.972Z] 127.0.0.1 "GET /" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
@@ -280,10 +280,10 @@
 [2026-09-09T00:38:30.037Z] 192.168.40.58 "GET /api/observe?case=DP1&result=blocked&note=%E6%89%8B%E5%8A%A8%E6%A0%87%3A%E8%A2%AB%E6%8B%A6(%E8%AF%B7%E6%88%AA%E5%B1%8F)&r=0.1641792019732986" 204 UA=Mozilla/5.0 (Linux; Android 9; CB-C6-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/80.0.3987.132 Safari/537.36 REF=http://192.168.40.90:9011/case-dp.html?case=DP12&hit=1 SF=-/-/- OBSERVE case=DP1 result=blocked
 [2026-09-09T00:38:39.274Z] 192.168.40.58 "GET /" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C6-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/80.0.3987.132 Safari/537.36 REF=- SF=-/-/- 
 [2026-09-09T00:38:39.297Z] 192.168.40.58 "GET /" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C6-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/80.0.3987.132 Safari/537.36 REF=- SF=-/-/- 
-[2026-09-09T00:53:13.070Z] server start port=9011 root=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
+[2026-09-09T00:53:13.070Z] server start port=9011 root=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
 [2026-09-09T00:53:15.365Z] 127.0.0.1 "GET /case-dp.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:53:15.642Z] 127.0.0.1 "GET /redir-xhr?case=SELFTEST" 302 UA=curl/8.0.1 REF=- SF=-/-/- REDIR-XHR -> http://192.168.40.90:9011/api/ping?case=SELFTEST
-[2026-09-09T00:59:33.250Z] server start port=9011 root=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
+[2026-09-09T00:59:33.250Z] server start port=9011 root=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
 [2026-09-09T00:59:50.307Z] 127.0.0.1 "GET /case-dp.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:59:50.612Z] 127.0.0.1 "GET /" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T00:59:50.952Z] 127.0.0.1 "GET /redir-xhr?case=SELFTEST" 302 UA=curl/8.0.1 REF=- SF=-/-/- REDIR-XHR -> http://192.168.40.90:9011/api/ping?case=SELFTEST
@@ -316,7 +316,7 @@
 [2026-09-09T01:15:02.358Z] 192.168.40.58 "GET /?=a" 200 UA=Mozilla/5.0 (Linux; Android 9; CB-C6-STU Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML  like Gecko) Version/4.0 Chrome/80.0.3987.132 Safari/537.36 REF=- SF=-/-/- 
 [2026-09-09T01:16:49.699Z] 127.0.0.1 "HEAD /case-dp.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T01:16:49.901Z] 127.0.0.1 "GET /case-dp.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
-[2026-09-09T01:28:15.221Z] server start port=9011 root=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\iflytek\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
+[2026-09-09T01:28:15.221Z] server start port=9011 root=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\pages rec=C:\Users\<user>\WorkBuddy\2026-09-07-17-53-13\mdm-browser-drill\records
 [2026-09-09T01:28:25.064Z] 127.0.0.1 "GET /case-dp2.html" 200 UA=curl/8.0.1 REF=- SF=-/-/- 
 [2026-09-09T01:28:25.411Z] 127.0.0.1 "HEAD /redir?case=DP12&to=case-dp2.html" 302 UA=curl/8.0.1 REF=- SF=-/-/- REDIR -> http://192.168.40.90:9011/case-dp2.html?case=DP12&hit=1
 [2026-09-09T01:28:25.673Z] 127.0.0.1 "HEAD /redir?case=DP12" 302 UA=curl/8.0.1 REF=- SF=-/-/- REDIR -> http://192.168.40.90:9011/case-dp.html?case=DP12&hit=1

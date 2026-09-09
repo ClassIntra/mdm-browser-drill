@@ -36,7 +36,7 @@
   <div data-page-node-id="Oh1EfH7KO2MFm1WdBztO3X">
     <span class="tag" data-page-node-id="nRjQMfSrkZYXhAirR7MYlj">授权环境</span><span class="tag" data-page-node-id="vrVQMENK1BOo1Q9QSfCEBO">自有设备</span><span class="tag" data-page-node-id="o2KfTvbxXSRGMQ2VClRtLA">自有靶机</span><span class="tag" data-page-node-id="qQ537XQAecLZHC61HXjhcF">不 root / 不越狱 / 不装证书 / 不做中间人</span>
   </div>
-  <div class="note" data-page-node-id="2HTMDGgXsVVVd7s8DtKUk5"><b data-page-node-id="H4ah9fv5StmWIM2Jg9Lnm6">合规边界声明</b>：全部实验在实验者自有受管设备、自有靶机与授权网段内完成，探测目标只指向实验者自己的服务器地址；未触碰厂商云端、未对第三方设备发起任何请求、未植入持久化载荷。本报告仅用于管理端策略修复工单与厂商沟通。</div>
+  <div class="note" data-page-node-id="2HTMDGgXsVVVd7s8DtKUk5"><b data-page-node-id="H4ah9fv5StmWIM2Jg9Lnm6">合规边界声明</b>：全部实验在实验者自有受管设备、自有靶机与授权网段内完成，探测目标只指向实验者自己的服务器地址；未触碰厂商云端、未对第三方设备发起任何请求、未植入持久化载荷。本报告仅用于授权环境内的技术学习与自有配置自查。</div>
 </div>
 
 <div class="card" data-page-node-id="qGgoiz9U6SUq9jzwdhjfmu">
@@ -235,7 +235,6 @@ def decide(authority: str) -&gt; bool:
 <tr data-page-node-id="9hsk0HoUxa4V5ve9zK7Q7N"><td data-page-node-id="5aXsYJGhET8f52sUi7bwjq">× · 40.100 别名</td><td data-page-node-id="RGYnoM4hIjKc7JDPNeLBAx">服务器网卡加 192.168.40.100 别名</td><td class="no" data-page-node-id="eBW5uQC5Q2SyP8WxahAivl">判死</td><td data-page-node-id="bqbRjD02ieqyxtfiUVC1Hp">DP30：黑名单子串连坐（40.1 是 40.100 前缀）</td></tr>
 <tr data-page-node-id="d9FH9P3FtNEjClS96zmu0C"><td data-page-node-id="sVJH3ix3oDcAZetr7viZ5c">× · 管理端 CIDR</td><td data-page-node-id="1PgCB91yC4brwC65ozJTTH">siteList 写 192.168.40.1/24 之类</td><td class="no" data-page-node-id="Iyo8Pf1KHb9xaWmT4tZwGp">无效</td><td data-page-node-id="ZwkCJxxPDFStFGFaCGce0H">siteList 不参与浏览器层判定；黑名单另一张表</td></tr>
 </table>
-<div class="good" data-page-node-id="KYMODF7VKuL6OzyGKotplg"><b data-page-node-id="aXuVlsBByhYbXCV8JA6Cgv">管理端修复建议</b>：① 浏览器禁止站点黑名单应按 IP 精确/解析匹配而非子串，且应校验条目不与合法网段重叠（40.1 连坐 40.100 即为实例）；② userinfo 凭据段应在判定前剥离或直接拒绝含凭据的 URL（现代浏览器已弃用，业务无合法场景）；③ 判定输入应使用剥离后、规范化后的最终请求 URL，消除「判定的字符串与发出的请求不一致」这一根因。</div>
 </div>
 
 <div class="card" data-page-node-id="5qAXygki5LJZoT2h5xoRHi">

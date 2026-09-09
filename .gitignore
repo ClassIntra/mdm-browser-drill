@@ -4,3 +4,4 @@ node_modules/
 Thumbs.db
 .DS_Store
 Desktop.ini
+docs/detection-pairing.md
