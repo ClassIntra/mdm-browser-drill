@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="gGRjJvEZfD68sf0Zjl8VEF">
+<head data-page-node-id="3x1A3M65wWgKaPjekKC2by">
+<meta charset="UTF-8" data-page-node-id="6ul07YgqG8MYYGn91D10dk">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="x7Qj1RK3YEl94W4k3SB9WS">
+<title>MDM 浏览器层过滤器黑盒测绘 · 完整测试报告</title>
+<style>
+  body{font:15px/1.85 "Microsoft YaHei","Segoe UI",sans-serif;margin:0;background:#f4f6fa;color:#1f2937}
+  .wrap{max-width:1080px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:22px 28px;margin:14px 0}
+  h1{font-size:22px;margin:0 0 2px} h2{font-size:17px;margin:26px 0 8px;border-left:4px solid #2f6bff;padding-left:10px}
+  h3{font-size:15px;margin:18px 0 6px;color:#334155}
+  .sub{color:#64748b;font-size:13px;margin-bottom:8px}
+  .tag{display:inline-block;background:#e8f0fe;color:#1d4ed8;border-radius:6px;padding:1px 10px;font-size:12px;margin-right:6px;font-weight:600}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:10px 0}
+  th,td{border:1px solid #dde4ef;padding:5px 9px;text-align:left;vertical-align:top}
+  th{background:#edf2fa;white-space:nowrap}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-all}
+  pre{background:#0f172a;color:#d7e3f4;padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:12.5px;line-height:1.6}
+  .ok{color:#0f9d58;font-weight:600}.no{color:#d93026;font-weight:600}.na{color:#6b7a94}
+  .note{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin:10px 0}
+  .good{background:#e8f6ee;border-left:4px solid #0f9d58;padding:8px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin:10px 0}
+  .bad{background:#fdecea;border-left:4px solid #d93026;padding:8px 14px;border-radius:0 8px 8px 0;font-size:13.5px;margin:10px 0}
+  .kpi{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+  .kpi div{flex:1;min-width:130px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;text-align:center}
+  .kpi b{display:block;font-size:22px;color:#1d4ed8}
+  .small{font-size:12px;color:#64748b}
+</style>
+</head>
+<body data-page-node-id="IGiKO7YrOGzBHvMBczQQaF">
+<div class="wrap" data-page-node-id="Y6ZsRYVzBCxFwnuGwLahme">
+
+<div class="card" data-page-node-id="RdEX4i3aeOO7UWnIde8RcE">
+  <h1 data-page-node-id="9hnpQzcKEMJTbjHkvhEygt">MDM 浏览器层过滤器黑盒测绘 · 完整测试报告</h1>
+  <div class="sub" data-page-node-id="st2kFFzKL0CLkqo5IAjmLq">两轮实测 · 62 探针 · 引擎判定规则收敛为 12 行伪代码 · 2026-09-08 至 2026-09-09</div>
+  <div data-page-node-id="Oh1EfH7KO2MFm1WdBztO3X">
+    <span class="tag" data-page-node-id="nRjQMfSrkZYXhAirR7MYlj">授权环境</span><span class="tag" data-page-node-id="vrVQMENK1BOo1Q9QSfCEBO">自有设备</span><span class="tag" data-page-node-id="o2KfTvbxXSRGMQ2VClRtLA">自有靶机</span><span class="tag" data-page-node-id="qQ537XQAecLZHC61HXjhcF">不 root / 不越狱 / 不装证书 / 不做中间人</span>
+  </div>
+  <div class="note" data-page-node-id="2HTMDGgXsVVVd7s8DtKUk5"><b data-page-node-id="H4ah9fv5StmWIM2Jg9Lnm6">合规边界声明</b>：全部实验在实验者自有受管设备、自有靶机与授权网段内完成，探测目标只指向实验者自己的服务器地址；未触碰厂商云端、未对第三方设备发起任何请求、未植入持久化载荷。本报告仅用于管理端策略修复工单与厂商沟通。</div>
+</div>
+
+<div class="card" data-page-node-id="qGgoiz9U6SUq9jzwdhjfmu">
+<h2 data-page-node-id="pdQqlHAUpvJVBjwqWLltUo">一、执行摘要</h2>
+<p data-page-node-id="ZIQ2uQpvhDDqhFyKDVNUOG">受管平板的 MDM 浏览器过滤器以「无效的响应」软拦内网裸 IP 访问。两轮共 <b data-page-node-id="DC0IdEh1ghw6mKVFGh3BYw">62 个探针</b>的黑盒测绘将引擎判定规则完整收敛（模型 v1→v6），核心结论：</p>
+<div class="good" data-page-node-id="7CFGwBWXa51IR62EDQ7EaL"><b data-page-node-id="4RYvw4UNo3Xm6fbGixboEB">引擎最终模型（v6）</b>：对 GURL 规范化后的 URL authority 拆为 <code data-page-node-id="Z3ImDgdrIqdlBZNlvVTbUQ">token（@ 前）</code>与 <code data-page-node-id="JZhfJjFQFXeC2wmR9QRisz">host</code> 两段——<b data-page-node-id="64OSJYiCwMHyLZspLk9FxI">token 非空时只查 token</b>（含黑名单 IP 点分四段子串即拦，host 完全不被查）；token 空或无时才查 host。黑名单 = {192.168.40.1, 192.168.40.90, 192.168.125.1}，全端口、<b data-page-node-id="Zrqa64kvvjtqVMQ4ZEtQiF">纯字符串子串匹配</b>、大小写不敏感。32 个数据点零矛盾。</div>
+<div class="kpi" data-page-node-id="9KYQBdoYkUxFfXW7NwGLlk">
+  <div data-page-node-id="xIYkmGeWYXRaGcxA95gEE0"><b data-page-node-id="hvcFocCFNg2MRcazSJ6Lo8">62</b>探针总数</div>
+  <div data-page-node-id="aHh3fnt9KjH1HbcRFEwRgz"><b data-page-node-id="2AM1LR8MjGsGn8KnVe90GA">2</b>台受管设备</div>
+  <div data-page-node-id="VLWnh2rRUuWst5F6FIBNmD"><b data-page-node-id="URdHMWACAIIQg4AxiVMWDe">6</b>版模型迭代</div>
+  <div data-page-node-id="5cNdfctXSzSi0xP2LGq6uk"><b data-page-node-id="Qw0d7TQbX1WC5Ssys0w9Aa">2</b>类绕过原语</div>
+  <div data-page-node-id="f4qXEqv85En7T1VQ7vgdxg"><b data-page-node-id="sklYIE4qxoE50UMJ7kalBm">3</b>黑名单成员</div>
+</div>
+<p data-page-node-id="6P0HwxsWhih05yQVbZEmMU"><b data-page-node-id="vBvcdjxHkwhxQLaHREr2GX">两类可复现绕过</b>：① 任意非空 userinfo token 短路（<code data-page-node-id="66PrI67iZ8ChkJvQx3g9FF">http://a@192.168.40.90:9011/</code> 即达）；② IPv4-mapped IPv6 字面量使点分四段在规范化后消失（<code data-page-node-id="5nyFcoLRtdxSIOhyx7ttM7">http://[::ffff:192.168.40.90]:9011/</code> 即达）。另有域名形态完整解（nip.io 横线形 / 自有域名 A 记录）。</p>
+</div>
+
+<div class="card" data-page-node-id="pFvhHA3lqHyEM63ayGCtlX">
+<h2 data-page-node-id="VmBz5WxB3s5ojvZHw7vcmf">二、环境与方法</h2>
+<table data-page-node-id="Bl8dFJ7PvvJDG1wXG6hND5">
+<tr data-page-node-id="UyJ43Y5qqHjrsmMTuSE2vB"><th data-page-node-id="uf7bXUurbIyGj7vNh7GnyT">项目</th><th data-page-node-id="auHRTi3xVnWvXskfqVXrNN">第一轮（09-08）</th><th data-page-node-id="2YgFWF8fKqQJyN3YfmYKwE">第二轮（09-09）</th></tr>
+<tr data-page-node-id="VzGDtC3W3ajSNLDuztcAe0"><td data-page-node-id="N3uCuaPZV6ggUjvqGQHmuG">受管设备</td><td data-page-node-id="Le21gSNToq4KoNFJywh0AK">CB-C8hPro-STU · Android 9 · X5 WebView TBS/046295 · Chrome/89（40.27）</td><td data-page-node-id="KbJJ4HZGeq3TUIKnvQBDfe">CB-C6-STU · Android 9 · 系统 WebView · Chrome/80 无 X5（40.58）</td></tr>
+<tr data-page-node-id="gvBjZOpj9WSKiwjZwD0OtY"><td data-page-node-id="0RcUiiIHmiHgpmojpkycrX">网络</td><td colspan="2" data-page-node-id="JfPpdfHHm3ysslFTeo4ROJ">192.168.40.0/24（MDM 管控）· 网关 192.168.40.1 · 课堂互动网关 192.168.125.1</td></tr>
+<tr data-page-node-id="BbCIZDosNVzcdW4UiTyZgS"><td data-page-node-id="amWv2khSnDHsKHfLufqAHH">靶机</td><td colspan="2" data-page-node-id="UV4DZEtkgCxawuB7Y73Ma9">192.168.40.90:9011 / :18081，自研 Node 实验台（lab-server.mjs），逐请求留痕 access.log + observe.csv</td></tr>
+<tr data-page-node-id="zOtiZrhPQgmKRlaGZiFpmK"><td data-page-node-id="afyjTK6HyP7OjjaglJI5br">探针</td><td data-page-node-id="S93UJ3TgNlgqO1ijGvsXNe">N 组 7 · S 组 7 · D 组 3 · DN 组 13 = 30</td><td data-page-node-id="k4Bca3PluV0MZmfBZ5d3Wa">DP 组 32（case-dp2/case-dp3 页）</td></tr>
+<tr data-page-node-id="99TENSIkQoKkwTFDYTdCGv"><td data-page-node-id="QVzOUSkzu6wkmeM9he94nV">窗口</td><td data-page-node-id="LT03Es7ZnD7RalbuB6I9bC">20:50–21:45</td><td data-page-node-id="nQrAquLFwAQvD1ZjN8Yhol">08:37–11:38（跨内核复测）</td></tr>
+</table>
+<h3 data-page-node-id="ssnyYXow6LfSaoB4hDmNQ0">判读规则（本轮方法论核心）</h3>
+<ul data-page-node-id="baslQ6kbsm6nhG8y7ao0iC">
+<li data-page-node-id="bukoKh2VHiCDIG7ioWBDoa"><b data-page-node-id="ac1mjU8YWqt65WBncja9BS">「无效的响应」（秒出）= 引擎软拦</b>——合成响应，目标侧零痕迹；顶层导航与 XHR onerror 均属此列。</li>
+<li data-page-node-id="hHsU6mF1meeWC45ezaGE9c"><b data-page-node-id="FQ0Uhz6fQd9RODXNNLrQVR">「连接被拒绝」/ 超时 / 出任何页面 = 引擎放行</b>——网络层真实结果。私网不可达目标转圈 30 秒以上，<b data-page-node-id="Sy8qPG4gY8fXDufU4ElEGr">转圈本身就是放行证据</b>。</li>
+<li data-page-node-id="yN7KF2vFMkfrJmmfUsSO6N">每轮带阴性对照（DN1 随机串）；服务端 beacon 落账为准，屏幕文案只作旁证。</li>
+</ul>
+<div class="note" data-page-node-id="AXoOqRTVVPdDEj1zw2YL3J">两台设备、两个内核（X5/89 与系统/80）全部结论一致 → 引擎位于 WebView 之下的 MDM 层，与内核无关。</div>
+</div>
+
+<div class="card" data-page-node-id="QQfhTtm4HOfr377dTYRjyU">
+<h2 data-page-node-id="osjAXq5x6FjSLuG4FGx3GD">三、引擎判定规则终稿（v6）</h2>
+<pre data-page-node-id="lMopp6j7uAcOtWsXv9FZIg">
+BLACKLIST = {"192.168.40.1", "192.168.40.90", "192.168.125.1"}   # 纯子串匹配，全端口
+
+def decide(authority: str) -&gt; bool:
+    # authority = GURL 规范化后的 "userinfo@host:port"（凭据未剥离）
+    if authority.count("@") &gt;= 2:
+        return DENY                                        # N6：粗糙合法性检查
+
+    token, _, hostport = authority.partition("@")
+
+    if token == "":                                        # 空/无 userinfo → 查 host
+        host = strip_port(hostport)
+        return DENY if any(ip in host for ip in BLACKLIST) else ALLOW
+
+    return DENY if any(ip in token for ip in BLACKLIST) else ALLOW
+    # token 非空 → 只查 token，host 完全不被查（userinfo 旁路的真正机理）
+</pre>
+<h3 data-page-node-id="p45raK0EyWXfajuEAQ7wlr">逐条证据映射</h3>
+<table data-page-node-id="FWCIHIrOPICyNEr1AAyTbd">
+<tr data-page-node-id="w34dUnsdre2AG1R9uOfMxU"><th data-page-node-id="J9TFfdUyjEQj9uhNykn4i9">规则</th><th data-page-node-id="g1hzIMKJrvj41TuDsXDq5G">证据</th><th data-page-node-id="Nd13FmFAWSWwK3Zm45iCb4">结论</th></tr>
+<tr data-page-node-id="fpBGWWsoPWF0EEQEJeBzSn"><td data-page-node-id="aTaLJzG5wlqL7aH3AwcASA">规范化输入</td><td data-page-node-id="09vX9ooRHmuTyZnCxEhmeA">DP1–DP4（十进制/十六进制/八进制/末尾点）全拦</td><td data-page-node-id="l93Py7GESit0Qi5NUtafFl">WHATWG URL 先规范化（quad 复原）再判定</td></tr>
+<tr data-page-node-id="SpAivedVqpZF0QRMAMjTuL"><td data-page-node-id="AnuRMfNMXVOzNj8Xq5mjHu">规范化输入（续）</td><td data-page-node-id="eJ63PNsNz3uyqE1r05DDOs">DP5 <code data-page-node-id="MBb6e9LmOAYBNV8L9gqqb2">[::ffff:192.168.40.90]</code> 过，location.host=[::ffff:c0a8:285a]:9011</td><td data-page-node-id="VlMzw3Ecb6h1uNTPqLT6lE">mapped-IPv6 被 hex 化，点分四段消失 → 分支不中</td></tr>
+<tr data-page-node-id="8fUoAgxOy6GlykYZdcXt8g"><td data-page-node-id="QGRS1wYRNvLSTS8GcOaxHk">token 短路</td><td data-page-node-id="9TrvNVntHEVGVf7WQoRKUm">N2 / DN1（任意串@IP 过）、DP7（token=1.2.3.4 过，02:53 复测）、<b data-page-node-id="HlVUDgsQEkz3yLHBueHPHe">DP32（token="a" 过，64ms 到达）</b></td><td data-page-node-id="0h03TMyBvDwKChuBg9ohVt">token 非空即只查 token，host 不设防</td></tr>
+<tr data-page-node-id="5VME5OUf2FFkITGzIvvuvw"><td data-page-node-id="sd8FO12US9yAhY37TBZQNn">token 段也查黑名单</td><td data-page-node-id="o5Swm1C4tlqkeD78FWPJuW"><b data-page-node-id="qOm4RUqh0DKtlTedPlw7NV">DP29</b> token=192.168.40.90 + 域名 host → 拦</td><td data-page-node-id="tBLDiZFPUNGQG8YO6zfEJW">推翻 v4「任一段域名样即放行」</td></tr>
+<tr data-page-node-id="CR7A8gZvMOqrQNvc7llcRE"><td data-page-node-id="6gQKdiPKOVvnpgQxQWVv45">黑名单·纯子串</td><td data-page-node-id="X4Nh1mvepDhywWD7VUcN6b"><b data-page-node-id="Mysnz1hj1fiORjMHKrolEq">DP30</b> 192.168.40.100 拦（被 40.1 前缀连坐）；DN11/DN13 nip.io 点分形拦</td><td data-page-node-id="4UN8iIem4DuUiX6byko7lv">非 IP 解析、非精确匹配，字面子串</td></tr>
+<tr data-page-node-id="L7sJyTYgDn0rYX9PLKhxrg"><td data-page-node-id="76aBEEe6yHlJygWJFinfKr">黑名单·全端口</td><td data-page-node-id="zBdTXhmCEAMwY7s1vbuG1h">.90 的 9011/18081 双拦（DP19）；.1 的 9011/80 双拦（DP26/27）</td><td data-page-node-id="2CzRHo7rD0m8ACoeMAGEDD">端口不参与</td></tr>
+<tr data-page-node-id="JJdKbLmZOpFEtcSNVbpG0P"><td data-page-node-id="YR7aKEUIlLGsaS09J34IFt">黑名单·三成员</td><td data-page-node-id="symPWkkSFvfggSK3nu5Sbu">DP26/27（.1）、N1/DP13/DP16/DP19（.90）、DP28（125.1）；DP31 portal 172.16.1.191 过</td><td data-page-node-id="NCnY2bH1aTBF5xPra9miDa">无第四成员；三员恰为网关+CI+课堂互动网关</td></tr>
+<tr data-page-node-id="kEfIL8jFoqFxaFppY9vFKe"><td data-page-node-id="1DQ5ksGitLKHXE0qaRZ6Yd">黑名单独立于策略 siteList</td><td data-page-node-id="o1teJkoaJ3Zggq4FB5EgO6">三条 /24 条目网络地址对账：119.6.237.1 过（DP17）/ 40.1 拦（DP26）/ 125.1 拦（DP28）</td><td data-page-node-id="wKCHzomZgwgBvPnl5xdYQc">siteList「白名单」不参与浏览器层判定，两张表</td></tr>
+<tr data-page-node-id="N2NrXFBb87wVT4vOyJGZ5R"><td data-page-node-id="xmj43GBkZFZuC9U0j1POMm">黑名单外全放行</td><td data-page-node-id="BTXxiL9RXw9o58P4uBCEnd">DP20–25：同 /24 相邻、192.168/16、10/8、172.16/12、回环、公网 1.1.1.1 全过</td><td data-page-node-id="FPfPSaHCI1ExJODSY27RlP">无网段级守卫、无 RFC1918 整体封锁</td></tr>
+</table>
+</div>
+
+<div class="card" data-page-node-id="MhvEuTTg4wpZEPD9vVeLE1">
+<h2 data-page-node-id="kO7qyl8SQQ80VyMotwNmDA">四、模型演进史（六版迭代，每版被什么推翻）</h2>
+<table data-page-node-id="8avpBNiSqiNDl7qDRJXEUx">
+<tr data-page-node-id="zgCueO9yYHSFoTPKlElLGU"><th data-page-node-id="r4dVQ9kOIpXFjmcvnPziiv">版本</th><th data-page-node-id="uN9q0Tags61xMwMm6rH0L5">命题</th><th data-page-node-id="xF0CCFDbRmSkKvuKbuv9NG">被何推翻 / 确立</th></tr>
+<tr data-page-node-id="5TcXA3SFE3t4sApXH1jLOV"><td data-page-node-id="SeqZ7xspWBkfH6xtzctSCD">v1 白名单整串包含</td><td data-page-node-id="GdXDHsE3L4VzB0xs1rTeDH">authority 含放行域名即过</td><td data-page-node-id="AUHqXLEhXRs98HhflE8UHq">DN1 阴性对照（zz-not-real.com@IP）放行 → 名单根本没被查</td></tr>
+<tr data-page-node-id="c8EuHOQw6FcBSDKzK9tCcj"><td data-page-node-id="fkZC1eX5kKDtDm9mnErIuN">v2/v3 字面量 IP 白名单</td><td data-page-node-id="7VBxJXRDMrUnHqx6jWGXkv">token/host 任一段内嵌 quad → 精确查 IP 单，命中放行；CIDR 不展开</td><td data-page-node-id="zmZdVPAKAltKXj7nds8AaG">DN7（40.1 拦）成立但语义当时不明；DN12 横线形过确立「quad 门控」</td></tr>
+<tr data-page-node-id="FQPvbkrFqSmiRNQPF6HS1i"><td data-page-node-id="CwRAgGtgbAjiNLIxBG061U">v4 GURL 分段白名单</td><td data-page-node-id="LBo2hGW4UkgF9lOGZcbH7i">任一段不含 quad 即整体放行；两段都 IP 样逐段查表</td><td data-page-node-id="0N7zAGq2j3hSbR5C0Gced6">DP5（mapped-IPv6）确立输入=规范化后 authority；DP12/13/14/19 确立 302 豁免仅顶层、逐导航重判；DP17/25 公网放行埋下反转伏笔</td></tr>
+<tr data-page-node-id="k9uBlSC2g0iFcErs46FxjP"><td data-page-node-id="yXEP45UknEWbpOmXLopw5V">v5 黑名单</td><td data-page-node-id="6s43VuXC838LVVANb8CWTv">守卫=quad IP 黑名单字面匹配（token 域名样放行；host 查黑名单）</td><td data-page-node-id="D9ZmD1ZqKdKPJj5NPGZbVj">DP20–25（黑名单外全放行）+ DP26/27（.1 实锤）确立；「白名单查表」作废（DP17 过 vs DP26 拦，同 siteList 不同判）</td></tr>
+<tr data-page-node-id="J77zB7cAOD4zAF35yvxW6D"><td data-page-node-id="tNKBKgGGrRfgwMlXeq50oF"><b data-page-node-id="UE9DfUB8MpIChWDHI5UpzD">v6 token 短路（终稿）</b></td><td data-page-node-id="5RiGGG3lLezS1T8iMZcoqI">token 非空只查 token；token 空查 host；黑名单纯子串</td><td data-page-node-id="Tgnj9l2uqFDrJIDa8LlQ9X">DP28（第三成员）、DP29（token 查黑名单）、DP30（子串连坐）、DP31（无第四成员）、DP32（非空即短路）终验，32 点零矛盾</td></tr>
+</table>
+<div class="note" data-page-node-id="Anlc1EjTGpxERNEDnom7VX">方法论要点：每一版模型都死于一个精心设计的探针，而不是死于参数调优。<b data-page-node-id="j32DaMANLOntq0kYBtHwKF">模型不是选出来的，是被一个个反例逼出来的。</b></div>
+</div>
+
+<div class="card" data-page-node-id="B18w2Q5JVRM9sIBhtqftqO">
+<h2 data-page-node-id="xCNJ5jcIJaFK5qaD1NxGFo">五、判定层事实（E1–E6，两轮通用）</h2>
+<table data-page-node-id="G7fWsq7ZahWP1t71bldFV9">
+<tr data-page-node-id="wi4SqF3bGhANVvFwugOt6m"><th data-page-node-id="NS6vfPNd0cgyheHvxMzdOi">编号</th><th data-page-node-id="UPq9xcNqRZLfPAisvkDU0F">事实</th><th data-page-node-id="FQxRvBpf9lCSFxDNDJvC3K">关键证据</th></tr>
+<tr data-page-node-id="wQtI9z0bC9gl9znT0FYudF"><td data-page-node-id="JEYX4rPhCnuU5JXd7X5Pgg">E1</td><td data-page-node-id="pSmMZE9Us9lQGdRGa0Xjwt">判定点在 WebView 请求拦截层，看到的是<b data-page-node-id="fOAlAXNs9wCbI7WBUmWFWN">凭据剥离前</b>的原始 URL（经 GURL 规范化）</td><td data-page-node-id="3rVmAVLpB4WF9PgTiPqRDY">S1/S2 对照：S2 页内 200 ↔ 日志唯一干净请求；S1 页内 404 ↔ 零命中</td></tr>
+<tr data-page-node-id="37fffPZv4KsdeCaz7eIILe"><td data-page-node-id="zNMpmBmhrMYnoK0omOB7Kf">E2</td><td data-page-node-id="5zjuSnv1MVXMgCgzutljDX">匹配对象=authority 段；大小写不敏感（N7）；端口无关（N3@18081）；query（N4）/fragment（N5）不参与</td><td data-page-node-id="VaXLWHnpliAiH0ugV0aECt">N 组</td></tr>
+<tr data-page-node-id="LYTYo1bfvBTl5QmGmmDtkG"><td data-page-node-id="H8r8YI1tZenp5PMU1vBFP6">E3</td><td data-page-node-id="iaiwWFl0H5hfVRlGefh80R">拦截=合成响应软拦：顶层导航「无效的响应」、子资源合成 404——均不上线、零痕迹</td><td data-page-node-id="CF8Qxva6GK1ZNK9LPKS3uE">S 组 + 全部 DP 拦侧</td></tr>
+<tr data-page-node-id="Za12tRywvs2FNsVToLGOGs"><td data-page-node-id="hVje1qwfqYCmWE9tGePhyB">E4</td><td data-page-node-id="s8uPyoPFVaenULlLhCrgcc">放行后凭据剥离：线上请求全为干净形式；文档地址栏显示归一化形态</td><td data-page-node-id="DOZeYcvbIUMO9nIyfBBLbe">DP32 REF=裸 IP 形态</td></tr>
+<tr data-page-node-id="7bBGj4egfIIt3Slv9SFCn1"><td data-page-node-id="SIN8xzM6b1KxDZdbnx5WeY">E5</td><td data-page-node-id="SoSsBserdLPqOFYidwD0OP">通道差异：fetch 对 userinfo 构造期抛 TypeError；XHR/加载器剥离后照发（剥离前已过闸）；<b data-page-node-id="BWiOCENFXe8498HmKqHAfd">明文 WS 保留凭据直达</b>（WS-UPGRADE 落账）</td><td data-page-node-id="er2XLtSthIrR9aix9EsQUv">S3/S7、DP15</td></tr>
+<tr data-page-node-id="GeWgfo25u47COxATR4XuGA"><td data-page-node-id="Mcu0qCf9GTVVKK0BW221dA">E6</td><td data-page-node-id="VAKVcUJUagGBUAQW6sXceO">大文档无渲染阈值：8.2MB 单文档正常加载</td><td data-page-node-id="xattEGLVTMX8O8FFYDAEUp">D 组 pad=8</td></tr>
+<tr data-page-node-id="Gzft0mktmrqj1F2XmliVND"><td data-page-node-id="PGfLG9UkiQwMQxN5z1EGOg">E7（二轮新增）</td><td data-page-node-id="lSuSUTNnJB8QFuFHJCutS3"><b data-page-node-id="Vz4yrpAiynf21deEzVIOWe">逐导航重判、无会话信任</b>：服务端 302 豁免仅顶层导航（DP12 过）；JS 直跳（DP13）、XHR 中继（DP14）、到达裸 IP 页后再跳（DP19）全部重判拦；hex origin 页内相对请求全免检（DP18，REF=[::ffff:c0a8:285a] 实锤）</td><td data-page-node-id="tU8Ra3sIlJvgnv1AbPbneg">C 组</td></tr>
+</table>
+</div>
+
+<div class="card" data-page-node-id="MSEXLG19X9hr4pbe0QrSGy">
+<h2 data-page-node-id="ZAoLJf4o5gJ2EPWFtJAFqK">六、完整探针清单（62 项）</h2>
+
+<h3 data-page-node-id="XoHRxVj0emV2F585eGxdTB">第一轮 · N 组（导航层，7）</h3>
+<table data-page-node-id="UEN5OcUBkP8F8Vf7D5TlvG">
+<tr data-page-node-id="e4c8oLg2PoURgAaGMq6PKU"><th data-page-node-id="jACOBxMuy1hHZpH1bEEXSP">编号</th><th data-page-node-id="AJAZtuKZJ6bhARQMN1VMbq">输入</th><th data-page-node-id="MllsQXiGe3X6Gu2DsqZ9we">结果</th></tr>
+<tr data-page-node-id="QmpUqSEIBFHNN1aS0UZ5lC"><td data-page-node-id="Uxhmtn9ROLwlJ2Evc9sGMZ">N1</td><td data-page-node-id="BV6V2HUAwbDscqjHatoP4r"><code data-page-node-id="q9EM6p0vbulN8Z1ABis8Qn">http://192.168.40.90:9011/</code></td><td class="no" data-page-node-id="dHrIgOk8Vb9ZhRHtGEapR4">拦 · 零命中</td></tr>
+<tr data-page-node-id="kx9DP8KQXEP4Vm98E7y4XE"><td data-page-node-id="FeiYJWoMJj6CwX0pfKu3UL">N2</td><td data-page-node-id="ELCOH33RsHVDU7akBOP40c"><code data-page-node-id="i2Q4DLvYECt8arCIalKQ4g">http://spark.changyan.com@192.168.40.90:9011/</code></td><td class="ok" data-page-node-id="x2pIDpd8q2eCLjsSDdzieA">过 · 12:53:32 命中</td></tr>
+<tr data-page-node-id="rOhvCnrNQE49Fxg72wjdAj"><td data-page-node-id="fAskEVmfAsTNP6pk9jw0O4">N3</td><td data-page-node-id="WqH5kAiKlqA5KnCoFlGsOf">N2 换端口 18081</td><td class="ok" data-page-node-id="YC1G8wzIW1YdkZlZG6zq3l">过</td></tr>
+<tr data-page-node-id="HNe6W215FCnTdy3hxv1osd"><td data-page-node-id="qFFPuZYSGwvfEzEovCl4EJ">N4/N5</td><td data-page-node-id="2WJOSlEtpC2ri0jf3RETvK">放行域名放 query / fragment</td><td class="no" data-page-node-id="dyBIsjEPMahdt4uqrFSDk3">拦 · 零命中</td></tr>
+<tr data-page-node-id="WaoDWEQRWDmOHAfvluvjc3"><td data-page-node-id="h0wntFWtDhlXgJnHIOH2Wt">N6</td><td data-page-node-id="fx9HjaJfgmAIDCj3HzkV32">双 <code data-page-node-id="1gZkVbvfnpQNUaFKucz4Q2">@</code></td><td class="no" data-page-node-id="AHKASfGdVUjd06RvQALtpn">拦</td></tr>
+<tr data-page-node-id="OFnwbkPOkTIuj4nF5WPtLF"><td data-page-node-id="JNdSeomJhRvnMyx3NVWjqj">N7</td><td data-page-node-id="nTLvF0dCvKFv0dLj3TyAOV">N2 全大写</td><td class="ok" data-page-node-id="NB32lVJRppbhfB1RNmDwk0">过</td></tr>
+</table>
+
+<h3 data-page-node-id="pG8lVq4xsRcPz8WkIpHIPw">第一轮 · S 组（子资源与协议，7）</h3>
+<table data-page-node-id="0mrBPVUQUUSWmm6bHVazIH">
+<tr data-page-node-id="wybwLqleoOn3IdQzLHMISX"><th data-page-node-id="sRllsUJC6s2ioaNIdmfkSU">编号</th><th data-page-node-id="sxKDzXU6u5MmvNF3jwgcrG">通道</th><th data-page-node-id="RcoMQwFPyjE9TCcFjmpXNP">结果</th></tr>
+<tr data-page-node-id="sH5WrguvC9hoJiwWnfAOBb"><td data-page-node-id="8tpGHRajzfRtl1Qz1sMXhi">S1</td><td data-page-node-id="2hujhtOqNObfK2Twe6YPx3">XHR 干净</td><td class="no" data-page-node-id="FNkgcd73tpoDtbbU9Nf0HL">404 + 零命中（合成）</td></tr>
+<tr data-page-node-id="lxxfHb9tmuW1Ab44gc6CkG"><td data-page-node-id="7D4i3TU0Xhu3QlFGEU9lDm">S2</td><td data-page-node-id="0TzEMktHZr3BC1YKiYY3I8">XHR userinfo</td><td class="ok" data-page-node-id="XtwRGpmRqyrTQuCGWJzyk3">200 上线（已剥离）</td></tr>
+<tr data-page-node-id="kInOlsKlcnVgibArBzi7b3"><td data-page-node-id="r8fcBEgPCdpFChlI4QHpEz">S3</td><td data-page-node-id="FJtoGdB3XVKoPUZXlcA88k">fetch userinfo</td><td class="na" data-page-node-id="f41THONEJcz2a6KxkVuiFh">构造期 TypeError，请求未发出</td></tr>
+<tr data-page-node-id="gvcZuwjmVIXtNlGvnW1rGX"><td data-page-node-id="hTmK2eOiueO32MrRYxrMxS">S4/S5</td><td data-page-node-id="xiQyABFSDBHKn9e9Q1LtwE">img / script userinfo</td><td class="no" data-page-node-id="ycpY0DK2qGAEvCxLAhGLSB">加载器剥离 → 干净 IP → 拦</td></tr>
+<tr data-page-node-id="vLoTAUePiyre5XXnX7V4f0"><td data-page-node-id="l7CAF6rBx7YCWZDud93Jpp">S6</td><td data-page-node-id="kEx1SGvR0H0Dm9myv3T5B7">userinfo base + 相对 XHR</td><td class="ok" data-page-node-id="FtDwMtimcJZcADz5X9coWH">200</td></tr>
+<tr data-page-node-id="ae3LvOxH2HksItU7Tlj7um"><td data-page-node-id="BtD6lflQs4G5Tg3JKLyHE0">S7</td><td data-page-node-id="oivgTrRRVHAqy6bxTHFiCf">WS userinfo</td><td class="ok" data-page-node-id="tKCrqBgK9hRUofYCr4idHm">握手成功 · WS-UPGRADE 落账</td></tr>
+</table>
+
+<h3 data-page-node-id="JjHkeYB5GJSFOdmdOpS8In">第一轮 · D 组（页面形态与稳健性，3）</h3>
+<p data-page-node-id="LZZqTB3MA0ACNOlOEH5gl5">三种页面形态 + 8.2MB 大文档全部一致；间隔 6–8 秒无一翻转 → <b data-page-node-id="ScYDZdIofyo60bYwTBoxxk">引擎确定性，无策略同步窗口</b>。</p>
+
+<h3 data-page-node-id="q0FkblVsQVnbEzFQhXLQzR">第一轮 · DN 组（匹配粒度，13）</h3>
+<table data-page-node-id="4vMNXf9xCXVgVB2kKxlkH6">
+<tr data-page-node-id="aRLV7BJUCE4vDEPFxuVLEv"><th data-page-node-id="0yVPMhK9bWpcF6gzNRhJ6B">编号</th><th data-page-node-id="sqiBIStsyBayelRVAfnahc">样本</th><th data-page-node-id="9nG79cBT3lTnFEkzK31ja7">结果</th></tr>
+<tr data-page-node-id="4WaLxYxj1Zs7aRJ7KivK7U"><td data-page-node-id="Gq6AADVmQC5VqpHuITqDGn">DN1</td><td data-page-node-id="QiPcOmzpgC5QX1H5Mdhuba"><code data-page-node-id="B18NYRnoF8AkVwsJKAm0mP">zz-not-real.com@IP</code>（阴性对照）</td><td class="ok" data-page-node-id="nILClsBdTAC65dlfVDch3E">过 ← 名单没被查，全场最值钱一枪</td></tr>
+<tr data-page-node-id="0lufNPooNECu4BrN8VLKcE"><td data-page-node-id="7uB6phWsawy0mq8VUj1EYE">DN2–6, DN10</td><td data-page-node-id="MAtNF56olhzHxmVkjESWAI">各域名串 / %2E 编码</td><td class="ok" data-page-node-id="XkdTRgmpUNjICDShjc5Q7K">全过</td></tr>
+<tr data-page-node-id="UxE4UFj1EiaebtHEXzoIui"><td data-page-node-id="bXAogp9DBktDToMGdAWLyR">DN8/DN9</td><td data-page-node-id="t1DSAWjQJjNQzJM04vAtpX">单内明文 IP（119.6.237.1 / 223.5.5.5 作 token）</td><td class="ok" data-page-node-id="1rU1mAnV0jyCYRBScijpFW">过</td></tr>
+<tr data-page-node-id="lyM2kzneb9HOvcw7Wh6Rl9"><td data-page-node-id="PHkfUyv8UJhSpUeeEFdT1L">DN7</td><td data-page-node-id="vwrCRcHB9aZLrJ5ppOrpDz">token=192.168.40.1（策略写作 192.168.40.1/24）</td><td class="no" data-page-node-id="OziCkfyfIPCU2aB5oZUbwQ">拦（二轮 DP26 补实锤语义）</td></tr>
+<tr data-page-node-id="zzHHNYhLjhxDWdEjP0138p"><td data-page-node-id="mHyN51cr0GaRP51kXxl7CA">DN11/DN13</td><td data-page-node-id="8JxKxxB0cOfGdaInA1q04E">host=192.168.40.90.nip.io / .sslip.io（内嵌 quad）</td><td class="no" data-page-node-id="U7DKYvbldZhs8Hd47jwkWC">拦 · 零命中</td></tr>
+<tr data-page-node-id="aubz0DjACTSV6OIJDL8sWz"><td data-page-node-id="hNfgtU8CsAmldGXGW8DzGj">DN12</td><td data-page-node-id="yMpEi94pQE0XWbwkHoaXtm">host=192-168-40-90.nip.io（横线形）</td><td class="ok" data-page-node-id="biQtQiIgObDbiD7vlQkTa8">过 · 全链路可用</td></tr>
+</table>
+
+<h3 data-page-node-id="juihHN61MmODLrJWMT5W8K">第二轮 · DP 组（模型收敛，32）</h3>
+<table data-page-node-id="ZboeP7DHzK8a6GeYNg5q9J">
+<tr data-page-node-id="NuA7POeA5hmXNhvjA6lHV3"><th data-page-node-id="4EX8cEtyTnlM0x3X3yglG6">编号</th><th data-page-node-id="ol6QC9HUDUnY2OTBk4DlhE">输入</th><th data-page-node-id="rVhYb7c1wNbmtJq2wBoYpl">结果</th><th data-page-node-id="px1TLCeAVcyaHlMa1ACiy3">贡献</th></tr>
+<tr data-page-node-id="BJdYt244dY5FwwEenTjnZP"><td data-page-node-id="1pwa4ZgrK9t5rQG1YLjiQR">DP1</td><td data-page-node-id="jaCxUNAEcf7HHFAHacsS55"><code data-page-node-id="yC04zAAmfMhpApWJzEyAwm">http://3232245850:9011/</code>（十进制）</td><td class="no" data-page-node-id="Cc5ExSbPBoyABvMzTGMSwR">拦</td><td rowspan="4" data-page-node-id="3yOajvkArRL02QKloXZRTt">规范化先于判定（WHATWG URL）</td></tr>
+<tr data-page-node-id="3nDdyjBH9BtIpnfpDJtZcq"><td data-page-node-id="90EJDTGrpMH5frUjAiIDyn">DP2</td><td data-page-node-id="nUie4mGgfsqKWAbEcEQOAw"><code data-page-node-id="Yg0QoGtSvrNdXrmEPkuKjA">http://0xc0a8285a:9011/</code>（十六进制）</td><td class="no" data-page-node-id="VsV50mhEd1jse8q7kV9oph">拦</td></tr>
+<tr data-page-node-id="K4YNr76xIVWkMrnzUg4kLI"><td data-page-node-id="0j7kKaZ7BOgYQEW06ywt09">DP3</td><td data-page-node-id="VrYreW5uXtGDZsNu0q5X0h"><code data-page-node-id="5N9rN0HKqoVMfte7Sbihcd">http://0300.0250.050.0132:9011/</code>（八进制）</td><td class="no" data-page-node-id="wnJeAahpFm4220Xh7PxDAf">拦</td></tr>
+<tr data-page-node-id="OxEYxiOqCUObpUxG39BNhV"><td data-page-node-id="5EH5p1KIBEz1JH0Gk1REQy">DP4</td><td data-page-node-id="8LVHkXRw3hSg1X8guHlhoU"><code data-page-node-id="rFqukmahNpKq39w70FDSYq">http://192.168.40.90.:9011/</code>（末尾点）</td><td class="no" data-page-node-id="KJNUlKFoBWK5p4pHPtQq4q">拦</td></tr>
+<tr data-page-node-id="j2V1XbrpLrOamBjwHuHC0C"><td data-page-node-id="oq3FHgmBgWGQrfMqK98vhN">DP5</td><td data-page-node-id="6tyYAVg2kZA1BUBhaBcGKD"><code data-page-node-id="DQK6gTiAClHGYmN9NzjmG9">http://[::ffff:192.168.40.90]:9011/</code></td><td class="ok" data-page-node-id="PuwbxBrrzqnabifHa9xYC1">过</td><td data-page-node-id="zGzbhd668dRzNmtuFhVtEd"><b data-page-node-id="CDPpXaRTwom3UgRso9i8SN">决定性</b>：mapped-IPv6 hex 化消字面；host=[::ffff:c0a8:285a]:9011</td></tr>
+<tr data-page-node-id="AAMEGjw8E1SbYzW85lrQW1"><td data-page-node-id="7x5VBmtYBMlk6DvhXc2O1c">DP6</td><td data-page-node-id="vctoRDVpNosEaDWdkOGDKc">空@ + quad（首轮数据污染）</td><td class="na" data-page-node-id="Bni6AjJiFzpuUdcxqFqGDh">作废</td><td data-page-node-id="ZGLqq5I61aVSspVHQKjdcX">干净复测=DP16</td></tr>
+<tr data-page-node-id="P9rx2U6dMeKyCEnS2yg53s"><td data-page-node-id="Z0RuoQnEHjbCezbIbk466C">DP7</td><td data-page-node-id="QfE6C5pKvFAAQROki4fvEJ">token=1.2.3.4 + host=横线形 nip.io</td><td class="ok" data-page-node-id="oTMwTVUZxQnV5JPhCMApAY">过 · 02:53:13 复测</td><td data-page-node-id="msJALMqL63kmQHam7hYmm6">token 非黑名单 → host 被无视</td></tr>
+<tr data-page-node-id="3HtYFCN6G5dYYhZBo6Zl7n"><td data-page-node-id="aqsclauEf3Q4XsWnwjBFQ8">DP8</td><td data-page-node-id="1ChTFMceLJbKSHnNq4qtVR">随机前缀 <code data-page-node-id="wA8GyO6295J2YpaztCAZj8">p80134.192-168-40-90.nip.io</code></td><td class="ok" data-page-node-id="Y9UL6XD10b8loDyVbWqZC8">过</td><td data-page-node-id="HTzbABu9zDZJkbUbchGLAy">网络侧第二层对新域名无名单</td></tr>
+<tr data-page-node-id="lCWThFtlLgDaaXv5wIAsXv"><td data-page-node-id="sWgk1HCS6liKYzB1gZdl6F">DP9</td><td data-page-node-id="Q56BWgrmEt1rKuCnX9YeWL">POST 裸 IP</td><td class="no" data-page-node-id="WxUQcoJFJsQFVKtHA0raXA">拦 · 0 落账</td><td data-page-node-id="EFBpIXAv2OX4DkulEHLvvj">方法与 GET 同判（首轮污染数据已剔除）</td></tr>
+<tr data-page-node-id="r3UmNUWdHNCriMgAwkAucH"><td data-page-node-id="QdsCT2ssKh07oVJIQPgiGy">DP10</td><td data-page-node-id="3Z1GCxBd7LUkpI5yNYkeKC">相对 POST</td><td class="ok" data-page-node-id="SneEYoEMYSas6RxtknRu6k">200</td><td data-page-node-id="rBj8KAazpx8VsC6BvLbAD7">同上</td></tr>
+<tr data-page-node-id="aihNInbOyLhGtCGUs7BV5N"><td data-page-node-id="4iKTig2u8ECUanfxESqxjl">DP11</td><td data-page-node-id="ZgQMAUsMhJnxNbuYiMBafs">CORS 预检裸 IP</td><td class="no" data-page-node-id="AjpTt07fv7E6LhCdHGThBW">拦</td><td data-page-node-id="83K9oOMJoc9WlE9Rp4EdA1">预检同判</td></tr>
+<tr data-page-node-id="c58dlibKTvQTv1oWjqsQqf"><td data-page-node-id="qHEHDhHFvBxieMBIHCTGgu">DP12</td><td data-page-node-id="9PVWZux2ysD6dV6dlFNOTZ">放行页 /redir 302 → 裸 IP 页</td><td class="ok" data-page-node-id="cCEs0qaFTpQ2ARnFBHqdkh">到达</td><td data-page-node-id="pcocVXonCgq91kJXUIi6OD">服务端重定向豁免（仅顶层）</td></tr>
+<tr data-page-node-id="kpNyR3EDxDqqYuiFSk50W6"><td data-page-node-id="0xxEYBfRNk5FEFLk9h8mG5">DP13</td><td data-page-node-id="yEsrIqUae4CzFgLq9ZJVXC">JS location.href 直跳裸 IP</td><td class="no" data-page-node-id="k8tFDRA4WKgsefHDCKLrfE">拦</td><td data-page-node-id="Vdr1DtCAkY9Lvd4FAKS4CN">逐导航重判</td></tr>
+<tr data-page-node-id="fe6idWkV6GgkDq0TUTZUdI"><td data-page-node-id="I9LdhqklM1WUCNajobxW9v">DP14</td><td data-page-node-id="jd1uJVc3FVAERlovWdbqf6">XHR 经 302 中继到裸 IP</td><td class="no" data-page-node-id="tAesEMdB9mNOVE0mZvL9O3">拦（onerror）</td><td data-page-node-id="PNWFwPSlDBGuXJCWPHzeKE">豁免不延及子资源</td></tr>
+<tr data-page-node-id="fnqOQUvc9OwpCAy9ly4spR"><td data-page-node-id="eknXgaJy31iyWB0afxpnT5">DP15</td><td data-page-node-id="CMcHl3QXrLshIxcG3ntsJK">WS 经 <code data-page-node-id="3BQtUBAQpp89Ob2JoHmvbG">[::ffff:c0a8:285a]</code>:9011</td><td class="ok" data-page-node-id="XF2RxBedY6kivJ7XOd6uHO">握手成功 · WS-UPGRADE ×2</td><td data-page-node-id="HRFzMptSc7uSwnIKMrItPu">hex 形态 WS 全通</td></tr>
+<tr data-page-node-id="LHODj0zGUbliUiaEgyHJrj"><td data-page-node-id="jyMMPviQn5xQ1sIEidN0sn">DP16</td><td data-page-node-id="1aI0pmoFdEysHT4X2JAEnF">空@ + quad 干净复测</td><td class="no" data-page-node-id="4KQcG8xnPPAD5EKznHFQoQ">拦</td><td data-page-node-id="ILYVQQ6PNy3p2gOIezZBl4">空 token 不短路 → host 被查</td></tr>
+<tr data-page-node-id="EqHUQsTHPIRGcWqsEtjVVA"><td data-page-node-id="hxf6TZ5L7kAGYQWIVGHbm2">DP17</td><td data-page-node-id="5I3MScORKtDH9Eywgu5WY6">host=119.6.237.1（siteList 内）</td><td class="ok" data-page-node-id="bhxNoCIHZFvJJF0S4EfQLL">过（连接被拒=真实网络错误）</td><td data-page-node-id="pkOcdgn3gk4OlTrZweAyLq">siteList 与浏览器层判定无关</td></tr>
+<tr data-page-node-id="aKTGsWKCGwMGXNrovrvLtw"><td data-page-node-id="dNHdZn50PEZ9r4mW959D8c">DP18</td><td data-page-node-id="yvrJa0LNnilzdVWmI17xwG">hex origin 页内相对 XHR</td><td class="ok" data-page-node-id="EywMBawYjbmhNhHCUAIJsu">200 落账 · REF=hex 页</td><td data-page-node-id="QTRVv1QjFqNhT3Tf3M9pGp">hex 全栈闭环</td></tr>
+<tr data-page-node-id="R7TAxXTJo1ih2zhmuPlXXl"><td data-page-node-id="ElHMyE5SEvbAwMfwcHsA1l">DP19</td><td data-page-node-id="8oMBG25dMmCB470eJJVrfi">302 到裸 IP 页 → JS 跳 :18081</td><td class="no" data-page-node-id="mDBD8QN5d6jzuc7tcYDQiD">拦 · 18081 零落账</td><td data-page-node-id="gQPRcXGeMP2qED6N3zioPM">无会话信任；.90 全端口实锤</td></tr>
+<tr data-page-node-id="nRGaWCbityJJQd9ZCnFm5Z"><td data-page-node-id="bwsX3ASY5kHJO9RjIf0RYD">DP20</td><td data-page-node-id="RO6XyTGz3jzSIfnIelCoN7">192.168.40.99（同 /24）</td><td class="ok" data-page-node-id="BBwEyyBFsL4sLoWyRXDOlJ">过（快速网络错误）</td><td rowspan="6" data-page-node-id="ikrBYrFUHJVkgqsDnYqDSS">黑名单外全放行：无网段守卫</td></tr>
+<tr data-page-node-id="R0V1zdAobj4t2ewqdI6nuH"><td data-page-node-id="3MRtTKt7SAWG0e5LJhox77">DP21</td><td data-page-node-id="MD5tFyDATwbszOEAG3dXN6">192.168.1.1</td><td class="ok" data-page-node-id="l1IWUDXK5F5vMBVUN64Ksc">过</td></tr>
+<tr data-page-node-id="Hk28rvFkllca0sAH5oBgIu"><td data-page-node-id="qGFTpYk9CLXwscCG2UiUk5">DP22</td><td data-page-node-id="kn1hR6HKqkUwsdL3TeAVya">10.1.2.3</td><td class="ok" data-page-node-id="Gdfs7mRBzHKznq2kb8OooC">过</td></tr>
+<tr data-page-node-id="ADQRUvzfnbbh63OympbINM"><td data-page-node-id="lrhNJyHO6UoWisOpDOQuV1">DP23</td><td data-page-node-id="HfMEEQfG0PewTlcrGJFEeA">172.16.5.4</td><td class="ok" data-page-node-id="hYvqyL2eGum7zWLQ6BiyWl">过</td></tr>
+<tr data-page-node-id="2yghtyNyOvUH63JDd0Gpzd"><td data-page-node-id="Gdmh80rEsG4URuU4P1PCPm">DP24</td><td data-page-node-id="qP3EFFbnbYJvOgFdvYucHB">127.0.0.1</td><td class="ok" data-page-node-id="B43FrhW01l3dKcdWtEd6yS">过</td></tr>
+<tr data-page-node-id="R9pUfJzcOh23SSURyziJF2"><td data-page-node-id="GXQ6f30D5HFLrn1XJJbeem">DP25</td><td data-page-node-id="rnOcm4Lh9Wm22AwDCvWLnK">1.1.1.1（公网）</td><td class="ok" data-page-node-id="9dv1apkwuSv4YPblBEl76c">过（页面出内容）</td></tr>
+<tr data-page-node-id="9eVlgkGADkNrJZBoEYyP4s"><td data-page-node-id="gxYL36avc0q1VjLMnehtaA">DP26</td><td data-page-node-id="NrWLJlLI1XbuT5DubdVtBi">192.168.40.1:9011</td><td class="no" data-page-node-id="NyyYWzY70b2B1TSLGJ39Cy">拦（无效的响应）</td><td data-page-node-id="c0jc1llvTjBGgpuTM6aPvq">黑名单第二成员实锤</td></tr>
+<tr data-page-node-id="tQjojN9iQOFuo8GEinaGbG"><td data-page-node-id="h3YnOOFW1MZ4IR9EAL8TOV">DP27</td><td data-page-node-id="kIB3K4Lbe7u4E9BGsKad8O">192.168.40.1:80</td><td class="no" data-page-node-id="hjGW8QJtF4vs0FXAzLD5mr">拦</td><td data-page-node-id="gD8YYA96wBff97OrxtZ9aR">.1 全端口</td></tr>
+<tr data-page-node-id="EoQQu7np6UFRIfDTXAyz5w"><td data-page-node-id="cLdmC18rP0r1nVjPEvOspM">DP28</td><td data-page-node-id="xwfXXt6fuvVlokyVKWbn4r">192.168.125.1:9011</td><td class="no" data-page-node-id="8nJppkEsF1xdjtbZaCfXxg">拦</td><td data-page-node-id="9eVwU2vLqwrl6xhbjke5lX">黑名单第三成员</td></tr>
+<tr data-page-node-id="33wBDxUt7zXeBWyHlX4xiq"><td data-page-node-id="xmICYvxAZHbaLCpD3uJj3j">DP29</td><td data-page-node-id="lUBJZRYhOslOADteVSFwyj"><code data-page-node-id="McebQGPtPr9ZoEn9j3uS0Q">http://192.168.40.90@192-168-40-90.nip.io:9011/</code></td><td class="no" data-page-node-id="hVTNlftoROE7KanXmUSGxC">拦</td><td data-page-node-id="EzCfgTKnxGJwDHRUzO0HHH"><b data-page-node-id="taHwlDUheCankNx1asoeCm">token 段也查黑名单</b> → v6</td></tr>
+<tr data-page-node-id="2ELgsQUKtRy9X0rqfJmnHs"><td data-page-node-id="4R4kywaFdM2P67pJNoAcpj">DP30</td><td data-page-node-id="2jO6FuDAjN5pV6isy1zsTj">192.168.40.100:9011</td><td class="no" data-page-node-id="DcuwRlxKAaH4Eg5BHvhFcI">拦</td><td data-page-node-id="sYFtrMn4JJOJVkbblPUpsj"><b data-page-node-id="0DqYG9iZV5oY7irPdO7YgH">纯子串匹配</b>（被 40.1 前缀连坐）</td></tr>
+<tr data-page-node-id="09yzO5PqtnlmV71fAp1hdt"><td data-page-node-id="h8eQhAR6uxKpv87z1DLGp0">DP31</td><td data-page-node-id="G8dJf9fMAm0RWdETd5uD3V">172.16.1.191（portal）</td><td class="ok" data-page-node-id="oTn9V8f0XwTZ2o0Q5Mfrjl">过（长转圈 · 双 fired 29s · 零下文）</td><td data-page-node-id="HMi1ZORCIw8POko1VEk3LU">无第四成员；DROP 型不可达</td></tr>
+<tr data-page-node-id="2p2aQl3e19f0dnfC73eUYO"><td data-page-node-id="NOD24dPPqgfjD8jxFsGfFw">DP32</td><td data-page-node-id="N5Jo3WpxjEdwBZDTAmO4KQ"><code data-page-node-id="xVQk3Cic9GyewrB8xHhAu6">http://a@192.168.40.90:9011/</code></td><td class="ok" data-page-node-id="gVhT3xYDxl1zDfWtRcFtv0">到达 · 64ms 自动标绿</td><td data-page-node-id="MYbIWymnEjutqbYXJ2E2U9"><b data-page-node-id="oPh5AsgBYnPsL3KmdRtgqb">token 非空即短路</b>，v6 终验</td></tr>
+</table>
+<div class="small" data-page-node-id="lCMZitOJRCrIrAwu9yH7Ti">判读口径：拦=「无效的响应」或零落账；过=落账/到达/真实网络错误。首轮 DP6 与 DP9/11 的二轮标记为污染数据，以干净复测为准，已在表中注明。</div>
+</div>
+
+<div class="card" data-page-node-id="lII0g4JGkKndgfIl4ClYdn">
+<h2 data-page-node-id="QXR8e3ZhofVtTSuamAkKSB">七、通道可达性矩阵</h2>
+<table data-page-node-id="qF0q8y6We2zlhyj5pfEUsa">
+<tr data-page-node-id="tyRrevO5p23Wees3xR5K8K"><th data-page-node-id="uIZXZCgJaATdnnAvYV3hiQ">通道</th><th data-page-node-id="cvlQnBF1lRrCxBqi6d699O">裸 IP</th><th data-page-node-id="9PcRrC65G9VTOyFUWbtU8k">字母@IP（userinfo）</th><th data-page-node-id="9iG1nc3L04D4b5RLIwuoWG">域名（无 quad）</th><th data-page-node-id="kVDCCi2DzWPQHPey73EA8X">域名（内嵌 quad）</th><th data-page-node-id="evq44Ln5RoNPQnSwTH7x1g">hex origin 页内相对请求</th></tr>
+<tr data-page-node-id="4CJcKbOTMUePdUYNJB6OWy"><td data-page-node-id="3CyOcwxo5qYG0ZtkFqohiy">顶层导航</td><td class="no" data-page-node-id="NAg5skFYBfJkFDLX1jl6QX">拦</td><td class="ok" data-page-node-id="e2xhtIC6yA91YBhj80cL7o">过</td><td class="ok" data-page-node-id="FIymHw6SQPD1ScgBXG5R8e">过</td><td class="no" data-page-node-id="wUfqxamjR0T2aDSoXh30eJ">拦</td><td class="ok" data-page-node-id="4ocuZVetBySWGMYYZTR7uo">过</td></tr>
+<tr data-page-node-id="88owSS8Y4PsiN3x4x8SWFK"><td data-page-node-id="Lc69s4WnsAUfguHu40wljt">XHR</td><td class="no" data-page-node-id="ExqNI4eertbbpLQeose0ni">拦</td><td class="ok" data-page-node-id="8bCI14qGSc9tmnMppAE1pW">过</td><td class="ok" data-page-node-id="xp4QRpGwJ3gOIFAAZsbWVt">过</td><td class="no" data-page-node-id="HEfIZCurz9ACDoXCuMJGcf">拦</td><td class="ok" data-page-node-id="K9dTVMv0xIhhazO3FLDQ9e">过</td></tr>
+<tr data-page-node-id="ZyOUytgr4ipXfaI6S6lLKe"><td data-page-node-id="6oPBIsyCOhI2mbuCdVkKrd">fetch</td><td class="no" data-page-node-id="xaYDshapZllBUz7f0ipnDJ">拦</td><td class="na" data-page-node-id="DANBMf2LHYLC6ufJegwUZh">构造期抛错</td><td class="ok" data-page-node-id="0wgFj1yjjCBqCSIwpPoKXp">过</td><td class="no" data-page-node-id="TMTmw51XJVvQobhKxZGJVm">拦</td><td class="ok" data-page-node-id="EwDnbSrWAqyCtl66FqDqyU">过</td></tr>
+<tr data-page-node-id="P1z7XwlsBoK4hltO4oF4zi"><td data-page-node-id="A3sAKq056K6mJ9q6Hc3Qqm">img / script</td><td class="no" data-page-node-id="ZsFdszU2CJ8jK1d0EmYDiD">拦</td><td class="no" data-page-node-id="eJFFOqrNiJu7CVB6HruXH6">拦（剥离后判定）</td><td class="ok" data-page-node-id="O20KnplD3oQ9UMZyQnZ8yW">过</td><td class="no" data-page-node-id="4xbnyIHF3sK5uB9aTZxxIe">拦</td><td class="ok" data-page-node-id="lhYUw0mLX1fxWHu7vsOWhi">过</td></tr>
+<tr data-page-node-id="0gbOeis9Fv5mG6XpammFar"><td data-page-node-id="n6M4dFSh6WqYg0S94XvXUq">WebSocket</td><td class="no" data-page-node-id="A3vmIE4LsY2xHjfG53CAqr">拦</td><td class="ok" data-page-node-id="EvAApiWb8HLEcUKIFXF3Jo">过（凭据直达）</td><td class="ok" data-page-node-id="H0kNIFzSupAjHLxyfmLzDX">过</td><td class="no" data-page-node-id="bz6meZ6tggsm2AkpiZLtZm">拦</td><td class="ok" data-page-node-id="2kdwAYMVU0JdEbKia1AU6Y">过（DP15）</td></tr>
+<tr data-page-node-id="cyJKDBFgJMOnVdTZDtnHAv"><td data-page-node-id="0mwzEolgvWfOLPrICNExNi">服务端 302 → 裸 IP</td><td class="ok" data-page-node-id="fHyORAR2FYO8ZYDjFVE128">到达（仅顶层）</td><td colspan="4" data-page-node-id="yzHUHHNX08zXxAlnsEecqH">JS 直跳 / XHR 中继 / 二次导航一律重判（E7）</td></tr>
+</table>
+</div>
+
+<div class="card" data-page-node-id="RuHP99Uez370TyzQySzkId">
+<h2 data-page-node-id="0z2aonzKr4JqNJFiHYfwf0">八、可用方案现状（按推荐序）</h2>
+<table data-page-node-id="BbJw9Ks9cxED8C72SisxFg">
+<tr data-page-node-id="Ijc2kv1PhbC2TqTNTgrwrp"><th data-page-node-id="4W8D6Nh6kjm5lqrOnacFWM">方案</th><th data-page-node-id="uukyGw2zIrDszxCK2t8l30">形态</th><th data-page-node-id="f1WwMZnRwX7DEMwNS1ok0y">状态</th><th data-page-node-id="oMXlIdMhlv0KiBlfN0EAmw">说明</th></tr>
+<tr data-page-node-id="1NAd1qxb8UkDBjcUMiyYKT"><td data-page-node-id="DGtLYgPfAfQ3yx7kena4P1"><b data-page-node-id="hXW4MnFrB0Esa2lEFTbFVu">A · 自有域名（正道终态）</b></td><td data-page-node-id="CZ3TQcKyjoGgYY6NkGJl4T">自有域名 A 记录 → 40.90，管理端入 siteList</td><td class="ok" data-page-node-id="Lfz93D9XDmO5x903BUbKWK">推荐</td><td data-page-node-id="y93l0X3CRSOra1KcJ73l1Z">全功能零 hack；域名串不含点分四段即可</td></tr>
+<tr data-page-node-id="mK3lbq2BifGBKtqkVbARSn"><td data-page-node-id="2uGD6HKVkh2Q4YsM8cYMuC"><b data-page-node-id="jyEGLglt7uMs5RQdHzhRTw">B · nip.io 横线形（即刻可用）</b></td><td data-page-node-id="ra1egZpXF2fQVoICYQhwyn">书签 <code data-page-node-id="eiSS7N9UXVwDLVxVRSClf6">http://192-168-40-90.nip.io:9001/</code>，WS <code data-page-node-id="hIklgGwYmW8do3TYwtsE6D">ws://192-168-40-90.nip.io:10001</code></td><td class="ok" data-page-node-id="PAVhSDlLi6NOHxpTMH8xCE">可用</td><td data-page-node-id="kc9BIJiKIqXMKAR9867lC5">fetch/绝对路径/子资源全原生；依赖外部公共 DNS 解析</td></tr>
+<tr data-page-node-id="UmkVDyK8xvIovEkuan3Jss"><td data-page-node-id="ASWtdUYCCQjDGnQ2DsDAAm">C · userinfo 形态（过渡）</td><td data-page-node-id="pYTfN9mOU6uaENN3z57Pm6"><code data-page-node-id="I5FqlCcE3uSDRJWpOnFisH">http://a@192.168.40.90:9001/</code>（任意非空 token）</td><td class="ok" data-page-node-id="pmvmcuChJCtUTKLBESk233">可用</td><td data-page-node-id="7HzBNap4hh8gAtqYq496HV">token 短路任意串成立（DP32）；代价：fetch 报废、img/script 需内联、刷新后归一化失效</td></tr>
+<tr data-page-node-id="LZjvjzKRvTFuICepG8w8Id"><td data-page-node-id="uPJAkaTWJA8AjHuIEwSxVh">D · hex origin（实验性）</td><td data-page-node-id="HjTlMZseNUDGoAoFNZx1pR"><code data-page-node-id="ByM39KbdjRleH5GlDPtyHm">[::ffff:192.168.40.90]</code> 导航 + 页内全相对路径</td><td class="ok" data-page-node-id="WIjPykaLgYQ39ioNn1zevY">可用</td><td data-page-node-id="24xOZ3RZTg0rgBWCrKNjwS">DP5/15/18 闭环；入口依赖 hex 字面量，地址栏形态怪异</td></tr>
+<tr data-page-node-id="9hsk0HoUxa4V5ve9zK7Q7N"><td data-page-node-id="5aXsYJGhET8f52sUi7bwjq">× · 40.100 别名</td><td data-page-node-id="RGYnoM4hIjKc7JDPNeLBAx">服务器网卡加 192.168.40.100 别名</td><td class="no" data-page-node-id="eBW5uQC5Q2SyP8WxahAivl">判死</td><td data-page-node-id="bqbRjD02ieqyxtfiUVC1Hp">DP30：黑名单子串连坐（40.1 是 40.100 前缀）</td></tr>
+<tr data-page-node-id="d9FH9P3FtNEjClS96zmu0C"><td data-page-node-id="sVJH3ix3oDcAZetr7viZ5c">× · 管理端 CIDR</td><td data-page-node-id="1PgCB91yC4brwC65ozJTTH">siteList 写 192.168.40.1/24 之类</td><td class="no" data-page-node-id="Iyo8Pf1KHb9xaWmT4tZwGp">无效</td><td data-page-node-id="ZwkCJxxPDFStFGFaCGce0H">siteList 不参与浏览器层判定；黑名单另一张表</td></tr>
+</table>
+<div class="good" data-page-node-id="KYMODF7VKuL6OzyGKotplg"><b data-page-node-id="aXuVlsBByhYbXCV8JA6Cgv">管理端修复建议</b>：① 浏览器禁止站点黑名单应按 IP 精确/解析匹配而非子串，且应校验条目不与合法网段重叠（40.1 连坐 40.100 即为实例）；② userinfo 凭据段应在判定前剥离或直接拒绝含凭据的 URL（现代浏览器已弃用，业务无合法场景）；③ 判定输入应使用剥离后、规范化后的最终请求 URL，消除「判定的字符串与发出的请求不一致」这一根因。</div>
+</div>
+
+<div class="card" data-page-node-id="5qAXygki5LJZoT2h5xoRHi">
+<h2 data-page-node-id="t2YclxENRLK4movjvjuayt">九、网络侧第二层观测</h2>
+<ul data-page-node-id="NVkonouJgBY361XX4FWcCI">
+<li data-page-node-id="0jF5B1OZu86ZEcbjqEYteL">域名形态（无 quad）导航全部出网成功（DN2–6、DN12、DP8 随机新域名）→ <b data-page-node-id="JbhmiSTus8lFAj6lwpoGmb">第二层「域名白名单+默认拒绝」对浏览器会话内的新域名未设防</b>，或其白名单按 SNI/Host 匹配且动态学习在吸收。</li>
+<li data-page-node-id="EGD631eIawUdd02lRZuDj3">热点对照（192.168.137.x 不受管网）全功能 → 管控面只在 40 网生效。</li>
+<li data-page-node-id="rQ9KEQYeg44aAvYPtpusox">成因未定，是本次<b data-page-node-id="RuFRQjq9wpSVSeBamehqhQ">唯一未收敛的外层未知</b>；B 方案稳定性与此相关（已有数日稳定实测窗口）。</li>
+</ul>
+</div>
+
+<div class="card" data-page-node-id="VaBekEKdC6oebqpCGNQFcg">
+<h2 data-page-node-id="nAE7UqBvF7whlhomszvZP0">十、事故与对策记录（对后续同类演习可复用）</h2>
+<table data-page-node-id="n1BeLFmftKxUMnkbixCkxf">
+<tr data-page-node-id="lgwCeP4z984hcfuZ2JzC6H"><th data-page-node-id="HkmOw3x7y6na9xlFTMR4wx">#</th><th data-page-node-id="F8p7dbMkTOfObFquaJ8oUi">事故</th><th data-page-node-id="ewSE12CUz39KYtTx75D848">根因</th><th data-page-node-id="o1jHtyUa4sB6RqgTepPE5r">对策</th></tr>
+<tr data-page-node-id="WBuRVeWAmJ20GH2R6cwmEl"><td data-page-node-id="NMUJvLJ3PWFyIaAgkyFfL9">1</td><td data-page-node-id="UgexItoz34sdIHKbQDtcPK">一整轮设备端数据沉默，差点误读「全部放行」</td><td data-page-node-id="ZKsFPzW4q7gfVd2jU2z1b7">userinfo 基址下 <code data-page-node-id="5O5ff1vQO7ofLGz5FfQDDr">fetch(相对路径)</code> 构造期抛错被 .catch 吞掉</td><td data-page-node-id="RzP7LUU25N1KQaLkJiJUCH">回传一律改 XHR</td></tr>
+<tr data-page-node-id="zSSZvZsT8IRV8iL5dnzmhk"><td data-page-node-id="B5tmOnXER01vD8Ylg40eJe">2</td><td data-page-node-id="7XVnSzLBfSnRXNqxyFstch">「页内 200、日志零命中」假象</td><td data-page-node-id="sa0J68ACGwMv27G3zXf8HU">同 URL XHR 内存缓存</td><td data-page-node-id="noMA7iqzl7Wdf6tP8NXTDK">探测 URL 加 <code data-page-node-id="KFqb8uqa39h0jXmfr4nHwZ">?r=</code> 随机数</td></tr>
+<tr data-page-node-id="2rzGVbmSuNjOYkluvDp28p"><td data-page-node-id="srBVJLk3uOSeTtovABNUso">3</td><td data-page-node-id="mf0nqJSKDiDV87Fl9rDOML">探针页区域级回写丢失（表格行回退旧版）</td><td data-page-node-id="SwOymwz74EbSzpLiVjBOdQ">外部同步进程与本地编辑竞态</td><td data-page-node-id="lotWFw1SZlJvMEX2RhL2iU">新探针页换新文件名；页面磁盘直读（lab-server 每请求 readFileSync）</td></tr>
+<tr data-page-node-id="f5qEBGU5kEbTZZK75fbekJ"><td data-page-node-id="bufWGmSPscJXZloCW8UyPn">4</td><td data-page-node-id="ClUOE3SMVeL1dirN5xZYtw">新探针页上线 20 分钟设备零请求（「没有啊」）</td><td data-page-node-id="WKTZLntRCYTapSMA0IccCd">总控台漏挂入口</td><td data-page-node-id="D79aJdh9cYh3NkEhizD3aD">新页面必须同步挂总控台入口</td></tr>
+<tr data-page-node-id="h03ULdwXuBWK42h9ExHTX6"><td data-page-node-id="egm9gcZ2uAmyN1ZBpienDo">5</td><td data-page-node-id="DdTCWEcxk91yHoxcPhHZc1">探针按钮行「上线」但设备看不到</td><td data-page-node-id="fAJbfSdlPoyGR8E5TjRPuq">同文件多处编辑漏发/并行写盘竞态覆盖</td><td data-page-node-id="mTljWcS3l5xDCV2oSp2r6r">同文件多处编辑逐个串行提交，提交后服务端响应实测校验</td></tr>
+</table>
+</div>
+
+<div class="card" data-page-node-id="BIPBwqHh9xGNH7dCbwOLJN">
+<h2 data-page-node-id="jcLVkSmUrQ1tE5rB8WnSvM">十一、遗留未解</h2>
+<ul data-page-node-id="FOxFZNHLkD7Apims0QTSQG">
+<li data-page-node-id="49aYkVnwysqkeibQOsiPKr"><b data-page-node-id="QDqbOIBdmSGBCQH8GmN0mp">黑名单来源</b>：{40.1, 40.90, 125.1} 恰为网关+CI+课堂互动网关，疑似管理端「浏览器禁止站点」手工清单——待管理台审计闭环（用户侧动作）。</li>
+<li data-page-node-id="e25vxZlPmGyxPYU9RrXTbc"><b data-page-node-id="rbBWmIRjpk7nSDQJCFqjFQ">token 侧子串细节</b>：quad 嵌于长 token（如 <code data-page-node-id="vy5pJL0Ziw89BsfO3guL3x">x192.168.40.90y</code>）是否同拦未单测；token 是否有 quad 门控（先判「含 quad」再查黑名单）未分辨——host 侧已确证两步语义（DN12 无 quad 直通），token 侧按对称假设处理。</li>
+<li data-page-node-id="qO43v6zz7ZfzbtnMgeQGC0"><b data-page-node-id="5nQwEz4v8ffZMT55yOVjma">IDN / Punycode</b>：只测了 %2E，Unicode 同形字与 Punycode 未测。</li>
+<li data-page-node-id="u7DdKBCBcv6YCvW2BDLNE2"><b data-page-node-id="pcNgUGuiQSUE1YGmoHqF63">双 @ 拒绝的内部机理</b>：合法性检查位置与实现未知。</li>
+<li data-page-node-id="7RqmSIjuJ4zWkNch7B2UqG"><b data-page-node-id="aIedNty86xNNu0b3AZ9nay">第二层成因</b>：见 §九。</li>
+<li data-page-node-id="odU7EY5fmTfrehrbp0ni7Y"><b data-page-node-id="uBBjQvafgmwMmwi0jikTcY">快照时效</b>：结论对本次策略快照与两台设备内核成立；策略或引擎升级后应抽检复测（DP5/29/32 三针即可回归）。</li>
+</ul>
+</div>
+
+<div class="card" data-page-node-id="4yA8EDMdRBEIVNZ2IAfqCD">
+<h2 data-page-node-id="5WYcf3peBvIxn566DC8Ek2">附录 A · 关键日志时间线摘录</h2>
+<pre data-page-node-id="UAatv3vXR5oZilWzuMvhGa">
+── 第一轮（40.27 / X5）──
+[12:53:32]        GET /case-nav.html?case=N2        200   N2 userinfo 导航（首破）
+[12:54:35.774]    GET /api/ping                     200   S2 剥离后唯一上线请求
+[12:54:35.813]    WS-UPGRADE /ws                          S7 明文 WS 直达
+
+── 第二轮（40.58 / 系统 WebView）──
+[00:37:54.280]    observe DP12 fired → /redir → case hit=1 落账    302 豁免
+[01:31:45–01:32:00] DP14 blocked / DP15 allowed(WS-UPGRADE ×2) / DP16 blocked
+[01:33:36]        GET /api/ping?case=DP18 200  REF=http://[::ffff:c0a8:285a]:9011/...   hex 全栈闭环
+[02:26–02:27]     DP20–25 fired ×2 轮，全部零 marks             黑名单外全放行
+[02:53:13]        case=DP7&v=1 到达 + allowed                    token 分支复测
+[03:05:05/03:05:12] DP28 / DP29 fired → 屏「无效的响应」         第三成员 + token 查黑名单
+[03:35:35]        DP30 fired → 「无效的响应」                    子串连坐
+[03:35:42+03:36:11] DP31 fired ×2（29s 重试）零下文 → 长转圈      portal 放行
+[03:36:58.759]    DP32 fired → GET /case-dp3.html?case=DP32&v=1 200
+[03:36:58.823]    DP32 allowed（到达后 64ms 自动标绿）           v6 终验
+</pre>
+<h3 data-page-node-id="JQiBU0vs708ypbSNp0j65O">附录 B · 留痕文件清单</h3>
+<table data-page-node-id="KlpPzFtL6ixwof0Kmh201F">
+<tr data-page-node-id="X1XDV4RS4rOybc9lMIwAkI"><th data-page-node-id="Hf7DGILm4jmzrpOakGAXai">文件</th><th data-page-node-id="zBjG4aLYGMTPlfIgAa8rWn">内容</th></tr>
+<tr data-page-node-id="EZGv5wQ1wbCNUzqgHH3As9"><td data-page-node-id="KjUp7aMsBbftvGbY2lNuAC"><code data-page-node-id="Z86mYpyc3eSrDTVDttDFE3">records/access.log</code></td><td data-page-node-id="T6rrRCDIdCtnY2AnhZPNbi">靶机逐请求原始日志（两端口、含 UA/REF/SF）</td></tr>
+<tr data-page-node-id="hcOzjUKhObCizI32NTwdgt"><td data-page-node-id="QajLYFVufgXKzE0OYDoBru"><code data-page-node-id="Mb4fB3vcwFGcWSHBABDPsM">records/observe.csv</code></td><td data-page-node-id="55IfxVi65nAB7B7XKSzyQj">设备端 beacon 结构化回传（fired/allowed/blocked）</td></tr>
+<tr data-page-node-id="B0ydMRbCySdEl19HdI4apx"><td data-page-node-id="UvX0Qq6zSFS3c7zdKpHAL4"><code data-page-node-id="B9pccrKuEWNGhCo0AUikR4">pages/case-nav/sub/dom/dp/dp2/dp3.html + index.html</code></td><td data-page-node-id="KtEoja6LU2E75jmbndMN9Y">全部探针页与总控台</td></tr>
+<tr data-page-node-id="IicKAb8srQgzGHd1DmNz16"><td data-page-node-id="YRIorWwSZnD0ysbKcihsrf"><code data-page-node-id="QTpeSV1OPLfEGXJJVVqHDC">server/lab-server.mjs</code></td><td data-page-node-id="vCFzSWAkWNXjIDjruOaLJT">实验台：磁盘直读、/redir 与 /redir-xhr 中继、双端口</td></tr>
+<tr data-page-node-id="M2Bb8DN0jtIBtBqt4B81Ql"><td data-page-node-id="KFGIHzWzi9ohl2Xt9RWdqO"><code data-page-node-id="0G1z9e3kdFIDkls5IUgE5E">01-演习方案.html / 02-首轮实测结论.html</code></td><td data-page-node-id="lfY1GkYxOZyfrGjmlVWvUb">方案与第一轮结论</td></tr>
+<tr data-page-node-id="2IhkLTOA1YEhzWqM9PEgi8"><td data-page-node-id="330h2AzmvLN2DVcCqiq1Wm"><code data-page-node-id="uDJaKw5zaxhtfo8AOMYuHr">docs/文章-让软破再次伟大.md</code></td><td data-page-node-id="vOgyVQrFuVL8cTkqPwHseX">过程叙事版（已同步 v6 终稿）</td></tr>
+</table>
+<div class="small" data-page-node-id="KW69ACgLtR3xC0KY8NLLAp">报告版本 v1.0 · 2026-09-09 · 与 ebmd-filter-model.md §二十一/§二十二 同源</div>
+</div>
+
+</div>
+</body>
+</html>

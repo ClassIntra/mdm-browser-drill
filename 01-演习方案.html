@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDM 管控下浏览器层过滤行为 — 全面测试演习方案 v1.0</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1a2333; --sub:#5a6b85; --line:#e3e8f0;
+    --brand:#2f6bff; --brand-soft:#eaf0ff; --ok:#0f9d58; --ok-soft:#e6f6ee;
+    --warn:#b26a00; --warn-soft:#fff4e0; --bad:#d93026; --bad-soft:#fdecea;
+    --code:#0b3a8c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1060px;margin:0 auto;padding:28px 22px 90px}
+  header.hero{background:linear-gradient(135deg,#16233f 0%,#1d3a75 60%,#2f6bff 100%);
+    color:#fff;border-radius:16px;padding:30px 32px;margin-bottom:22px}
+  header.hero h1{margin:0 0 6px;font-size:25px;letter-spacing:.5px}
+  header.hero .meta{opacity:.85;font-size:13px}
+  .tag{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);
+    border-radius:20px;padding:1px 11px;font-size:12px;margin:0 6px 6px 0}
+  h2{font-size:19px;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h2 .no{display:inline-block;background:var(--brand);color:#fff;width:26px;height:26px;line-height:26px;
+    text-align:center;border-radius:7px;font-size:14px;margin-right:8px;vertical-align:2px}
+  h3{font-size:15.5px;margin:18px 0 8px}
+  p{margin:8px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px;background:#fff}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#f0f4fb;font-weight:600}
+  tr:nth-child(even) td{background:#fafbfd}
+  code,.mono{font-family:Consolas,"Courier New",monospace;font-size:12.5px;background:#eef2f8;
+    padding:1px 5px;border-radius:4px;color:var(--code);word-break:break-all}
+  .pill{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .pill.hi{background:var(--ok-soft);color:var(--ok)}
+  .pill.mid{background:var(--warn-soft);color:var(--warn)}
+  .pill.lo{background:#eef1f6;color:var(--sub)}
+  .pill.nav{background:var(--brand-soft);color:var(--brand)}
+  .pill.danger{background:var(--bad-soft);color:var(--bad)}
+  .callout{border-left:4px solid var(--brand);background:var(--brand-soft);border-radius:0 10px 10px 0;
+    padding:10px 14px;margin:12px 0;font-size:14px}
+  .callout.warn{border-color:#e0a800;background:var(--warn-soft)}
+  .callout.red{border-color:var(--bad);background:var(--bad-soft)}
+  .callout.green{border-color:var(--ok);background:var(--ok-soft)}
+  ul,ol{margin:8px 0 8px 4px;padding-left:22px}
+  li{margin:4px 0}
+  .small{font-size:12.5px;color:var(--sub)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .kbd{font-family:Consolas,monospace;background:#fff;border:1px solid #cfd8e6;border-bottom-width:2px;
+    border-radius:6px;padding:0 7px;font-size:12.5px}
+  footer{margin-top:36px;color:var(--sub);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>MDM 管控下 · 浏览器层过滤行为全面测试演习</h1>
+  <div class="meta">演习方案 v1.0 &nbsp;|&nbsp; 2026-09-08 &nbsp;|&nbsp; 基线依据:资料库文档《EBMD MDM 过滤器行为模型(实测知识与证据 2026-09-08)》&nbsp;|&nbsp; 方法参考:github.com/AndrewAltimit/exploits(仅方法论)</div>
+  <div style="margin-top:10px">
+    <span class="tag">范围:自有受管设备 192.168.40.27 ↔ 自有服务器 192.168.40.90</span>
+    <span class="tag">性质:受控授权审计 · 证据驱动 · 可回滚</span>
+    <span class="tag">目标:定案过滤器确定性 + 产出厂商漏洞证据链</span>
+  </div>
+</header>
+
+<!-- ============ 0 ============ -->
+<h2><span class="no">0</span>摘要与定位</h2>
+<div class="card">
+<p>本演习<strong>不是</strong>「帮助设备逃逸管控的作业指导」,而是对<strong>自有 MDM 部署</strong>的一次受控安全评估:通过浏览器形态学测试,验证 URL 过滤器引擎的真实判定规则,把基线文档中带置信度标注的行为模型升级为<strong>可复现、带证据</strong>的定论,并完成两件事——(1) 用 A/B 受控协议解决文档 §四「非确定性/策略同步窗口」这一未定案矛盾;(2) 产出可直接提交厂商的漏洞报告证据链(URL 字符串匹配 + userinfo 绕过 + CIDR 条目无效)。</p>
+<p><strong>为什么引用 AndrewAltimit/exploits:</strong>该仓库没有 MDM/URL 过滤专项(经核对其 README 与目录,相关的是浏览器扩展供应链、浏览器原生后利用、Chrome/Firefox CVE、SCCM/RMM/EDR 等,目标对象与本题不符)。它真正可迁移的是<strong>方法论与纪律</strong>:沙盒遏制(ContainmentGuard:强制回环/隔离,超出即拒)、攻击-检测成对交付(每个动作必配防御侧观测)、Mock 环境先行。本演习按同一纪律落地:隔离到 9011 演习端口、只碰自有地址、每个用例都带观测点与检测建议。</p>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2><span class="no">1</span>授权声明与红线(先读)</h2>
+<div class="card">
+<h3>演习合法性前提(必须全部满足,任一不满足即中止)</h3>
+<ul>
+  <li><strong>资产归属:</strong>目标仅限自有受管设备 192.168.40.27 与自有服务器 192.168.40.90(本机);不触碰其它租户/班级设备、不直接攻击厂商云端 mdm 服务端(策略接口只能由设备自身按既定节奏拉取,演习不做任何重放/篡改/伪造)。</li>
+  <li><strong>人员授权:</strong>执行者为该 MDM 部署的 owner/受权审计人(与基线文档立场一致)。</li>
+  <li><strong>透明原则:</strong>全程保留服务器访问日志与设备侧观测,不做日志清理、进程伪装、审计规避。</li>
+</ul>
+<h3>红线(本演习明确排除,与既定运维安全边界一致)</h3>
+<table>
+  <tr><th style="width:30%">排除项</th><th>原因 / 替代</th></tr>
+  <tr><td>运行 / 编译 exploits 仓库内任何二进制、Rust crate、CVE 载荷、C2/窃密模块</td><td>目标对象不符(面向桌面/云/EDR),且为武器化代码;本机不落地执行。方法层已足够。</td></tr>
+  <tr><td>浏览器引擎漏洞利用(CVE-2024-9680 / CVE-2026-2441 类)</td><td>即使成功也只是代码执行,不改变网络白名单判定;属越权攻击面,且无补丁确认前不可用于生产设备。</td></tr>
+  <tr><td>持久化 / 自启动 / 刷机 / Root / Xposed / ADB 恢复</td><td>与「不刷机、不动刀」约束冲突;会命中 blockapp 日检与 L4 违规锁。基线文档 §十四已逐条证伪。</td></tr>
+  <tr><td>ARP/DHCP 欺骗、TCP RST、DNS 劫持、策略包伪造</td><td>过不了响应签名 + md5 转存前后校验;且属中间人攻击面。基线文档 §十四 1/3/4。</td></tr>
+  <tr><td>任何指向第三方/公网的「放行测试」</td><td>演习只度量「40.90:9011 是否可达」这一布尔量;URL 里的域名串仅作为字符串样本,不解析不访问。</td></tr>
+  <tr><td>结果用于真实逃逸课堂管控</td><td>演习结论仅用于:管理端白名单配置、厂商漏洞报告、本地检测规则。</td></tr>
+</table>
+<div class="callout red"><strong>判定规则:</strong>所有用例的观测对象是「服务器是否收到请求 + 设备浏览器表现」,二者必须成对取证。任何单侧观察(只截屏、只看日志)不计为证据。</div>
+</div>
+
+<!-- ============ 2 ============ -->
+<h2><span class="no">2</span>环境拓扑与角色</h2>
+<div class="card">
+<table>
+  <tr><th>角色</th><th>实体</th><th>备注</th></tr>
+  <tr><td>演习服务器(本机)</td><td><code>192.168.40.90:9011</code> + <code>127.0.0.1:9011</code></td><td>独立 Node 静态+日志服务器(零依赖),不占 9000/9001 生产端口;产出访问日志与观察回传 CSV。</td></tr>
+  <tr><td>生产 CI 服务</td><td><code>192.168.40.90:9001</code></td><td><strong>演习期间不部署、不注入、不改配置</strong>,保持 9-7 基线。部分历史对照用例可直接开 9001 页面,但记录需并入本次日志。</td></tr>
+  <tr><td>受管设备</td><td><code>192.168.40.27</code>(40 网段 WiFi,MDM 客户端)</td><td>唯一被测对象;浏览器打开演习页执行用例;操作人手动执行+观察。</td></tr>
+  <tr><td>对照热区</td><td>PC 热点 <code>192.168.137.1:9011</code>(可选)</td><td>基线文档 §二.4 确认 137 网段不受管,用于区分「过滤器拦截」与「服务端故障」。</td></tr>
+  <tr><td>证据源</td><td>演习访问日志 / observe 回传 / 设备截屏(带时间)</td><td>morgan 远程地址格式已在生产侧还原说明(文档 §七);演习侧自带 :remote-addr 等价物。</td></tr>
+</table>
+</div>
+
+<!-- ============ 3 ============ -->
+<h2><span class="no">3</span>基线行为模型(引用,含置信度)</h2>
+<div class="card">
+<table>
+  <tr><th>#</th><th>模型陈述</th><th>置信度</th><th>来源(文档节)</th></tr>
+  <tr><td>B1</td><td>导航判定基于 <strong>URL 字符串</strong>,不基于解析后 host;裸 IP:PORT 被拦(即使 40.0/24 已在白名单单),字符串含已放行域名即放行</td><td><span class="pill hi">高</span></td><td>§二.1 / §10.1</td></tr>
+  <tr><td>B2</td><td>子资源/API 按<strong>同一字符串规则逐请求判定</strong>;@ userinfo 形式可达,干净形式被拦</td><td><span class="pill hi">高</span></td><td>§二.2(日志)</td></tr>
+  <tr><td>B3</td><td><code>fetch()</code> 对带 userinfo URL 直接抛错(<em>Request cannot be constructed…</em>);XHR(axios)剥离 userinfo 后照常发;带 userinfo 可加载;图片等会剥离→变干净→被拦。<strong>实测引擎:腾讯 X5 WebView(Chromium 89 基线)</strong>,fetch/XHR 的 userinfo 行为沿用 Blink 规范,可预期与基线文档一致,但须用 M 组逐条复核</td><td><span class="pill hi">高</span></td><td>§二.3(浏览器规范)+ 本演习 M 组</td></tr>
+  <tr><td>B4</td><td>明文 WebSocket 曾有放行先例(noVNC);137 热点网段原生可用(含 AI 流式)</td><td><span class="pill mid">中</span></td><td>§二.4(日志)</td></tr>
+  <tr><td>B5</td><td>过滤器存在<strong>非确定性 / 策略同步窗口</strong>的可能(11:05-11:07 全通 vs 11:23+ 全拦);可能被 13.7MB 文档崩溃掩盖</td><td><span class="pill mid">中·未定案</span></td><td>§二.5 / §四</td></tr>
+  <tr><td>B6</td><td>策略接口响应带 md5+签名、内存缓存、00:01 定时拉取 → 篡改/伪造/断网 fail-open 均不可行</td><td><span class="pill hi">高</span></td><td>§十一 / §十四</td></tr>
+  <tr><td>B7</td><td>设备强制面:ADB/USB 禁用、私有 DNS 禁、应用冻结、黑名单日检、定位采集;侧载/证书通道被封</td><td><span class="pill hi">高</span></td><td>§十一 / §十四</td></tr>
+</table>
+<div class="callout"><strong>演习核心价值:</strong>把 B1–B4 从「当天特定时间线的观察」升级为「受控可复现结论」,并对 B5 做定案实验;B6/B7 不重测(已高置信)。</div>
+</div>
+
+<!-- ============ 4 ============ -->
+<h2><span class="no">4</span>仓库能力映射(采用 / 改编 / 排除)</h2>
+<div class="card">
+<table>
+  <tr><th>仓库模块</th><th>判定</th><th>理由与本演习的用法</th></tr>
+  <tr><td>ContainmentGuard 遏制纪律</td><td><span class="pill hi">采用</span></td><td>演习强制「9011 独立端口 + 仅自有 IP + 不落生产」;访问越界地址的用例直接删除。</td></tr>
+  <tr><td>Attack ↔ Detection 成对交付</td><td><span class="pill hi">采用</span></td><td>每条用例带「服务器观测点 + 设备观测点 + 防御侧检测建议」(见 §8),直接复用其「进攻模块必有防御侧目录」的结构。</td></tr>
+  <tr><td>Mock 环境先行 / 分阶段迭代</td><td><span class="pill hi">采用</span></td><td>本机 curl/Node 先行验证演习页可服务、日志可写,再上真机;结果先本地收敛再打补做 A/B。</td></tr>
+  <tr><td>浏览器扩展供应链(MV3)攻击面</td><td><span class="pill lo">排除</span></td><td>受管设备无扩展安装通道(interfaceManager 收口),且属终端对抗而非网络过滤器评估。</td></tr>
+  <tr><td>浏览器原生后利用 / WASM 载荷 / 浏览器 CVE</td><td><span class="pill lo">排除</span></td><td>武器化且不改变白名单判定;违反红线。</td></tr>
+  <tr><td>Evasion(Rust:睡眠混淆/间接调用/ETW/AMSI)、BYOVD、EDR 静默</td><td><span class="pill lo">排除</span></td><td>面向 Windows 端点的对抗技术;与既定「透明运维、不做审计规避」边界冲突。</td></tr>
+  <tr><td>C2、凭据窃取、RMM 滥用、横向移动、云身份、Snowflake/Databricks 链</td><td><span class="pill lo">排除</span></td><td>目标对象不符,且属高危害攻击面。</td></tr>
+</table>
+<div class="callout warn"><strong>结论先行:</strong>经映射,该仓库对本题的净贡献 = 方法论 3 条,载荷 0 条。浏览器层过滤的实测攻击面远小于仓库覆盖面——这正是值得写进演习报告的结论之一。</div>
+</div>
+
+<!-- ============ 5 ============ -->
+<h2><span class="no">5</span>演习总流程</h2>
+<div class="card">
+<ol>
+  <li><strong>准备(P0):</strong>本机启动演习服务器(见 README 启动节),<code>curl</code> 冒烟自检 9011;确认 9001 生产服务未受影响;设备接入 40 网段 WiFi。</li>
+  <li><strong>基线复测(P1):</strong>真机执行 <strong>N 组(导航层)</strong>用例,重建文档 §三 关键时间线样本(约 20 分钟)。</li>
+  <li><strong>子资源层(P2):</strong>真机打开 <code>case-sub.html</code>,页内自动探测 fetch/XHR/WS/img 的各类 URL 形态并回传,人工核对服务器日志。</li>
+  <li><strong>确定性定案(P3):</strong>按 §7 A/B 受控协议执行,目标:B5 定案为「确定性」或「策略同步窗口」并测出窗口量级。</li>
+  <li><strong>对照(P4):</strong>设备切 PC 热点 137.x 重跑 P1 代表性用例,区分过滤拦截与服务端故障。</li>
+  <li><strong>收敛(P5):</strong>按 §9 判定规则收敛每条用例,补证据(截屏/日志节选),填记录表。</li>
+  <li><strong>回滚(P6):</strong>停演习服务器;确认生产 9001 与设备状态无残留(文档 §七 基线核对)。</li>
+  <li><strong>交付(P7):</strong>产出:演习记录表 + 厂商漏洞报告证据包(§8 检测建议并入)+ 管理端白名单工单建议。</li>
+</ol>
+</div>
+
+<!-- ============ 6 ============ -->
+<h2><span class="no">6</span>用例矩阵(分层)</h2>
+<div class="card">
+<p class="small">执行约定:每条用例 = 设备浏览器动作 + 服务器日志命中情况 + 设备表现,三列证据。URL 中的 <code>SVCDOM</code> 指代放行名单中存在的域名字符串(如 service.example.com),<code>LABIP</code>=192.168.40.90,<code>LABPORT</code>=9011。所有目标均为本环境自有地址。</p>
+
+<h3>6.1 N 组 · 导航层(顶层导航)</h3>
+<table>
+  <tr><th style="width:44px">编号</th><th>导航 URL 形态</th><th>假设(依模型)</th><th>证据/判定</th></tr>
+  <tr><td>N1</td><td><code>http://LABIP:LABPORT/</code> 裸 IP:PORT</td><td>被拦(字符串无放行域名)→ 服务器无日志</td><td>复现文档 §二.1</td></tr>
+  <tr><td>N2</td><td><code>http://SVCDOM@LABIP:LABPORT/</code> userinfo</td><td>放行(字符串含放行域名)→ 日志命中</td><td>复现 11:05-11:07 形态</td></tr>
+  <tr><td>N3</td><td><code>http://SVCDOM@LABIP/</code>(80 端口)</td><td>同上;观察是否与端口无关(纯字符串)</td><td>端口无关性佐证</td></tr>
+  <tr><td>N4</td><td><code>http://LABIP:LABPORT/…?x=SVCDOM</code> query 含域名</td><td>若纯字符串匹配 → 可能放行</td><td>探测「域名出现在任意位置即放行」</td></tr>
+  <tr><td>N5</td><td><code>http://LABIP:LABPORT/#SVCDOM</code> fragment 含域名</td><td>fragment 不发出 → 应被拦</td><td>验证判定发生在请求前(字符串=整串?)</td></tr>
+  <tr><td>N6</td><td><code>http://SVCDOM@LABIP:LABPORT@127.0.0.1:LABPORT/</code> 双@畸形</td><td>浏览器解析为 host=LABIP,userinfo=SVCDOM@LABIP:LABPORT? 观察实际行为</td><td>畸形串边界用例</td></tr>
+  <tr><td>N7</td><td>大小写/全角/URL 编码变体:<code>HTTP://</code>,<code>％2f</code>,punycode 形态</td><td>记录是否归一化(引擎强弱)</td><td>归一化能力证据</td></tr>
+</table>
+
+<h3>6.2 S 组 · 子资源/API 层(页内请求)</h3>
+<table>
+  <tr><th style="width:44px">编号</th><th>请求形态</th><th>假设(依模型 B2/B3)</th><th>证据/判定</th></tr>
+  <tr><td>S1</td><td>XHR → <code>http://LABIP:LABPORT/api/ping</code>(干净绝对)</td><td>被拦(服务器无日志)</td><td>基线 §二.2</td></tr>
+  <tr><td>S2</td><td>XHR → <code>http://SVCDOM@LABIP:LABPORT/api/ping</code></td><td>XHR 剥离 userinfo 后发出;若字符串在剥离前判定→放行;剥离后判定→被拦。11:05 观察支持放行</td><td>核心矛盾点之一</td></tr>
+  <tr><td>S3</td><td>fetch → 同上 userinfo</td><td>fetch 构造期抛错,不发请求(浏览器规范)</td><td>验证 B3</td></tr>
+  <tr><td>S4</td><td><code>new Image()</code> → userinfo</td><td>剥离 credentials→干净→被拦(11:52 图标空框)</td><td>复现</td></tr>
+  <tr><td>S5</td><td><code>&lt;script src&gt;</code> / <code>&lt;link&gt;</code> CSS → userinfo</td><td>是否同样被剥离(取决于资源类型加载器)</td><td>扩展 B3 覆盖面</td></tr>
+  <tr><td>S6</td><td>页面 <code>&lt;base href="http://SVCDOM@LABIP:LABPORT/"&gt;</code> + 相对路径资源</td><td>相对路径解析为 userinfo 基址→若放行则全套可达(文档 §五「脏文档+绝对干净 API」变体)</td><td>组合面验证</td></tr>
+  <tr><td>S7</td><td>WebSocket <code>ws://SVCDOM@LABIP:LABPORT/ws</code>(明文)</td><td>noVNC 先例→可能放行</td><td>验证 B4;注意 ws 握手日志</td></tr>
+  <tr><td>S8</td><td>Service Worker / manifest 无</td><td>不适用(页+静态;仅记录 SW 注册在受管环境是否被禁)</td><td>环境能力登记,不计结论</td></tr>
+  <tr><td>S9</td><td>blob:/data: 内联资源(图标/字体)</td><td>无网络请求→不受过滤器影响;仅受页面体积/渲染压力影响</td><td>对照文档 9.4MB dataURI 观察</td></tr>
+</table>
+
+<h3>6.3 D 组 · 确定性 A/B(对应 §7 协议)</h3>
+<table>
+  <tr><th style="width:44px">编号</th><th>对照条件</th><th>目的</th></tr>
+  <tr><td>D-A</td><td>页面以 <code>http://SVCDOM@LABIP:LABPORT/pageA</code> 进入,无 base,页内混合 userinfo 与干净绝对 API 各一条</td><td>复刻 11:05-11:07「全通」条件</td></tr>
+  <tr><td>D-B</td><td>页面以干净形式进入(或带 base),资源全为干净绝对 URL</td><td>复刻 11:23+「全拦」条件</td></tr>
+  <tr><td>D-C</td><td>页面小体积(&lt;300KB)vs 大体积(≥8MB)同形态</td><td>剥离「文档过大→渲染崩溃→JS 未执行」混淆变量(§四①)</td></tr>
+</table>
+
+<h3>6.4 M 组 · 浏览器引擎登记(X5 WebView,Chromium 89 基线)</h3>
+<table>
+  <tr><th style="width:44px">编号</th><th>登记项</th><th>目的/预期</th></tr>
+  <tr><td>M1</td><td>UA 抓取(演习页顶部展示 + 服务器日志记录):识别 <code>X5/</code>、<code>TBS/</code>、<code>Chrome/89… wv</code>、<code>Version/4.0</code> 等标记</td><td>确认本次实际运行的是 X5 内核还是「X5 加载失败回退系统 WebView」;每轮记录,防止引擎漂移污染结论</td></tr>
+  <tr><td>M2</td><td>X5 能力基线:fetch()/XHR 对 userinfo URL 的抛错/剥离行为(对照 B3)</td><td>在 X5 上复核 S2/S3,确认与 Chromium 89 规范一致</td></tr>
+  <tr><td>M3</td><td>WebSocket 握手(明文 ws://)是否可用;X5 网络栈对 WS 的代理/过滤可见性</td><td>验证 B4;注意 X5 若自带网络层需确认日志可达性</td></tr>
+  <tr><td>M4</td><td>远程调试通道:ADB 已禁 → chrome://inspect / WebView 远程调试预期不可用;X5 调试包需提权不适用</td><td>证据采集只能走「截屏 + 服务器日志」双通道,本登记用于锁定采集手段</td></tr>
+  <tr><td>M5</td><td>Service Worker / 缓存 / base 标签在 X5 的行为(静态页内验证)</td><td>评估是否存在引擎级差异导致的额外可达面(预期与 Blink 一致)</td></tr>
+  <tr><td>M6</td><td>证书/安全:userinfo 仅限 http 明文场景;https+私有 CA 不在本演习范围(X5 无证书安装通道,基线 §十四.3)</td><td>锁定本演习仅测 http:// 形态,不引入证书面</td></tr>
+</table>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2><span class="no">7</span>A/B 受控协议(B5 定案)</h2>
+<div class="card">
+<p>目的:判定过滤器是<strong>确定性</strong>(同形态同结果)还是存在<strong>策略同步窗口</strong>(随策略拉取周期变化)。基线 §四 要求「同一分钟内 A/B 交替」。</p>
+<ol>
+  <li><strong>轮次:</strong>连续 5 轮,每轮 60s:第 0-25s 执行 D-A,第 25-50s 执行 D-B,第 50-60s 留空观察;轮间不重置浏览器(保留 cookie/缓存现实性)。</li>
+  <li><strong>时序对齐:</strong>本机与设备对时;服务器日志本身带时间戳,设备动作记录到秒(截屏带时间水印或手记)。</li>
+  <li><strong>结果编码:</strong>每轮每形态记 <code>通/拦</code>;同时记录策略拉取周期参考点(设备端日志 00:01 周期 + 手动触发拉取周期,见文档附录时间线)。</li>
+  <li><strong>收敛规则:</strong>
+    <ul>
+      <li>5/5 一致 → 判定「确定性」,采纳该形态结论;</li>
+      <li>出现 ≥1 次翻转 → 判定「存在同步窗口/非确定因素」,追加 2 轮并定位翻转是否贴合策略拉取时刻;</li>
+      <li>全程全拦且与体积无关 → 支持基线回滚后现状(9-7 基线轻量版),历史「全通」归因于当时内联注入形态或同步窗口。</li>
+    </ul>
+  </li>
+  <li><strong>对照组:</strong>同轮次内,137 热点下同页面应全通——用于排除服务端故障假象。</li>
+</ol>
+</div>
+
+<!-- ============ 8 ============ -->
+<h2><span class="no">8</span>防御侧配对(Detection Pairing)</h2>
+<div class="card">
+<p>对每一条「可能被放行的形态」,给出防御侧应做的检测信号与修复动作——这是本演习对部署 owner 与厂商的双重产出。</p>
+<table>
+  <tr><th>可放行形态</th><th>本地/管理端检测信号</th><th>引擎修复建议(厂商)</th><th>管理端止损</th></tr>
+  <tr><td>B1 字符串匹配(userinfo / query / 任意位置域名)</td><td>URL 中出现 <code>@</code> 的导航即告警;命中「白名单域名但解析 host 为 IP」模式</td><td>改为解析后 host 精确匹配;userinfo 一律拒绝或剥离后再判定</td><td>加入「禁止 userinfo 导航」策略项;相关域名串事件上报表</td></tr>
+  <tr><td>B2 子资源逐请求字符串判定</td><td>日志聚合:同一页面出现「域名串 + IP host」子资源突发</td><td>判定点统一到解析后 host+port 规范形</td><td>对含 @ 的资源请求降级拦截并记录</td></tr>
+  <tr><td>B4 明文 WS/热点放行</td><td>非白名单目标建立 TCP 的周期审计;137 网段流量旁路识别</td><td>WS 握手纳入同规则;端口归一(80/443/自定义)</td><td>课堂热点纳入策略覆盖或物理隔离(文档 §十四 残余风险)</td></tr>
+  <tr><td>B5 同步窗口</td><td>策略生效时差监控:拉取时刻前后 1-2 分钟加强审计</td><td>策略原子生效 + 版本生效时间戳上报</td><td>关键时段(课堂)缩窗口;生效前保持上一策略</td></tr>
+  <tr><td>CIDR 条目无效</td><td>定期「条目-引擎」一致性巡检(脚本比对清单与实测)</td><td>实现 CIDR 解析引擎或移除误导性条目</td><td>管理端 UI 明示「网段条目需引擎支持」</td></tr>
+</table>
+<div class="callout green"><strong>最终处置建议(非入侵路径):</strong>CI 正式访问的正道仍是管理端将自有域名入单(文档 §六),本演习证据用于驱动该工单与厂商修复,而非绕过长期运行。</div>
+</div>
+
+<!-- ============ 9 ============ -->
+<h2><span class="no">9</span>记录与验收</h2>
+<div class="card">
+<ul>
+  <li><strong>记录载体:</strong><code>records/result.csv</code>(用例矩阵逐条:编号/动作/服务器日志命中 Y-N/设备表现/结论/证据引用)+ 每关键用例 1-2 张带时间截屏。</li>
+  <li><strong>验收标准:</strong>N1-N7、S1-S9、D-A/B/C 全部至少一轮;A/B 5 轮完成并按 §7.4 收敛;P4 对照组完成。</li>
+  <li><strong>证据包:</strong>演习访问日志、observe.csv、截屏、本方案与基线文档 §三/§十 引用段落,打包为厂商报告附录。</li>
+  <li><strong>退出条件:</strong>任何违反 §1 红线的尝试 → 立即终止该用例并在记录中标红,不纳入结论。</li>
+</ul>
+</div>
+
+<!-- ============ 10 ============ -->
+<h2><span class="no">10</span>附录</h2>
+<div class="card">
+<ul>
+  <li><strong>快速启动:</strong><code>node server/lab-server.mjs</code>(或 <code>start.cmd</code>)→ 本机 <code>http://127.0.0.1:9011/</code> 冒烟 → 设备浏览器开 <code>http://SVCDOM@192.168.40.90:9011/</code>(N2 形态)开始。</li>
+  <li><strong>配套文件:</strong>README.md(运行手册)/ server/lab-server.mjs / pages/ 各用例页 / records/result.csv(模板)/ docs/detection-pairing.md。</li>
+  <li><strong>参照文档:</strong>资料库《EBMD MDM 过滤器行为模型 —— 实测知识与证据(2026-09-08)》(nodeId Q9Ct3IxpiDMiYNJvl7gTZC);exploits 仓库 README(仅方法引用)。</li>
+  <li><strong>风险缓解:</strong>演习端口与生产隔离;日志可整目录删除;演习页无任何对外请求;本机不下载/执行仓库任何载荷。</li>
+</ul>
+</div>
+
+<footer>MDM 浏览器层过滤全面测试演习 · 方案 v1.0 · 2026-09-08 · 仅限授权自有环境执行</footer>
+</div>
+</body>
+</html>

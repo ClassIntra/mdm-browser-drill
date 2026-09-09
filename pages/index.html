@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDM 过滤演习 · 总控台</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:900px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:14px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{border:1px solid #dde4ef;padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#edf2fa}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-all}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:13px;word-break:break-all}
+  .warn{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 12px;border-radius:0 8px 8px 0;font-size:13.5px;margin:10px 0}
+  a.btn{display:inline-block;margin:3px 4px 3px 0;padding:6px 14px;border-radius:8px;background:#2f6bff;color:#fff;text-decoration:none;font-size:13.5px}
+  .note{font-size:12.5px;color:#6b7a94}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>MDM 浏览器层过滤 · 演习总控台</h1>
+  <div class="sub">本页能打开 = 当前导航形态已被放行(对照你输入的 URL)。本机地址 192.168.40.90:9011 · 只连自有环境</div>
+  <div class="ua">本页 User-Agent(记录 M1,确认 X5 / 系统内核回退):<br><b id="ua"></b></div>
+
+  <div class="warn">操作规则:任何导航尝试后,请在本机服务器访问日志(records/access.log)核对「该 URL 是否到达」;被拦时设备端出现管控拦截提示,请截屏留证(带时间)。</div>
+
+  <h2 style="font-size:16px">入口</h2>
+  <a class="btn" href="case-nav.html">N 组 · 导航层用例(N1-N7)</a>
+  <a class="btn" href="case-sub.html">S 组 · 子资源探针(S1-S9)</a>
+  <a class="btn" href="case-dom.html">DN 组 · 匹配粒度(DN1-DN13)</a>
+  <a class="btn" href="case-dp2.html">DP 组 · 变体与二次判定 v2(DP1-DP19)★新一轮</a>
+  <a class="btn" href="case-dp3.html">D 组 · IP 守卫集形状(DP20-32)★最新:子串判别/portal/token短路</a>
+  <a class="btn" href="ab.html?mode=A">D 组 · A 页(mode=A)</a>
+  <a class="btn" href="ab.html?mode=B">D 组 · B 页(mode=B)</a>
+  <a class="btn" href="ab.html?mode=A&pad=8">D 组 · 大文档对照(pad=8)</a>
+
+  <h2 style="font-size:16px">参数</h2>
+  <p class="note">各用例页顶部自带可编辑常量 <code>LAB</code>(目标基址,缺省 <code>http://192.168.40.90:9011</code>)与 <code>DOM</code>(域名字符串样本,缺省 <code>service.example.com</code>);也支持 <code>?dom=</code> 临时覆盖。</p>
+  <p class="note">换用 PC 热点对照时把页面内 <code>LAB</code> 指向 <code>http://192.168.137.1:9011</code>(P4 对照)。</p>
+</div>
+<script>
+  document.getElementById('ua').textContent = navigator.userAgent;
+  // 回传改用 XHR(userinfo 基址下 fetch 抛错,见 02-结论 §4)
+  try {
+    var x = new XMLHttpRequest();
+    x.open('GET', '/api/observe?case=M1&result=loaded&ua=' + encodeURIComponent(navigator.userAgent) + '&note=index', true);
+    try { x.send(); } catch (e) {}
+  } catch (e) {}
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D 组 · A/B 对照页</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:760px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:10px}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-all}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;word-break:break-all}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+  th,td{border:1px solid #dde4ef;padding:6px 8px;text-align:left}
+  th{background:#edf2fa}
+  button{font-size:13px;border:1px solid #c8d3e4;background:#fff;border-radius:6px;padding:4px 14px;cursor:pointer}
+  .ok{color:#0f9d58;font-weight:600}.err{color:#d93026;font-weight:600}.pend{color:#b26a00}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>D 组 · A/B 确定性对照页</h1>
+  <div class="sub" id="modeinfo"></div>
+  <div class="ua" id="ua"></div>
+  <p id="env"></p>
+  <p>页内两枚探针(与方案 §6.3 对应):</p>
+  <table>
+    <tr><th>探针</th><th>URL 形态</th><th>结果</th></tr>
+    <tr><td>P1 · XHR userinfo</td><td><code id="u1"></code></td><td id="r1" class="pend">待执行</td></tr>
+    <tr><td>P2 · XHR 干净绝对</td><td><code id="u2"></code></td><td id="r2" class="pend">待执行</td></tr>
+  </table>
+  <p><button onclick="run()">▶ 执行探针并回传本轮</button> <span id="tip" class="pend"></span></p>
+</div>
+<script>
+const LAB_IP='192.168.40.90', LAB_PORT='9011', LAB='http://'+LAB_IP+':'+LAB_PORT;
+const DOM = new URLSearchParams(location.search).get('dom') || 'service.example.com';
+const UINFO = DOM + '@' + LAB_IP + ':' + LAB_PORT;
+const mode = (new URLSearchParams(location.search).get('mode') || 'A').toUpperCase();
+const pad = new URLSearchParams(location.search).get('pad') || '0';
+
+const entry = location.href.slice(0, 120);
+document.getElementById('ua').textContent = 'User-Agent: ' + navigator.userAgent;
+document.getElementById('modeinfo').innerHTML = '当前:mode=<b>' + mode + '</b> · pad=' + pad + 'MB · 进入 URL=' + entry;
+document.getElementById('u1').textContent = 'http://' + UINFO + '/api/ping';
+document.getElementById('u2').textContent = LAB + '/api/ping';
+const padNote = pad > 0 ? ' (本页由服务器注入约 ' + pad + 'MB 内联注释,复刻大文档条件)' : '';
+
+function xhrProbe(url){return new Promise(res=>{try{const x=new XMLHttpRequest();x.timeout=6000;x.onload=()=>res('OK '+x.status);x.onerror=()=>res('ERR');x.ontimeout=()=>res('TIMEOUT');x.open('GET',url);x.send();}catch(e){res('EXC '+e.name);}});}
+const setR=(i,cls,txt)=>{const el=document.getElementById(i);el.className=cls;el.textContent=txt;};
+// 回传改用 XHR(userinfo 基址下 fetch 抛错,见 02-结论 §4)
+function observePost(result,note){try{const x=new XMLHttpRequest();x.open('GET','/api/observe?case='+mode+'&result='+encodeURIComponent(result)+'&note='+encodeURIComponent(note||''),true);try{x.send();}catch(e){}}catch(e){}}
+async function run(){
+  document.getElementById('tip').textContent='执行中…';
+  const rnd=Math.random().toString(36).slice(2);
+  setR('r1','pend','…'); const a=await xhrProbe('http://'+UINFO+'/api/ping?r='+rnd); setR('r1',a.startsWith('OK')?'ok':'err',a);
+  setR('r2','pend','…'); const b=await xhrProbe(LAB+'/api/ping?r='+rnd+'b'); setR('r2',b.startsWith('OK')?'ok':'err',b);
+  const note = 'mode='+mode+'|pad='+pad+padNote;
+  observePost('P1:'+a+'|P2:'+b, note);
+  document.getElementById('tip').textContent='已回传本轮结果。按 §7 协议:本轮起始时间='+new Date().toISOString().slice(11,19)+'(与服务器日志对齐)';
+}
+</script>
+</body>
+</html>

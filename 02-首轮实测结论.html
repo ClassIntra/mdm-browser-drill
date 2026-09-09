@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="nX6XjJVwAHyUSfCx1IPDdJ">
+<head data-page-node-id="gqjRAJ0HJEBO5rt2DhTFGC">
+<meta charset="UTF-8" data-page-node-id="n5CmXqDMheCflXiErxxsbU">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="rmGg7BFeVoRK9GDouoM1zi">
+<title>MDM 过滤器 · 首轮真机实测结论(引擎模型 v2)</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#1a2333;--sub:#5a6b85;--line:#e3e8f0;--brand:#2f6bff;
+    --ok:#0f9d58;--ok-soft:#e6f6ee;--warn:#b26a00;--warn-soft:#fff4e0;--bad:#d93026;--bad-soft:#fdecea;--code:#0b3a8c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 22px 80px}
+  header.hero{background:linear-gradient(135deg,#0f2f1e 0%,#145a35 55%,#0f9d58 100%);color:#fff;border-radius:16px;padding:26px 30px;margin-bottom:20px}
+  header.hero h1{margin:0 0 6px;font-size:23px}
+  header.hero .meta{opacity:.9;font-size:13px}
+  .tag{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:1px 11px;font-size:12px;margin:6px 6px 0 0}
+  h2{font-size:18.5px;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h2 .no{display:inline-block;background:var(--ok);color:#fff;width:26px;height:26px;line-height:26px;text-align:center;border-radius:7px;font-size:14px;margin-right:8px;vertical-align:2px}
+  h3{font-size:15.5px;margin:16px 0 8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px;background:#fff}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#eef7f1;font-weight:600}
+  tr:nth-child(even) td{background:#fafcfa}
+  code{font-family:Consolas,monospace;font-size:12px;background:#eef2f8;padding:1px 5px;border-radius:4px;color:var(--code);word-break:break-all}
+  .pill{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+  .pill.hi{background:var(--ok-soft);color:var(--ok)} .pill.mid{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+  .callout{border-left:4px solid var(--ok);background:var(--ok-soft);border-radius:0 10px 10px 0;padding:10px 14px;margin:12px 0;font-size:14px}
+  .callout.warn{border-color:#e0a800;background:var(--warn-soft)}
+  .callout.red{border-color:var(--bad);background:var(--bad-soft)}
+  .mono-log{font-family:Consolas,monospace;font-size:11.5px;background:#0e1726;color:#c8e1ff;border-radius:8px;padding:8px 12px;margin:6px 0;overflow-x:auto;white-space:nowrap}
+  .small{font-size:12.5px;color:var(--sub)}
+  ul,ol{margin:8px 0;padding-left:22px} li{margin:4px 0}
+  footer{margin-top:30px;color:var(--sub);font-size:12px;text-align:center}
+</style>
+</head>
+<body data-page-node-id="yEhVL2nDJJJvyh3GfDUaxe">
+<div class="wrap" data-page-node-id="wo1ytj4M168yXFIqDAEsNG">
+
+<header class="hero" data-page-node-id="Zc6XxEKOLQlucQBvrhDIRF">
+  <h1 data-page-node-id="NwKeFqYTLYB5unAZRYGGhg">MDM 过滤器 · 首轮真机实测结论(引擎模型 v2)</h1>
+  <div class="meta" data-page-node-id="DfSq0BmPQiYBShLn9Cx7Y1">2026-09-08 20:50–20:55(GMT+8)· 演习 P1/P2/P3 首轮 · 证据:设备截屏 ×6 + 服务器 access.log / observe.csv 全量对照</div>
+  <div data-page-node-id="9ciSQaTkqDlInyt6Xwb6wU">
+    <span class="tag" data-page-node-id="o0R57VIPgixonrXRPOAL2S">设备:CB-C8hPro-STU · Android 9</span>
+    <span class="tag" data-page-node-id="2KR06zPlUISIJnDfYhudIm">引擎:X5 WebView · TBS/046295 · Chrome/89.0.4389.72(M1 已登记)</span>
+    <span class="tag" data-page-node-id="ODfHn9BdGY84PqYr9HhfYS">上下文:40 受管网(192.168.40.27)+ PC 热点(192.168.137.247)对照</span>
+  </div>
+</header>
+
+<!-- 1 -->
+<h2 data-page-node-id="qzHEazuWjXcNCefeJ2oODR"><span class="no" data-page-node-id="t3zPeWGh98iV0h1A07YTqA">1</span>引擎模型 v2 —— 六条定论</h2>
+<div class="card" data-page-node-id="clx1EgQ7WG1C9cu7yxZ7BM">
+<table data-page-node-id="TvJIPsZJ1AceyX0aEjD5wW">
+  <tr data-page-node-id="ZL29UnjmpX2bDxCgbSDUNR"><th style="width:56px" data-page-node-id="hqCf37RRKulXo0RMYBPMvK">编号</th><th data-page-node-id="EqEMP4KMVcYDYMa5Z1dgLM">定论</th><th style="width:88px" data-page-node-id="97GxlDqruqyh52u2Cy0fyO">置信度</th><th data-page-node-id="lYQt4V8WP35DbcMPrE1FUp">关键证据</th></tr>
+  <tr data-page-node-id="avXuUoxU2Erp9m8kwnyOCG"><td data-page-node-id="8JaWlcwGjdG3FDfIaiuZcx"><b data-page-node-id="RDXj6S0GJfcyvIhcFVAKsM">E1</b></td><td data-page-node-id="BBscSVFDkJl8eifNvl3hKa"><b data-page-node-id="95WyIF6R4U7BMsg8GHv4pL">判定点在 WebView 请求拦截层,看到的是「凭据剥离之前」的原始 URL</b></td><td data-page-node-id="aeAWO7itmfXMPBxcchZ4J2"><span class="pill hi" data-page-node-id="bqznUp8XxpzpjCQxnjHRaW">高</span></td><td data-page-node-id="ZIUqDR9AsHq2gjEgw5sOwR">S2(XHR userinfo):页内 200,服务器日志唯一一条干净 <code data-page-node-id="6ogqdPY0ChN0QSt9Ym0UBm">/api/ping 200</code>(12:54:35.774);S1(干净 XHR):页内 <code data-page-node-id="XL1LEnJiyhAoMvrcGcnq0y">OK 404</code> 但服务器<b data-page-node-id="Jb58uBU2LQHVibzPEhp2Jx">零命中</b> → 同一条线路,判定差异只能来自剥离前的字符串</td></tr>
+  <tr data-page-node-id="D105idQeFlAr7CrpoWNcSM"><td data-page-node-id="e6lB1F4zg9GOAV1nr94wUk"><b data-page-node-id="D6z7136uOStp65YCgD83Dq">E2</b></td><td data-page-node-id="GU3eeMpEcZ2ATplZc8eVIF"><b data-page-node-id="dq64qtZqOYDZXZeeGSz4h4">匹配对象是 authority 段(userinfo@host:port)</b>:大小写不敏感、与端口无关;query/fragment 不参与</td><td data-page-node-id="NmVtqJ9vYFhPjPHSHF27AJ"><span class="pill hi" data-page-node-id="EZc4o1Jy0HujP2rztx3lOy">高</span></td><td data-page-node-id="L14Fqvh2rQSikN2FaPAXNN">N3 经 18081 放行(12:53:33 命中);N7 全大写放行(12:53:41);N4(query 含域名)/N5(fragment 含域名)被拦且零日志</td></tr>
+  <tr data-page-node-id="VwE31JYPjNbNaa7QsyOOYW"><td data-page-node-id="VOKoo4BfDfeqlfjmgZWEED"><b data-page-node-id="V4Cv1rkONXbhoT993M3JRD">E3</b></td><td data-page-node-id="ceu0MM27aK35m0ImAFyQLx"><b data-page-node-id="aqlFKy860jIPlahByB1b4T">拦截表现是「合成 404」软拦</b>(子资源)/「无效的响应」拦截页(顶层导航),不是丢包</td><td data-page-node-id="nFdH0W6kzR38xXzYXTI1AC"><span class="pill hi" data-page-node-id="A8pT2T9gvJAt3zTXaCWLGW">高</span></td><td data-page-node-id="bz3J1Jm0AiInWWjDkzlbkT">S1 页内 <code data-page-node-id="uz1ab5TQYx7hVd3GcPBLgL">OK 404</code> + 服务器零日志;顶层直接访问 40.90:9011 出「无效的响应」(操作者确认)</td></tr>
+  <tr data-page-node-id="SXfIQeQzT2lPFagqYMLUbZ"><td data-page-node-id="xmP6rkGlFob7G6rW57YlOq"><b data-page-node-id="Oz1F7j10Cdk4QAn35dyP4F">E4</b></td><td data-page-node-id="2PS46MDSSxIFln9a8o8tCc"><b data-page-node-id="G626YQMOHJxUa7VOSUED3q">放行后凭据被剥离:线上请求均为干净形式;文档 URL 显示为剥离后形态</b></td><td data-page-node-id="3gBPgEgM6P1av6WFSpXVQo"><span class="pill hi" data-page-node-id="u7FlsVgiAfihi3WDjsSg1I">高</span></td><td data-page-node-id="8CUbfbv5r6CwkOD4NTt6qh">D 组页「进入 URL」显示干净 <code data-page-node-id="ffKjkrcxLB6pApF5Zgdaxn">http://192.168.40.90:9011/ab.html?mode=A</code>,但该请求实为 userinfo 基址解析出的相对链(12:54:46 命中)——显示已归一化</td></tr>
+  <tr data-page-node-id="16bUgTPXqKzP8W5FDlKcZ7"><td data-page-node-id="os6ldEic2iBDB2AMinjxaC"><b data-page-node-id="OQ7Y6IkTVZ60OrXkJZX2l6">E5</b></td><td data-page-node-id="hmsJtimbSrexf93MivkJ33"><b data-page-node-id="YP5KfdlqDtcJ4R1A9zVvcG">协议面:fetch 对 userinfo 规范期抛错;XHR 剥离后照发;img/script 剥离→拦;<b data-page-node-id="jlSyYkA8cDJVjxVHhm1Ovb">明文 WS 带 userinfo 直达服务器</b></b></td><td data-page-node-id="MhSestqmQY8qb0qddjIBEU"><span class="pill hi" data-page-node-id="LfmYvBUj4SxOGzht4QkzAF">高</span></td><td data-page-node-id="WQU5EUTuOmjV5V6rWH5p4n">S3 <code data-page-node-id="NDm2sXBJDQwT24IzRwhK34">TypeError: Request cannot be constructed…</code>;S2 200;S4/S5 ERR 且零日志;<b data-page-node-id="UAvT3w8AfTatuu8POLBxyG">S7 OK open + 12:54:35.813 <code data-page-node-id="up1MDH6hbZ28LEkz3xnBlD">WS-UPGRADE /ws</code> 来自 40.27</b></td></tr>
+  <tr data-page-node-id="qPdNrGdTWDjRrrgKPA6nml"><td data-page-node-id="oFFQMEFxAcDribi7qFp5T6"><b data-page-node-id="ijdWhwd8EYpXt3jLNSXuBz">E6</b></td><td data-page-node-id="els0YuHEBQ5D9150ljyA2U"><b data-page-node-id="hRkYpvrHods5MGM6TA5q5n">大文档不是问题:8MB 页面在 40 网正常加载</b></td><td data-page-node-id="OfsFUCHI1osU14J9asWQoF"><span class="pill mid" data-page-node-id="AGxGXy0cQSAdaWCCsEEZkT">中高</span></td><td data-page-node-id="daqilv9Ntghrt7DF8QedfX">12:55:02 <code data-page-node-id="0nWO7oUjxVPlpJDZbp72n6">ab.html?mode=A&pad=8</code> 命中 + 截屏正常渲染 → 13.7MB「渲染崩溃」假说不再需要</td></tr>
+</table>
+<div class="callout" data-page-node-id="0H7Ls4MDoTFEFtqExhVEcl"><b data-page-node-id="v3cnmlaxHXe23hqcpHNuIE">一句话模型:</b>过滤器 = 「对 WebView 每个请求的 authority 原始字符串做大小写不敏感的包含匹配;命中 → 剥离凭据放行;不命中 → 合成 404 / 拦截页」。无 CIDR、无端口语义、不看 query/fragment、不做 host 解析。</div>
+</div>
+
+<!-- 2 -->
+<h2 data-page-node-id="Lyqg21uNGkErAcsUwOA1qJ"><span class="no" data-page-node-id="vZttRWCLPtzXHoZpeiPLKR">2</span>基线文档 §四悬案定案(B5 关闭)</h2>
+<div class="card" data-page-node-id="QhGBcURVcSk80EUvGDFii4">
+<p data-page-node-id="2pP0DPRgZCnZxvJtFAjyHv">历史矛盾「11:05-11:07 全通 vs 11:23+ 全拦」<b data-page-node-id="njfT1ZK115s0P3ZxECmabG">不需要</b>「策略同步窗口/非确定性」假说,机制上必然:</p>
+<table data-page-node-id="2TzlQynLpTiM1mCGEgnt8U">
+  <tr data-page-node-id="3kHAIQJ9xurJElGkvM9tyW"><th data-page-node-id="lsAijqGvqHcXkm1yPEPf0b">历史现象</th><th data-page-node-id="x4Q5WVnuXpTCBFZiNIkRHS">v2 模型解释</th></tr>
+  <tr data-page-node-id="TBi6UZskfxmBg8a6XAcUBx"><td data-page-node-id="VaSaU1VDJ9SvwVYbsdH9uJ">11:05-11:07 @ 内联页全通(icons/app-control/ai-chat 全 200)</td><td data-page-node-id="0lEmen9vLgMlCLHHKp22rC">页面与其全部子资源都以 userinfo 形态构造 → authority 全部命中 → 全放行(E1/E4)</td></tr>
+  <tr data-page-node-id="nMfhpAg2dynW5KufgpQBY1"><td data-page-node-id="uInzwlaKUbVtImZXPcHa4p">11:23+ 之后 HTML-only、零子资源</td><td data-page-node-id="JBGNGLrBC5PGnvyOTKj9Lm">回退版本引入「干净 base / 干净子资源 URL」→ 逐请求 authority 不命中 → 合成 404 软拦(E3),服务器侧表现为「零请求到达」,与当时观察一致</td></tr>
+  <tr data-page-node-id="hjsVD5H1Flqb19mZhm5HIN"><td data-page-node-id="zKZScWUBNgyDW3sLpRs7AO">fetch 崩溃(ai-chat stream)</td><td data-page-node-id="po3uOTEFsO5bynHhhE43KU">userinfo 基址下任何 fetch(含相对路径)构造期抛错(E5)→ 与当时 <code data-page-node-id="KykoR71wL5d2cSUPUweVFE">/api/ai-chat/chat/stream</code> 失败吻合</td></tr>
+</table>
+<p class="small" data-page-node-id="cJ3WLPB8pm6CQ0azPZNcpn">结论:引擎是<b data-page-node-id="e4IJKHfg5nqURgZwx3aFuZ">确定性的</b>;方案 §7 的严格 5×60s A/B 降级为「可选复验」,不再阻塞结论。</p>
+</div>
+
+<!-- 3 -->
+<h2 data-page-node-id="WHaxOhmydtT9kIDe6nqvO2"><span class="no" data-page-node-id="BDAjr36DgPAMwYtKFriULE">3</span>证据对照表(40 受管网会话)</h2>
+<div class="card" data-page-node-id="jaHrLwrlrtTNuMRo0HWYYa">
+<table data-page-node-id="p5GnztTvkmDM7qfwdkQQ0T">
+  <tr data-page-node-id="FoTA9bYSuzlTLqJqC5ysvG"><th data-page-node-id="HOMFqhdj97rQeyU2ChMvZw">用例</th><th data-page-node-id="1NOda2Y8M3TMJjRxBFuNrf">设备端(截屏)</th><th data-page-node-id="NYjdx9r6kOSpexvaXKPhsH">服务器日志</th><th data-page-node-id="T19aD3RT9SanIndSEt5cNq">判定</th></tr>
+  <tr data-page-node-id="T4L7xEnibiHed2SOYuY8dc"><td data-page-node-id="vY5HLScspt3paxIzWkA40D">N1 裸 IP 导航</td><td data-page-node-id="uxgW2KGrN0C656UQOAwEzx">拦截页</td><td data-page-node-id="H8eAElLw0oOI9ZBCHjwFN4">无命中</td><td data-page-node-id="Nm8VE2Mt1X3Hpr0cmLgVq7"><span class="pill bad" data-page-node-id="ZeE9YY2mfNrF0QLo6xpdSf">拦</span></td></tr>
+  <tr data-page-node-id="Ulq8jTDsIXT6l9sycHzRMt"><td data-page-node-id="P2tgZI9X995u8Dwv3ozQGC">N2 userinfo 导航</td><td data-page-node-id="GX9p7V2NK2v4wEt6bEx4DV">页面正常</td><td data-page-node-id="VhctHkfEG9GqUMQBJa59h8"><code data-page-node-id="UcwX5ng72sm29Br1xdyJnq">12:53:32 GET /case-nav.html?case=N2</code>(40.27)</td><td data-page-node-id="8ZRzEQhmIbsHnLfLD7tdiQ"><span class="pill hi" data-page-node-id="6fAtssixen8TI6Eu76NAVh">放</span></td></tr>
+  <tr data-page-node-id="uROq4ES6MQ9jH7fHoHyiLe"><td data-page-node-id="6mC9SJYabGrfKMK7sf2ipM">N3 userinfo@18081</td><td data-page-node-id="BnqNAMZy1tjljluBb1ZqrN">页面正常</td><td data-page-node-id="BoXwCappATCKEqv2ZOVAs3"><code data-page-node-id="lJ7v4CHAMUu28WG6dNAKMK">12:53:33 ?case=N3</code></td><td data-page-node-id="P9VKplV7xmXbTgera13Mfw"><span class="pill hi" data-page-node-id="JhAO659FbERRwLVj4r9ct5">放</span>(端口无关)</td></tr>
+  <tr data-page-node-id="qHDPmO8oAV1bCuJ5nPHv0r"><td data-page-node-id="RgqucpFnUXl6G5tN4BiB0r">N4 query 含域名</td><td data-page-node-id="V1Fbmd7maYLwCRne1dL9p0">拦截</td><td data-page-node-id="fVAGrEC80InSvX2hLOhpK1">无命中</td><td data-page-node-id="CYGmEoWVtDM8qreRmkh8e2"><span class="pill bad" data-page-node-id="MesNXS45HR41CgidMVIqak">拦</span>(query 不参与)</td></tr>
+  <tr data-page-node-id="LhOFd0S3SgdipFQJvXVWEs"><td data-page-node-id="fMT9aj7EqrrSjktZsNTHdH">N5 fragment 含域名</td><td data-page-node-id="zH0z1PxEpGG2T1RVWM7LtB">拦截</td><td data-page-node-id="aMXI9AePGI82TyK2F77Omf">无命中</td><td data-page-node-id="0wV0pFMWPo6PxaBoF3E8sa"><span class="pill bad" data-page-node-id="b6Z3QndOY42ESdLKYNKjey">拦</span></td></tr>
+  <tr data-page-node-id="VKwtFPRzjAle8m2hWmIsAe"><td data-page-node-id="wrigaIuH6bKd5DrHNGGxHi">N6 双 @ 畸形</td><td data-page-node-id="fimPuq9zAAt1xqfyvSVfLD">拦截</td><td data-page-node-id="tYxPzUUwrnMHpsd23p9lYq">无命中</td><td data-page-node-id="bAjCNxsdVMz2KgAkxzs7Ut"><span class="pill bad" data-page-node-id="hDurdjRApAqU9HToPF2jbI">拦</span></td></tr>
+  <tr data-page-node-id="w1SXpd0Xek70qPHLuM4NvP"><td data-page-node-id="QcLrTS3pj6D86tvFh4VUCF">N7 大写变体</td><td data-page-node-id="E4P7XkoYfX7uYhn4iPTBk7">页面正常</td><td data-page-node-id="WApaLmzRn3O8sRHrKsD7Te"><code data-page-node-id="DW4nUyvEMZyOFvyR5K0Ml4">12:53:41 ?case=N7&v=upper</code></td><td data-page-node-id="cLN9X6gMUkx3OJjYvn7Abu"><span class="pill hi" data-page-node-id="k6xvkFd4uOAGOeYQs82xbP">放</span>(大小写不敏感)</td></tr>
+  <tr data-page-node-id="EUTYz3NWnGovDdhcQogRt3"><td data-page-node-id="dcWgOOCxd8mN77bWkZ73wn">S1 XHR 干净</td><td data-page-node-id="2WDek1i4jtHoMZcYYjBs4H"><code data-page-node-id="HZMYlDdw3JvAb8P0mBD6GC">OK 404</code></td><td data-page-node-id="eJ6LwU3EXU86IRoZqBKUd5">无命中</td><td data-page-node-id="UYTflDS24nVLKWgzQmj86U"><span class="pill bad" data-page-node-id="ZcHPLCGEDSExAd3px7uCBH">合成 404</span>(E3 铁证)</td></tr>
+  <tr data-page-node-id="8D2YrNpenYjHdEbzjZmRaP"><td data-page-node-id="QNAZL6OkKmFwYvFNRvc6BB">S2 XHR userinfo</td><td data-page-node-id="UW7EXMGTLB8qyBF29ulkfT"><code data-page-node-id="toCS7jEwOCl1a7mDSlbuhY">OK 200</code></td><td data-page-node-id="r9YBATkxDjrfui9UVIvdro"><code data-page-node-id="F9gnRx8XoSFp7foEHyDh1s">12:54:35.774 /api/ping 200</code>(唯一一条)</td><td data-page-node-id="GAbnS06qJww9VljUJWefgu"><span class="pill hi" data-page-node-id="uouuMdP7OMHqnFe3Cj39tD">放·剥离后上线</span>(E1 铁证)</td></tr>
+  <tr data-page-node-id="uzB5q5ENGLZtCDKcI9nJrE"><td data-page-node-id="Ano5GgtyiHr8YEQuzxKFR3">S3 fetch userinfo</td><td data-page-node-id="Sln5S7BENYwSQpnjyr5t9k"><code data-page-node-id="CvUCr2jTld6XV88MgoOpNG">EXC TypeError</code></td><td data-page-node-id="gusduOiELtaUFGVvDEODeK">—</td><td data-page-node-id="K8dAmMD9FEKUTHCDYEKvRK"><span class="pill mid" data-page-node-id="cSdw30D6QEXlcGru0rMyjq">规范抛错</span></td></tr>
+  <tr data-page-node-id="cv6AafcSOTdIgiQZt7xLUN"><td data-page-node-id="1UYkPIFX0UuaJb8tjpybKQ">S4/S5 img·script userinfo</td><td data-page-node-id="a58HoSSqE1Mfqb1YJFXRou"><code data-page-node-id="niJjdjtPcxebrUneFVACR0">ERR load</code></td><td data-page-node-id="Ok4fsDdJIvdQa9XIz3uD9W">无命中</td><td data-page-node-id="x7P8z8DR8ZCKaJehTZKndc"><span class="pill bad" data-page-node-id="ctaJbEEgeOYBTce39BuHEX">剥离→软拦</span></td></tr>
+  <tr data-page-node-id="5Tz3hc8w0aLwpf5Pq66uWw"><td data-page-node-id="xKmO9hvDP5BF2VYgwUeBzY">S6 base userinfo + 相对 XHR</td><td data-page-node-id="26qqCBWI1SRdEQMyRQih3t"><code data-page-node-id="zcwma9GNG1HW520HxqdHFY">OK 200</code></td><td data-page-node-id="8ijZN6chTsSoUDhf820LHE">无第二条(同 URL 命中 XHR 内存缓存)</td><td data-page-node-id="XniLiacyKNoG4qhZWkaATs"><span class="pill hi" data-page-node-id="cCpBln68PZjsvjP1tS0lP4">放</span></td></tr>
+  <tr data-page-node-id="cEsslqa183GaESMCj4rl8D"><td data-page-node-id="A1CdcV1RdjAo0GBaDO69KX">S7 WS userinfo</td><td data-page-node-id="puSFAbm5HUiSHJh2zzwGpR"><code data-page-node-id="qHFUUKgyntZ1f5enRJsqRx">OK open</code></td><td data-page-node-id="qwcMPB4vm2D7lTgTnxF1Hm"><code data-page-node-id="q62oJ9XGq8aCsdHeFhYsU2">12:54:35.813 WS-UPGRADE /ws</code>(40.27)</td><td data-page-node-id="uyUJxYIvMxGUCx5SMuhM4W"><span class="pill hi" data-page-node-id="kCE8zJ9RQlc4MUYI8cvp4A">放·直达</span>(E5)</td></tr>
+  <tr data-page-node-id="e2JoqDHiQVvFP9OWdFsySp"><td data-page-node-id="99HOxSeYdBNGxefGj6LtUJ">D-A / D-B / D-C(pad=8)</td><td data-page-node-id="APtOFXakrE2On9Sojop91S">P1 userinfo=200;P2 干净=404</td><td data-page-node-id="QO4loCNLSGiMTgzaU6KH1a"><code data-page-node-id="vIGsBaAcIWSssTGKEU4Wht">12:54:46 / 12:54:55 / 12:55:02</code> 三次页面命中;探测回传因 fetch 抛错丢失(见 §4)</td><td data-page-node-id="jyB7NZ7V8GiGoeIglgaUNF"><span class="pill hi" data-page-node-id="dI7HekYYnJoYi6VE3TWfDD">与模型全洽</span></td></tr>
+</table>
+<div class="mono-log" data-page-node-id="1ZL9yhZZ4f741jW0fyA68r">[12:54:35.774] 192.168.40.27 "GET /api/ping" 200 …(S2 剥离后唯一上线请求)
+[12:54:35.813] 192.168.40.27 "WS-UPGRADE /ws" …(S7 明文 WS 直达)
+[12:54:46.217] 192.168.40.27 "GET /ab.html?mode=A" 200 …(userinfo 基址相对链,显示为干净 URL)</div>
+</div>
+
+<!-- 4 -->
+<h2 data-page-node-id="DODcHrhJd3yVjDaSKsQjY2"><span class="no" data-page-node-id="I8GoCV6bEiI14CQr0FCLKC">4</span>本轮两个「假阴性」通道(方法论修正)</h2>
+<div class="card" data-page-node-id="SxQqLTlYAuxBMrgXWsF2Vh">
+<ul data-page-node-id="6ugmGUC0fA8HfxFhHMHMKS">
+  <li data-page-node-id="3qwRb15q0F2YUPPQ5YNr4r"><b data-page-node-id="vMCjPe3p8BQC7NjBWjexsM">observe 回传丢失:</b>40 网会话里页内回传用 <code data-page-node-id="4ui8WEeTxUto3dLNNVcmX6">fetch(相对路径)</code> → 在 userinfo 基址下构造期抛错(E5)→ <code data-page-node-id="e7UtMq4WWc5MoNzYBklDfd">.catch</code> 吞掉 → D 组与手点「被拦」的上报全部没到服务器。<b data-page-node-id="wP4nOB5zu4vk5a4UP5S6am">修正:回传改用 XHR(no-cors)。</b></li>
+  <li data-page-node-id="oV1NzC2ouhalpMTTCAKKww"><b data-page-node-id="2WP0PEc13O5hBwKloqtBg9">XHR 内存缓存:</b>S6/P1 的 200 没有产生第二条线上请求(同 URL 复用 S2 缓存)。<b data-page-node-id="Xq7eZCd1vpE03FGWXSNmHF">修正:探测 URL 加随机 <code data-page-node-id="5aOBvudDaIqqcMORpVVJ0S">?r=</code> 防缓存。</b></li>
+  <li data-page-node-id="havLdWdjkU2ZgsukeBhPAE"><b data-page-node-id="nADXoEegnAt3jLUlyuzfgq">热点对照的局限:</b>热点会话(137.247)顶层导航可经 hairpin 到达(日志源地址显示 40.90),但热点源页面发往 40.90 的 XHR/img 未达(路由/防火墙行为,非过滤器);后续热点对照统一用 <code data-page-node-id="oVJv0ajwcJEsg8WwtGuyg9">http://192.168.137.1:9011</code> 访问本服务器。</li>
+</ul>
+</div>
+
+<!-- 5 -->
+<h2 data-page-node-id="E9tcy24Z2aSmRQqo6vFNSA"><span class="no" data-page-node-id="uX9hDE9maJ56HwWHnf56fx">5</span>下一轮清单(约 15 分钟,服务器已升级)</h2>
+<div class="card" data-page-node-id="vEIpiChFUH22BWFgNrI0qg">
+<ol data-page-node-id="aYfSqVPRmr9IWRWfOwhsdM">
+  <li data-page-node-id="8vq3cBiaHg5A67hdSmUVRV"><b data-page-node-id="UWOuAgCbTSM0GqzAXu6ILa">匹配粒度定位(重要):</b>本轮 <code data-page-node-id="lCRrq7LPzTPugmcAt5ngbD">service.example.com@…</code> 也放行了——说明占位串本身命中了某条后缀/包含规则。下一轮在 N 组页用 <code data-page-node-id="PuEkuw4jJhIFXNtgS8Eoet">?dom=</code> 依次测:<code data-page-node-id="N5GP0t69AC3l4cV4NWvQMD">zz-not-real.com</code>(预期拦)→ <code data-page-node-id="RqTj4UTvkkfcmFAWPu8W5H">changyan.com</code> → <code data-page-node-id="xCl8FU9DySbHIWMDMsj1fZ">example.com</code>,定位是「全串 / 后缀 / 任意包含」。</li>
+  <li data-page-node-id="m7PJDF0pkV6aBQheu3Q5tn"><b data-page-node-id="OnW9xdFxTLE8zpvJxoS2wh">入口方式判别:</b>N1 类干净导航,分别「地址栏输入」与「已放行页内相对链点」各一次;服务器已记录 <code data-page-node-id="hC6l3aZTvHhw5yF28xkEF8">REF / Sec-Fetch-Site</code>,可自动区分,关闭「同源放行」残余疑问。</li>
+  <li data-page-node-id="SPpD33J36oxeAw50lI9jEm"><b data-page-node-id="IJ5Hnum4AjNDJ0MYuogajV">回传修正复测:</b>S 组重跑一遍(观察 observe.csv 是否补齐 D 组/手点记录)。</li>
+  <li data-page-node-id="Eog1jRKCCwriIT35fjYVF1">(可选)严格 5×60s A/B 复验,作报告附录。</li>
+</ol>
+<p class="small" data-page-node-id="w6eGtt0Eq31cV8QHQfDrVv">服务器升级内容:access.log 现在每行附加 <code data-page-node-id="ur8wPd5LSLHtpvP149FbEw">REF=Referer SF=site/dest/mode</code>;重启命令见 README §2。records 已含本轮全量留痕,打包即证据。</p>
+</div>
+
+<!-- 6 -->
+<h2 data-page-node-id="SI32tVhHuCCUzdC3K1FWTA"><span class="no" data-page-node-id="HXdhtyhIwMkTNdCaFcMeun">6</span>对 CI 适配与漏洞报告的含义</h2>
+<div class="card" data-page-node-id="sc85W7pgL9xpRC3FFt0vWw">
+<h3 data-page-node-id="uxbZiJ02h1kFvdK8gzpMqD">临时适配(自有服务可用形态,依 E1-E5)</h3>
+<ul data-page-node-id="IFiKDgV2WdNzQlBNF9m3Ko">
+  <li data-page-node-id="XFd1KpK39PQ7SIOVB4tXtG">入口:userinfo 形态导航(或已放行页内相对链);</li>
+  <li data-page-node-id="tc2IE1UpZXnDITjk4Tw2tP">资源:全部走「相对路径」(解析后继承 userinfo authority,逐请求命中)或内联 dataURI;</li>
+  <li data-page-node-id="yxyDEJlAqQycgkzRiAgtBr">API/长连接:<b data-page-node-id="KeqNe8pK28QH6GfPGCqe16">URL 字符串必须带 userinfo authority</b>(XHR 自动剥离、WS 直达),<b data-page-node-id="ObMsMxoDaGLOMW5VX4PMCz">禁用 fetch</b>(规范抛错)——即文档 §五假设的实测修正版;</li>
+  <li data-page-node-id="Q10DEH9ikRmcKy2ftzVpVv">限制:页面显示 URL 已被归一化(E4),刷新/分享链接时需重新拼 userinfo 形态。</li>
+</ul>
+<h3 data-page-node-id="wuLjKz5Baj9cKwHyhmUdAq">厂商漏洞报告证据链(已完备)</h3>
+<ul data-page-node-id="V79g5gyxe3cDBK9AfLCdxM">
+  <li data-page-node-id="QQHNSNi1YmxIzRUkrypsN9">① 判定基于原始 authority 字符串而非解析后 host(E1/E2);</li>
+  <li data-page-node-id="UCgCLjx5Zmg6RvPbcXox5k">② userinfo 可过判定、放行后凭据剥离(E1/E4),纯客户端无通用利用面但管理语义被完全绕过;</li>
+  <li data-page-node-id="g407D0E2OurdPcbtQfy8e2">③ 拦截为合成 404 软拦,不产生网络侧审计痕迹(E3);</li>
+  <li data-page-node-id="Ul3Dp7N2KNr7DSHDAcpTl6">④ 大小写/端口不敏感、query/fragment 与 CIDR 均不参与(E2、基线 §10.1);</li>
+  <li data-page-node-id="EjXhDJAgNow4cZ0VU2ke6y">⑤ 明文 WS 同样仅字符串判定(E5)。</li>
+</ul>
+<div class="callout warn" data-page-node-id="PFEXK5Z11RmMOpxKxnsAwJ"><b data-page-node-id="MinqrhNozENU8b9EhkQ4RH">边界不变:</b>以上结论仅用于自有部署的管理端白名单工单、厂商修复推动与本地检测规则;不做持久化、不装载外部载荷、不触碰厂商云端与其它设备。</div>
+</div>
+
+<!-- 7 -->
+<h2 data-page-node-id="v5jqOgFtNuHcQDI8qVNwAR"><span class="no" data-page-node-id="tnUqxlr2Siuh95QaBYe5tC">7</span>第二轮复测定论(21:16–21:17,修正后套件)</h2>
+<div class="card" data-page-node-id="OZZUDVagJBuhSApAJOSufv">
+<table data-page-node-id="JHmcO5wUTITmtAzWHKLQe5">
+  <tr data-page-node-id="uI8s2WbArwkbcpx5M5FrSY"><th data-page-node-id="ECkCw9F8v16TsMA1oYV4Mr">验证点</th><th data-page-node-id="zdfjWlK0GU8TuZmkPZ7Rj8">本轮日志证据</th><th data-page-node-id="dI5DOpFCHf2xK9Phf8zgzQ">结论</th></tr>
+  <tr data-page-node-id="QjubmOj4rEuopKBPoaG764"><td data-page-node-id="HiaV031wTaQehwzZOxpSlp">回传通道修复</td><td data-page-node-id="q7nyrzF7MaCSOSreEVUJe4">observe.csv 新增 17 行全部来自 40.27(S 组 8 行 + N 组 3 行 + D 组 3 行 + M1 等),上轮丢失的 D 组 P1/P2 结果这次全部落库</td><td data-page-node-id="CUmUXM5kLBBdyuRfGw9SoV"><span class="pill hi" data-page-node-id="DklE2233G6Nrp4GSzpnFUI">XHR 回传修复生效</span></td></tr>
+  <tr data-page-node-id="FWuKZu9pUim9ihJE3KmGp9"><td data-page-node-id="eY23p64iTo055FYuD0XDqb">XHR 缓存假说证实</td><td data-page-node-id="hFdVFaHCcb3HfaQxyyKR0O">防缓存 <code data-page-node-id="enZk0CEcZE60U0VCdS0yAc">?r=</code> 生效后,S2/S6 与 D 组 P1 各自有独立线上命中(<code data-page-node-id="3qw6UoPULaiIIKSjowvFF8">13:16:38.573/.594</code>、<code data-page-node-id="uDWN30FtKdYnFUs4bgSbuh">13:17:10.127/18.938/24.878</code> 共 5 条 /api/ping 200)——上轮 S6/P1 的 200 确为缓存复用</td><td data-page-node-id="7cbpBmIHFrmflLOFWcazDN"><span class="pill hi" data-page-node-id="YL5nkZpw76kJg0j2NqaVxz">证实</span></td></tr>
+  <tr data-page-node-id="m3BA0xsXC6DANR2XEIw3sS"><td data-page-node-id="0SlbSQ9rOOv4bjNoYY0YGd">确定性(§四)终验</td><td data-page-node-id="mC2wV8ylG16MdfAQGgPnfk">D 组三条件 A / B / pad=8 结果完全一致:P1(userinfo XHR)=OK 200, P2(干净 XHR)=OK 404(零命中);间隔 8s/6s 跨页型无一翻转</td><td data-page-node-id="CGesMYCqeIJyDeM56IsmTs"><span class="pill hi" data-page-node-id="lXheWYDuEtd1homWwpLn1q">确定性定案</span></td></tr>
+  <tr data-page-node-id="nCkubTj2BTze9wB06do6cP"><td data-page-node-id="eRD6G1DunYktE7LVmrTGSA">E4 新证据:Referer 也被归一化</td><td data-page-node-id="kKL8BbBampTWYPVv8SfcFq">case 页的 <code data-page-node-id="EauDu3MdbhB6utmg0QgcC4">REF=http://192.168.40.90:9011/?=4870</code> 等——Referer 中 <b data-page-node-id="vArgmIFhi6zwTF0BnPyEVY">spark.changyan.com@ 已被剥离</b>;地址栏直入(<code data-page-node-id="ZuNfEnYuJj35EgpD1sMSVE">GET /?=4870</code>)8 次 REF=- 全部放行</td><td data-page-node-id="a0qGKeCQ2khEtgf03aJNWY"><span class="pill hi" data-page-node-id="B17baqWc7Cc53G9z9uDctK">E4 强化</span></td></tr>
+  <tr data-page-node-id="z3V2noM4UXzCEw8Bn0Qkup"><td data-page-node-id="JFAHi4DNn4HXS566wM159N">Sec-Fetch 可用性</td><td data-page-node-id="FuDvYfSKII3M8Q4xecWLgB">X5/89 全部 <code data-page-node-id="ecEPkUwRUtESlT0zF9eeel">SF=-/-/-</code>(WebView 未启用元数据头)→ 判别「地址栏 vs 链点」只能依赖 REF 字段</td><td data-page-node-id="G0nk9pS08iPHbraXYfCqyW"><span class="pill mid" data-page-node-id="COBTUSfh8HtbnAmPawRqYu">工具面记录</span></td></tr>
+</table>
+<p class="small" data-page-node-id="C7dQ8hyE0nRG3jJUckCgSa">仍未完成(唯一开放项):匹配粒度定位 —— 用 <code data-page-node-id="4kk69v06QzA86XGAwC3Rg8">?dom=</code> 依次测 <code data-page-node-id="5AF4d2ndYqgvE7grRjbPJO">zz-not-real.com / changyan.com / example.com</code>,定死「全串 / 后缀 / 任意包含」。另:N1/N4/N5/N6 本轮未重测(无 observe 记录),补测时点「被拦」按钮即可自动落库。</p>
+</div>
+
+<!-- 8 -->
+<h2><span class="no">8</span>DN 组粒度测试判读(21:32,模型升 v3)</h2>
+<div class="card">
+<table>
+  <tr><th>探针</th><th>样本(@ 前token)</th><th>结果</th><th>判读</th></tr>
+  <tr><td>DN1</td><td><code>zz-not-real.com</code>(阴性对照)</td><td><b>放行</b></td><td><b>推翻 v2「包含放行域名」假设</b>:任意字母串都行,导航层根本不查域名名单</td></tr>
+  <tr><td>DN2-DN6</td><td>spark.changyan.com / changyan.com / x.changyan.com / example.com / service.example.com</td><td>全部放行</td><td>与 DN1 一致:域名样 token 一律过</td></tr>
+  <tr><td>DN10</td><td><code>spark%2Echangyan%2Ecom</code></td><td>放行</td><td>是否解码不影响(字母样即过)</td></tr>
+  <tr><td>DN8 / DN9</td><td><code>119.6.237.1</code> / <code>223.5.5.5</code>(均在 IP 放行单)</td><td>放行</td><td>IP token 精确命中 IP 单 → 放行</td></tr>
+  <tr><td><b>DN7</b></td><td><code>192.168.40.1</code>(CIDR 条目 40.1/24 的网络地址)</td><td><b>拦截</b></td><td><b>CIDR 完全不展开</b>:连 40.1 本身都不在可命中列表(单里只有原串"192.168.40.1/24")→ 策略-引擎失配第二铁证;40.100 别名路线同时判死</td></tr>
+</table>
+<div class="callout"><b>引擎模型 v3(浏览器层)——其实只有一条「IP 字面量守卫」:</b><br>
+判定材料取 authority 中「@ 之前的 token」(无 @ 时取 host):token 是<b>域名样(含字母)→ 直接放行</b>(不查任何名单);token 是 <b>IPv4 字面量 → 精确匹配 IP 放行单</b>(CIDR 不展开);双 @ 畸形 → 拒绝(N6)。放行后剥凭据上线(E4);img/script 子资源在剥离后才被判定 → 干净 IP → 合成 404(S4/S5);XHR/WS 保留 userinfo 可见 → 放行(S2/S6/S7)。</div>
+<h3>三个直接后果</h3>
+<ul>
+  <li><b>方案 C 适用域变宽:</b>userinfo 串随便用什么字母样 token 都行,不再依赖 spark.changyan.com 在单(建议固定一个自造域名,如 <code>ci-gw.lab</code>,语义清晰且与真实名单无关);</li>
+  <li><b>厂商报告严重级上调:</b>浏览器层「白名单」对导航/XHR 实际为空——唯一拦得住的是裸 IP 字面量,一个字母的 @ 串即绕过;且 IP 单的 CIDR 不展开,40.1 自身都放不进去;</li>
+  <li><b>决定性新探针 DN11-DN13(已上线):</b>用公网通配 DNS(nip.io / sslip.io)把<b>真实域名</b>解析到 192.168.40.90,<b>干净导航(无 userinfo)</b> —— 若放行,则「域名样 → 放行」对真实 host 同样成立,CI 直接换域名形态即可全功能访问(服务器零改造,不用 fetch-hack);若拦,则真实 host 走名单查询,回到 §六入单路径。本机已验证 <code>192.168.40.90.nip.io → 192.168.40.90</code> 解析正常。</li>
+</ul>
+</div>
+
+<!-- 9 -->
+<h2><span class="no">9</span>DN11-13 终判(21:41,模型定稿 v3.1)+ 演习收官结论</h2>
+<div class="card">
+<table>
+  <tr><th>探针</th><th>host(无 userinfo,干净导航)</th><th>结果</th><th>判读</th></tr>
+  <tr><td>DN11</td><td><code>192.168.40.90.nip.io</code>(含点分四段子串)</td><td><span class="pill bad">拦</span>(零命中)</td><td>host 内嵌「点分四段」模式 → 按 IP 字面量处理 → 精确查 IP 单 → 不中 → 拦</td></tr>
+  <tr><td><b>DN12</b></td><td><code>192-168-40-90.nip.io</code>(横线形,无点分四段)</td><td><span class="pill hi">放</span></td><td><b>干净域名形态全链路可用</b>:页面 200 + 相对 XHR 回传到达 —— 导航/XHR/资源在域名 host 下全过</td></tr>
+  <tr><td>DN13</td><td><code>192.168.40.90.sslip.io</code>(含点分四段子串)</td><td><span class="pill bad">拦</span></td><td>与 DN11 同理,交叉印证</td></tr>
+</table>
+<div class="callout"><b>引擎终版模型 v3.1(浏览器层守卫,全证据闭环):</b><br>
+取 authority 中「@ 前 token」(无 @ 取 host):<b>①内嵌点分四段(IP 样)→ 必须精确命中 IP 放行单(CIDR 不展开,几乎必拦);②其它域名样 → 直接放行(不查名单);③双 @ 畸形 → 拒</b>。放行后剥凭据上线(E4);img/script 在剥离后才判定,故 IP host 的子资源全灭、域名 host 全过;XHR/WS 保留 userinfo 可见;fetch 对 userinfo 构造期抛错(E5)。所谓「浏览器白名单」实为一条可被任意域名绕过的 IP 字面量守卫。</div>
+<h3>演习最终结论(定稿)</h3>
+<ul>
+  <li><b>CI 在 40 网 WiFi 的正常访问方案(终态,零改造):</b>书签 <code>http://192-168-40-90.nip.io:9001/</code>,聊天 WS 用 <code>ws://192-168-40-90.nip.io:10001</code>。域名形态下 fetch/绝对路径/img/script 全部原生可用,方案 C(userinfo+XHR 改造)<b>不再需要</b>,仅作域名失效时的备用。长期建议换自有域名(不含点分四段样式)A 记录 → 192.168.40.90;</li>
+  <li><b>方案 C 定位修订:</b>备用方案(nip.io 不可用/被墙时),详版文档保留;</li>
+  <li><b>厂商漏洞报告定稿证据链(6 条):</b>①守卫仅识别「点分四段」IP 字面量,任意其它域名(含公网通配 DNS 指向内网 IP)直接放行;②IP 单精确匹配且 CIDR 不展开(40.1 自身被拦);③拦截为合成 404/空响应,无网络侧审计痕迹;④userinfo 使判定材料移位,@ 任意字母串绕过;⑤大小写/端口不敏感、query/fragment 不参与;⑥img/script 判定发生在凭据剥离后,与导航/XHR 判定时序不一致。用途:管理端工单(域名/地址入单)+ 厂商引擎修复(解析后 host 精确匹配、拒绝 userinfo、展开 CIDR、审计留痕);</li>
+  <li><b>合规提示:</b>域名形态属基线文档 §六「给 CI 配域名身份」的正道实现;建议同步走管理端入单,双保险且合规闭环。</li>
+</ul>
+</div>
+
+<footer data-page-node-id="yp9o3er2DwfDqLKO23dInF">MDM 浏览器层过滤演习 · 终版结论 v1.3(模型 v3.1 定稿 + 演习收官) · 2026-09-08 · 证据:截屏×6 + access.log/observe.csv(records/ 全量留痕)</footer>
+</div>
+</body>
+</html>

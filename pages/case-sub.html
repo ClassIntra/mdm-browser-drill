@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S 组 · 子资源/API 层探针</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:980px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:10px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid #dde4ef;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#edf2fa}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+  .warn{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 12px;border-radius:0 8px 8px 0;font-size:13px;margin:8px 0}
+  .ok{color:#0f9d58;font-weight:600} .err{color:#d93026;font-weight:600} .pend{color:#b26a00}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;word-break:break-all}
+  button{font-size:13px;border:1px solid #c8d3e4;background:#fff;border-radius:6px;padding:4px 14px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>S 组 · 子资源 / API 层探针(S1-S9)</h1>
+  <div class="sub">本页被成功打开 = 当前导航形态放行。点击「执行全部探针」后,页内自动对 fetch / XHR / Image / script / base+相对 / WebSocket 等形态逐项探测,结果显示在下表,并回传 observe.csv。</div>
+  <div class="ua" id="ua"></div>
+  <div class="warn">每个探针目标都是本环境自有地址 192.168.40.90:9011;X5/Chromium 89 下 fetch 遇 userinfo 应抛 TypeError(基线 B3)。请同时在服务器日志核对哪些 /api/ping 真的到达。</div>
+  <table id="t">
+    <tr><th>编号</th><th>形态</th><th>目标</th><th>结果(页内)</th><th>服务器日志命中</th></tr>
+  </table>
+  <p><button onclick="runAll()">▶ 执行全部探针</button> <span id="tip" class="pend"></span></p>
+</div>
+<script>
+// ===== 可编辑常量 =====
+const LAB_IP = '192.168.40.90';
+const LAB_PORT = '9011';
+const LAB = 'http://' + LAB_IP + ':' + LAB_PORT;
+const DOM = new URLSearchParams(location.search).get('dom') || 'service.example.com';
+const UINFO = DOM + '@' + LAB_IP + ':' + LAB_PORT;
+document.getElementById('ua').textContent = 'User-Agent: ' + navigator.userAgent + ' | DOM 样本: ' + DOM;
+
+const API = LAB + '/api/ping';
+const t = document.getElementById('t');
+const logHit = {};
+
+function row(id, name, target) {
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><b>' + id + '</b></td><td>' + name + '</td><td><code>' + target + '</code></td>' +
+    '<td id="r-' + id + '" class="pend">待执行</td><td id="h-' + id + '">—</td>';
+  t.appendChild(tr);
+  return tr;
+}
+const setR = (id, cls, txt) => { const el = document.getElementById('r-' + id); el.className = cls; el.textContent = txt; };
+// 回传改用 XHR(相对路径在 userinfo 基址下 fetch 会抛错,见 02-结论 §4)
+const post = (id, result, note) => {
+  try {
+    const x = new XMLHttpRequest();
+    x.open('GET', '/api/observe?case=' + id + '&result=' + encodeURIComponent(result) + '&note=' + encodeURIComponent(note || ''), true);
+    try { x.send(); } catch (e) {}
+  } catch (e) {}
+};
+const pingUrl = (host) => 'http://' + host + '/api/ping?r=' + Math.random().toString(36).slice(2);
+
+const timeout = (ms) => new Promise(r => setTimeout(r, ms));
+
+async function xhrProbe(url) {
+  return new Promise(res => {
+    try {
+      const x = new XMLHttpRequest();
+      x.timeout = 5000;
+      x.onload = () => res('OK ' + x.status);
+      x.onerror = () => res('ERR network');
+      x.ontimeout = () => res('TIMEOUT');
+      x.open('GET', url); x.send();
+    } catch (e) { res('EXC ' + e.name); }
+  });
+}
+async function fetchProbe(url) {
+  try { const r = await fetch(url, { cache: 'no-store' }); return 'OK ' + r.status; }
+  catch (e) { return 'EXC ' + e.name + (e.message ? ': ' + e.message.split('\n')[0].slice(0, 90) : ''); }
+}
+function imgProbe(url, ms) {
+  return new Promise(res => {
+    const i = new Image(); let done = false;
+    const fin = (v) => { if (!done) { done = true; res(v); } };
+    i.onload = () => fin('OK ' + i.naturalWidth + 'x' + i.naturalHeight);
+    i.onerror = () => fin('ERR load');
+    i.src = url;
+    setTimeout(() => fin('TIMEOUT'), ms || 5000);
+  });
+}
+
+row('S1', 'XHR 干净绝对 URL', API);
+row('S2', 'XHR userinfo(浏览器剥离? 逐请求判定?)', 'http://' + UINFO + '/api/ping');
+row('S3', 'fetch userinfo(规范:构造期抛错)', 'http://' + UINFO + '/api/ping');
+row('S4', 'Image userinfo(剥离→干净→被拦?)', 'http://' + UINFO + '/pixel.png');
+row('S5', 'script userinfo(动态插入)', 'http://' + UINFO + '/script-probe.js');
+row('S6', 'XHR 相对路径 + base=userinfo', 'base=' + 'http://' + UINFO + '/ + 相对 api/ping');
+row('S7', 'WebSocket 明文 userinfo', 'ws://' + UINFO + '/ws');
+row('S9', 'blob:/data: 内联(无网络请求)', 'data:text/plain,inline');
+
+async function runAll() {
+  document.getElementById('tip').textContent = '执行中…';
+  // --- S1/S2 XHR ---
+  setR('S1', 'pend', '…'); const s1 = await xhrProbe(pingUrl(LAB_IP + ':' + LAB_PORT)); setR('S1', s1.startsWith('OK') ? 'ok' : 'err', s1);
+  setR('S2', 'pend', '…'); const s2 = await xhrProbe(pingUrl(UINFO)); setR('S2', s2.startsWith('OK') ? 'ok' : 'err', s2);
+  // --- S3 fetch ---
+  setR('S3', 'pend', '…'); const s3 = await fetchProbe('http://' + UINFO + '/api/ping'); setR('S3', s3.startsWith('OK') ? 'ok' : 'err', s3);
+  // --- S4 image ---
+  setR('S4', 'pend', '…'); const s4 = await imgProbe('http://' + UINFO + '/pixel.png?r=' + Math.random().toString(36).slice(2)); setR('S4', s4.startsWith('OK') ? 'ok' : 'err', s4);
+  // --- S5 script ---
+  setR('S5', 'pend', '…');
+  const s5 = await new Promise(res => {
+    const s = document.createElement('script');
+    s.src = 'http://' + UINFO + '/script-probe.js?r=' + Math.random().toString(36).slice(2);
+    s.onload = () => res('OK loaded');
+    s.onerror = () => res('ERR load');
+    document.head.appendChild(s);
+    setTimeout(() => res('TIMEOUT'), 5000);
+  });
+  setR('S5', s5.startsWith('OK') ? 'ok' : 'err', s5);
+  // --- S6 base + relative XHR ---
+  setR('S6', 'pend', '…');
+  const oldBase = document.baseURI;
+  const b = document.createElement('base'); b.href = 'http://' + UINFO + '/'; document.head.appendChild(b);
+  const s6 = await xhrProbe('api/ping?r=' + Math.random().toString(36).slice(2));
+  b.remove();
+  setR('S6', s6.startsWith('OK') ? 'ok' : 'err', s6 + ' | 原base=' + oldBase.slice(0, 60));
+  // --- S7 websocket ---
+  setR('S7', 'pend', '…');
+  const s7 = await new Promise(res => {
+    try {
+      const ws = new WebSocket('ws://' + UINFO + '/ws');
+      const fin = (v) => { try { ws.close(); } catch (e) {} res(v); };
+      ws.onopen = () => fin('OK open');
+      ws.onerror = () => fin('ERR connect');
+      setTimeout(() => fin('TIMEOUT'), 5000);
+    } catch (e) { res('EXC ' + e.name); }
+  });
+  setR('S7', s7.startsWith('OK') ? 'ok' : 'err', s7);
+  // --- S9 inline ---
+  setR('S9', 'ok', '无网络请求,预期即时可用');
+  document.getElementById('tip').textContent = '完成。已在本地展示;回传服务器留痕中。';
+  ['S1','S2','S3','S4','S5','S6','S7','S9'].forEach(id => post(id, document.getElementById('r-' + id).textContent));
+}
+</script>
+</body>
+</html>

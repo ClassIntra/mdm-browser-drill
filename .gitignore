@@ -1,0 +1,6 @@
+node_modules/
+.workbuddy/
+*.tmp
+Thumbs.db
+.DS_Store
+Desktop.ini

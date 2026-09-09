@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D 组 · IP 守卫集形状测绘 v3</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:1020px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:10px}
+  h2{font-size:16px;margin:18px 0 6px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid #dde4ef;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#edf2fa;white-space:nowrap}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;word-break:break-all}
+  .stat{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .stat.t{background:#e6f6ee;color:#0f9d58}.stat.f{background:#fdecea;color:#d93026}.stat.p{background:#f0f2f6;color:#6b7a94}
+  button{font-size:12px;border:1px solid #c8d3e4;background:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;margin:2px}
+  button.go{background:#2f6bff;color:#fff;border-color:#2f6bff}
+  .note{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 12px;border-radius:0 8px 8px 0;font-size:13px;margin:8px 0}
+  .r{font-size:12px;color:#6b7a94;margin:2px 0;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>D 组 · IP 守卫集形状测绘 <span style="color:#2f6bff">v3</span></h1>
+  <div class="sub">页面版本 v3(2026-09-09)。背景:DP17 证伪「IP 白名单默认拒」—— 公网 IP 119.6.237.1 被引擎放出内网(连接被拒=真实网络错误,非软拦)。本组测引擎到底守「哪个集合」的目的地。</div>
+  <div class="ua" id="ua"></div>
+  <div class="note"><b>本组判读规则(全部看屏幕,通用)</b>:出现『无效的响应』=引擎拦(点「被拦」);出现『连接被拒/超时/任何页面内容』=引擎放行(点「放行」)。<b>私网不可达目标可能转圈 30 秒以上才报错,耐心等 —— 转圈本身就是放行证据</b>。所有目标都不在本靶机上,不会有服务端日志,屏幕即真相。</div>
+
+  <h2>D 组 · 守卫集形状(DP20-DP32)</h2>
+  <table>
+    <tr><th>编号</th><th>动作</th><th>探测点</th><th>判读含义</th><th>结果</th></tr>
+    <tr><td><b>DP20</b></td><td><button class="go" onclick="t20()">导航 http://192.168.40.99:9011</button></td><td>同 /24 相邻主机(无监听)</td><td>拦=守卫覆盖整个 /24 网段;拒/超时=只精确守 .90 单个 IP</td><td><span class="stat p" id="st-DP20">未测</span> <button onclick="mark('DP20','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP20','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP21</b></td><td><button class="go" onclick="t21()">导航 http://192.168.1.1:9011</button></td><td>192.168/16 其他子网</td><td>拦=整个 192.168/16 在守卫集;否则=只看 /24 或精确名单</td><td><span class="stat p" id="st-DP21">未测</span> <button onclick="mark('DP21','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP21','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP22</b></td><td><button class="go" onclick="t22()">导航 http://10.1.2.3:9011</button></td><td>10/8 私网段</td><td>拦=10/8 在守卫集(RFC1918 全守);否则=守卫集更窄</td><td><span class="stat p" id="st-DP22">未测</span> <button onclick="mark('DP22','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP22','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP23</b></td><td><button class="go" onclick="t23()">导航 http://172.16.5.4:9011</button></td><td>172.16/12 私网段</td><td>拦=172.16/12 在守卫集;否则=守卫集更窄</td><td><span class="stat p" id="st-DP23">未测</span> <button onclick="mark('DP23','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP23','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP24</b></td><td><button class="go" onclick="t24()">导航 http://127.0.0.1:9011</button></td><td>回环地址(平板自身)</td><td>拦=loopback 也守;拒(应很快)=只守私网单播</td><td><span class="stat p" id="st-DP24">未测</span> <button onclick="mark('DP24','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP24','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP25</b></td><td><button class="go" onclick="t25()">导航 http://1.1.1.1/</button></td><td>公网有真实监听者(Cloudflare)</td><td>页面出内容=公网全通实锤;拒/超时=引擎放行但网络不通;『无效的响应』=公网也拦(推翻 DP17)</td><td><span class="stat p" id="st-DP25">未测</span> <button onclick="mark('DP25','t','放行(页面/网络错误)')">放行</button> <button onclick="mark('DP25','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP26</b></td><td><button class="go" onclick="t26()">导航 http://192.168.40.1:9011</button></td><td><b>DN7 复测(新语义)</b> —— 网关 IP。当年判「拦」发生在两文案区分确立之前,可能把网络拒绝误读成引擎拦</td><td>『无效的响应』=黑名单含 .1(多条目黑名单);拒/超时=黑名单仅 .90,DN7 拦结论作废</td><td><span class="stat p" id="st-DP26">未测</span> <button onclick="mark('DP26','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP26','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP27</b></td><td><button class="go" onclick="t27()">导航 http://192.168.40.1/(80 端口)</button></td><td>网关 80 端口(可能有管理页)</td><td>出页面/拒=引擎放行 .1(双重确认);『无效的响应』=同 DP26 拦侧</td><td><span class="stat p" id="st-DP27">未测</span> <button onclick="mark('DP27','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP27','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP28</b></td><td><button class="go" onclick="t28()">导航 http://192.168.125.1:9011</button></td><td>siteList 另一个 /24 条目(192.168.125.0/24 课堂互动)的网络地址 —— 探黑名单来源</td><td>拦=黑名单与策略 /24 条目相关(但须解释 DP17 为何放行 119.6.237.1);过=黑名单是独立配置的小集合</td><td><span class="stat p" id="st-DP28">未测</span> <button onclick="mark('DP28','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP28','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP29</b></td><td><button class="go" onclick="t29()">导航 http://192.168.40.90@192-168-40-90.nip.io:9011</button></td><td><b>黑名单 IP 作 token</b> + 域名 host —— token 段是否也查黑名单</td><td>过=黑名单只作用于 host 段(v4 预测);拦=任一段含黑名单 IP 即拦</td><td><span class="stat p" id="st-DP29">未测</span> <button onclick="mark('DP29','t','放行(到达)')">放行</button> <button onclick="mark('DP29','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP30</b></td><td><button class="go" onclick="t30()">导航 http://192.168.40.100:9011</button></td><td><b>子串 vs 精确判别</b> —— "192.168.40.1" 是 "192.168.40.100" 的前缀</td><td>『无效的响应』=黑名单按<b>子串</b>匹配(40.100 被 40.1 连坐);拒/超时=<b>精确匹配</b> → 40.100 别名直访路线复活</td><td><span class="stat p" id="st-DP30">未测</span> <button onclick="mark('DP30','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP30','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP31</b></td><td><button class="go" onclick="t31()">导航 http://172.16.1.191/</button></td><td>portal 认证地址(校园常用基础 IP)</td><td>『无效的响应』=黑名单第四成员;出页面/拒/超时=黑名单仍仅三成员</td><td><span class="stat p" id="st-DP31">未测</span> <button onclick="mark('DP31','t','放行(非无效的响应)')">放行</button> <button onclick="mark('DP31','f','被拦(无效的响应)')">被拦</button></td></tr>
+    <tr><td><b>DP32</b></td><td><button class="go" onclick="t32()">导航 http://a@192.168.40.90:9011</button></td><td><b>非域名单字符 token</b>("a",无点)+黑名单 host —— token 短路的适用条件(v6 终验)</td><td>到达本页(<b>自动标绿</b>)=任意非空 token 都短路;『无效的响应』=token 须域名样(含点)才短路</td><td><span class="stat p" id="st-DP32">未测</span> <button onclick="mark('DP32','t','放行(到达)')">放行</button> <button onclick="mark('DP32','f','被拦(无效的响应)')">被拦</button></td></tr>
+  </table>
+  <div class="r" id="log"></div>
+</div>
+<script>
+const RPT = 'http://192-168-40-90.nip.io:9011/api/observe';
+const HOST = location.host;
+document.getElementById('ua').textContent = 'UA: ' + navigator.userAgent + ' | 当前 host: ' + HOST + ' | 本页入口: ' + location.href.slice(0, 120);
+
+function beacon(id, result, note) {
+  try { new Image().src = RPT + '?case=' + id + '&result=' + result + '&note=' + encodeURIComponent(note || '') + '&r=' + Math.random(); } catch (e) {}
+}
+function mark(id, v, note) {
+  const el = document.getElementById('st-' + id);
+  if (!el) return;
+  el.textContent = v === 't' ? '放行' : '被拦';
+  el.className = 'stat ' + v;
+  if (note) { const l = document.getElementById('log'); l.innerHTML = '[' + id + '] ' + note + '<br>' + l.innerHTML; }
+  beacon(id, v === 't' ? 'allowed' : 'blocked', note || '');
+}
+
+function nav(id, url) { beacon(id, 'fired', 'D 组点击,跳 ' + url); location.href = url; }
+function t20() { nav('DP20', 'http://192.168.40.99:9011/case-dp3.html?case=DP20&v=1'); }
+function t21() { nav('DP21', 'http://192.168.1.1:9011/case-dp3.html?case=DP21&v=1'); }
+function t22() { nav('DP22', 'http://10.1.2.3:9011/case-dp3.html?case=DP22&v=1'); }
+function t23() { nav('DP23', 'http://172.16.5.4:9011/case-dp3.html?case=DP23&v=1'); }
+function t24() { nav('DP24', 'http://127.0.0.1:9011/case-dp3.html?case=DP24&v=1'); }
+function t25() { nav('DP25', 'http://1.1.1.1/?case=DP25'); }
+function t26() { nav('DP26', 'http://192.168.40.1:9011/case-dp3.html?case=DP26&v=1'); }
+function t27() { nav('DP27', 'http://192.168.40.1/?case=DP27'); }
+function t28() { nav('DP28', 'http://192.168.125.1:9011/case-dp3.html?case=DP28&v=1'); }
+function t29() { nav('DP29', 'http://192.168.40.90@192-168-40-90.nip.io:9011/case-dp3.html?case=DP29&v=1'); }
+function t30() { nav('DP30', 'http://192.168.40.100:9011/case-dp3.html?case=DP30&v=1'); }
+function t31() { nav('DP31', 'http://172.16.1.191/?case=DP31'); }
+function t32() { nav('DP32', 'http://a@192.168.40.90:9011/case-dp3.html?case=DP32&v=1'); }
+
+(function () {
+  const m = location.search.match(/case=(DP\d+)/);
+  if (m && m[1] === 'DP32') mark('DP32', 't', '到达(token 短路成立,自动标绿)');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DN 组 · 匹配粒度定位</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:980px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:10px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid #dde4ef;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#edf2fa;white-space:nowrap}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;word-break:break-all}
+  .stat{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .stat.t{background:#e6f6ee;color:#0f9d58}.stat.f{background:#fdecea;color:#d93026}.stat.p{background:#f0f2f6;color:#6b7a94}
+  button{font-size:12px;border:1px solid #c8d3e4;background:#fff;border-radius:6px;padding:2px 8px;cursor:pointer}
+  .note{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 12px;border-radius:0 8px 8px 0;font-size:13px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>DN 组 · 匹配粒度定位(?dom= 逐串探测)</h1>
+  <div class="sub">操作:自上而下逐条点链接(每条都是 userinfo 导航,目标串不同)。放行 → 页面重载自动标绿并回传;被拦 → 回到本页点「被拦」标红并回传。</div>
+  <div class="ua" id="ua"></div>
+  <div class="note">DN1-DN10 已测(见 02-结论 v1.2):阴性对照 zz-not-real.com 也放行 → 导航层并不查域名名单,真正规则是「IP 字面量守卫」(详判读见报告)。本轮新增 <b>DN11-DN13(★干净导航,无 userinfo)</b>:公网通配 DNS(nip.io/sslip.io)把域名解析到 192.168.40.90 —— 若任一放行,即证明「域名样 token → 放行」对真实 host 同样成立,CI 可直接用域名形态全功能访问,连 userinfo 都不用。</div>
+  <table id="t">
+    <tr><th>编号</th><th>userinfo 域名样本</th><th>探测什么</th><th>预期</th><th>结果</th></tr>
+  </table>
+</div>
+<script>
+const HOST = location.host; // 归一化后的干净 host:port,重建 userinfo 用
+document.getElementById('ua').textContent = 'User-Agent: ' + navigator.userAgent + ' | 当前 host: ' + HOST + ' | 入口 href: ' + location.href.slice(0, 110);
+
+// [id, 样本, 探测点, 预期, clean?](clean=true → 干净导航,无 userinfo)
+const rows = [
+ ['DN1','zz-not-real.com','阴性对照:不在任何单里的随机串','拦(实际:过!→ 引出模型 v3)'],
+ ['DN2','spark.changyan.com','已知放行串(阳性对照)','过'],
+ ['DN3','changyan.com','父域本身在单吗(后缀/通配?)','?'],
+ ['DN4','x.changyan.com','子域构造:entry⊂authority 方向','?'],
+ ['DN5','example.com','解释 service.example.com 之谜:更短后缀在单?','?'],
+ ['DN6','service.example.com','占位串复测(上轮意外放行)','过?'],
+ ['DN7','192.168.40.1','CIDR 条目(192.168.40.1/24)被字符串化?','?'],
+ ['DN8','119.6.237.1','10.1 明文 IP 条目进引擎列表?','?'],
+ ['DN9','223.5.5.5','公共 DNS 条目(在 10.1 单)进引擎?','?'],
+ ['DN10','spark%2Echangyan%2Ecom','百分号编码点号:引擎是否先解码再匹配','拦=不解码'],
+ ['DN11','192.168.40.90.nip.io','★干净导航(无@): nip.io 域名 A 记录→40.90','过=v3域名分支成立'],
+ ['DN12','192-168-40-90.nip.io','★干净导航: nip.io 横线形(A 记录同上)','过=同上'],
+ ['DN13','192.168.40.90.sslip.io','★干净导航: sslip.io 备选','过=同上'],
+];
+
+const t = document.getElementById('t');
+rows.forEach(([id, dom, probe, expect, clean]) => {
+  const url = clean
+    ? 'http://' + dom + ':9011/case-dom.html?case=' + id + '&dom=' + encodeURIComponent(dom)
+    : 'http://' + dom + '@' + HOST + '/case-dom.html?case=' + id + '&dom=' + encodeURIComponent(dom);
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><b>' + id + '</b></td>' +
+    '<td><code><a href="' + url + '">' + dom + '</a></code></td>' +
+    '<td>' + probe + '</td><td>' + expect + '</td>' +
+    '<td nowrap><span class="stat p" id="st-' + id + '">未测</span> ' +
+    '<button onclick="mark(\'' + id + '\',\'t\',\'' + dom + '\')">放行</button> ' +
+    '<button onclick="mark(\'' + id + '\',\'f\',\'' + dom + '\')">被拦</button></td>';
+  t.appendChild(tr);
+});
+
+function mark(id, v, dom) {
+  const el = document.getElementById('st-' + id);
+  el.textContent = v === 't' ? '放行' : '被拦';
+  el.className = 'stat ' + v;
+  try {
+    const x = new XMLHttpRequest();
+    x.open('GET', '/api/observe?case=' + id + '&result=' + (v === 't' ? 'allowed' : 'blocked') + '&note=dom=' + encodeURIComponent(dom), true);
+    try { x.send(); } catch (e) {}
+  } catch (e) {}
+}
+// 放行重载后自动标记
+const m = location.search.match(/case=(DN\d+)/);
+const d = new URLSearchParams(location.search).get('dom') || '';
+if (m) mark(m[1], 't', d);
+</script>
+</body>
+</html>

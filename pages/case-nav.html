@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N 组 · 导航层用例</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:980px;margin:22px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:20px 24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:14px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid #dde4ef;padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#edf2fa;white-space:nowrap}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:12.5px;word-break:break-all}
+  .warn{background:#fff6e5;border-left:4px solid #e6a23c;padding:8px 12px;border-radius:0 8px 8px 0;font-size:13px;margin:8px 0}
+  .stat{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .stat.t{background:#e6f6ee;color:#0f9d58}.stat.f{background:#fdecea;color:#d93026}.stat.p{background:#f0f2f6;color:#6b7a94}
+  button{font-size:12px;border:1px solid #c8d3e4;background:#fff;border-radius:6px;padding:2px 8px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>N 组 · 顶层导航用例(N1-N7)</h1>
+  <div class="sub">操作:逐个点击下方链接(浏览器当前标签跳转)。放行 → 页面重载并在 URL 带 ?case=;被拦 → 管控提示页,点击「被拦」按钮留证。</div>
+  <div class="ua" id="ua"></div>
+  <div class="warn">每次尝试后回服务器核对:URL 含 <code>?case=Nx</code> 的记录是否出现。命中的行是「放行」的唯一客观证据。</div>
+
+  <table id="t">
+    <tr><th>编号</th><th>导航 URL(点击执行)</th><th>说明/假设</th><th>结果</th></tr>
+  </table>
+  <p style="font-size:12.5px;color:#6b7a94" id="foot"></p>
+</div>
+<script>
+// ===== 可编辑常量(改 LAB 指向热点/其它端口;DOM 换放行名单字串样本) =====
+const LAB = 'http://192.168.40.90:9011';
+const DOM = new URLSearchParams(location.search).get('dom') || 'service.example.com';
+const CASE_PAGE = '/case-nav.html';
+document.getElementById('ua').textContent = 'User-Agent: ' + navigator.userAgent + '\n当前 DOM 样本: ' + DOM;
+
+const rows = [
+ ['N1','裸 IP:PORT','http://192.168.40.90:9011' + CASE_PAGE + '?case=N1','被拦(字符串无放行域名)→ 服务器无日志;复现基线 §二.1'],
+ ['N2','userinfo 前置放行域名','http://' + DOM + '@192.168.40.90:9011' + CASE_PAGE + '?case=N2','放行(字符串含放行域名)→ 日志命中;复现 11:05-11:07'],
+ ['N3','userinfo + 备用端口(18081)','http://' + DOM + '@192.168.40.90:18081' + CASE_PAGE + '?case=N3','放行与否 → 佐证「与端口无关(纯字符串)」;服务器在 18081 同样监听'],
+ ['N4','裸 IP + query 含域名','http://192.168.40.90:9011' + CASE_PAGE + '?case=N4&dom=' + DOM,'若放行 → 域名出现在 URL 任意位置即命中(纯字符串最强证据)'],
+ ['N5','裸 IP + fragment 含域名','http://192.168.40.90:9011' + CASE_PAGE + '?case=N5#' + DOM,'fragment 不随请求发出;若被拦 → 判定先于请求(整串?)'],
+ ['N6','双 @ 畸形','http://' + DOM + '@192.168.40.90:9011@127.0.0.1:9011' + CASE_PAGE + '?case=N6','观察浏览器实际解析;畸形串边界'],
+ ['N7','编码/大小写变体','http://' + DOM.toUpperCase() + '@192.168.40.90:9011' + CASE_PAGE + '?case=N7&v=upper','大小写变体是否仍命中 → 引擎归一化能力证据'],
+];
+
+const t = document.getElementById('t');
+rows.forEach(([id, name, url, note]) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><b>' + id + '</b></td>' +
+    '<td>' + name + '<br><code><a href="' + url + '">' + url + '</a></code></td>' +
+    '<td>' + note + '</td>' +
+    '<td nowrap><span class="stat p" id="st-' + id + '">未测</span> ' +
+    '<button onclick="mark(\'' + id + '\',\'t\')">放行</button> ' +
+    '<button onclick="mark(\'' + id + '\',\'f\')">被拦</button></td>';
+  t.appendChild(tr);
+});
+
+function mark(id, v) {
+  const el = document.getElementById('st-' + id);
+  el.textContent = v === 't' ? '放行' : '被拦';
+  el.className = 'stat ' + v;
+  // 回传改用 XHR(userinfo 基址下 fetch 抛错,见 02-结论 §4)
+  try {
+    const x = new XMLHttpRequest();
+    x.open('GET', '/api/observe?case=' + id + '&result=' + (v === 't' ? 'allowed' : 'blocked') + '&note=' + encodeURIComponent(location.href), true);
+    try { x.send(); } catch (e) {}
+  } catch (e) {}
+}
+
+// 若本页是被放行导航的结果,自动识别 case 并回传
+const m = location.search.match(/case=(N\d+)/);
+if (m) { mark(m[1], 't'); }
+document.getElementById('foot').textContent = '提示:若被拦后回到本页再次操作,浏览器可能仍显示拦截页——请用服务器日志为准。';
+</script>
+</body>
+</html>
