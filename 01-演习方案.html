@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="zh-CN" data-page-node-id="RjQj28uOXvwxpvhMk5YqOZ">
+<head data-page-node-id="94AbuuIfVaTVmVJGoypWzT">
+<meta charset="UTF-8" data-page-node-id="voNW2lqpvGtKUYhbbAGMRQ">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="5zhvzkb3uVCBa0FgWU5kub">
 <title>MDM 管控下浏览器层过滤行为 — 全面测试演习方案 v1.0</title>
 <style>
   :root{
@@ -54,200 +54,200 @@
   footer{margin-top:36px;color:var(--sub);font-size:12px;text-align:center}
 </style>
 </head>
-<body>
-<div class="wrap">
+<body data-page-node-id="k3v6Bjef9Ck6HD869WvWiH">
+<div class="wrap" data-page-node-id="Jd3XFIVZyQCwJwdQtRu3pP">
 
-<header class="hero">
-  <h1>MDM 管控下 · 浏览器层过滤行为全面测试演习</h1>
-  <div class="meta">演习方案 v1.0 &nbsp;|&nbsp; 2026-09-08 &nbsp;|&nbsp; 基线依据:资料库文档《EBMD MDM 过滤器行为模型(实测知识与证据 2026-09-08)》&nbsp;|&nbsp; 方法参考:github.com/AndrewAltimit/exploits(仅方法论)</div>
-  <div style="margin-top:10px">
-    <span class="tag">范围:自有受管设备 192.168.40.27 ↔ 自有服务器 192.168.40.90</span>
-    <span class="tag">性质:受控授权审计 · 证据驱动 · 可回滚</span>
-    <span class="tag">目标:定案过滤器判定规则 + 形成可复现证据链</span>
+<header class="hero" data-page-node-id="C2sMHu165hlcZUsEP1nHE4">
+  <h1 data-page-node-id="8NIFy6AsX8AnOR4CTn5y3f">MDM 管控下 · 浏览器层过滤行为全面测试演习</h1>
+  <div class="meta" data-page-node-id="Zn4cd826UI8E5C5MMZ6ETF">演习方案 v1.0 &nbsp;|&nbsp; 2026-09-08 &nbsp;|&nbsp; 基线依据:资料库文档《EBMD MDM 过滤器行为模型(实测知识与证据 2026-09-08)》&nbsp;|&nbsp; 方法参考:github.com/AndrewAltimit/exploits(仅方法论)</div>
+  <div style="margin-top:10px" data-page-node-id="mwbIqmKURjN0bqNg5ooTSC">
+    <span class="tag" data-page-node-id="pZuDZOYgmWix1P8YRYWy1c">范围:自有受管设备 192.168.40.27 ↔ 自有服务器 192.168.40.90</span>
+    <span class="tag" data-page-node-id="UNly3aVtFnzcjj9PSFClVV">性质:受控授权审计 · 证据驱动 · 可回滚</span>
+    <span class="tag" data-page-node-id="dZHm9puWEncqygAyEYbvN4">目标:定案过滤器判定规则 + 形成可复现证据链</span>
   </div>
 </header>
 
 <!-- ============ 0 ============ -->
-<h2><span class="no">0</span>摘要与定位</h2>
-<div class="card">
-<p>本演习<strong>不是</strong>「帮助设备逃逸管控的作业指导」,而是对<strong>自有 MDM 部署</strong>的一次受控安全评估:通过浏览器形态学测试,验证 URL 过滤器引擎的真实判定规则,把基线文档中带置信度标注的行为模型升级为<strong>可复现、带证据</strong>的定论,并完成两件事——(1) 用 A/B 受控协议解决文档 §四「非确定性/策略同步窗口」这一未定案矛盾;(2) 对 URL 字符串匹配、userinfo 绕过、CIDR 条目无效三个现象形成可复现证据链。</p>
-<p><strong>为什么引用 AndrewAltimit/exploits:</strong>该仓库没有 MDM/URL 过滤专项(经核对其 README 与目录,相关的是浏览器扩展供应链、浏览器原生后利用、Chrome/Firefox CVE、SCCM/RMM/EDR 等,目标对象与本题不符)。它真正可迁移的是<strong>方法论与纪律</strong>:沙盒遏制(ContainmentGuard:强制回环/隔离,超出即拒)、攻击-检测成对交付(每个动作必配防御侧观测)、Mock 环境先行。本演习按同一纪律落地:隔离到 9011 演习端口、只碰自有地址、每个用例都带服务器与设备双观测点。</p>
+<h2 data-page-node-id="9sSahOHueP6TOcHUlvvyI5"><span class="no" data-page-node-id="UxDPaokCZf0T8kjJH325Lt">0</span>摘要与定位</h2>
+<div class="card" data-page-node-id="DAleaPGYsJaqBRWc00cEpM">
+<p data-page-node-id="eF1sFkj4Jq0VIl1OvDQDw2">本演习<strong data-page-node-id="pHdbpCyRfkxeYFP4H7cfNJ">不是</strong>「帮助设备逃逸管控的作业指导」,而是对<strong data-page-node-id="RbdLDZKoVIq3WkKHIXBKfs">自有 MDM 部署</strong>的一次受控安全评估:通过浏览器形态学测试,验证 URL 过滤器引擎的真实判定规则,把基线文档中带置信度标注的行为模型升级为<strong data-page-node-id="wGNCiLBsCzsnryCFQGOZaV">可复现、带证据</strong>的定论,并完成两件事——(1) 用 A/B 受控协议解决文档 §四「非确定性/策略同步窗口」这一未定案矛盾;(2) 对 URL 字符串匹配、userinfo 绕过、CIDR 条目无效三个现象形成可复现证据链。</p>
+<p data-page-node-id="Qlf0dBtAkycRFgFnB51aS1"><strong data-page-node-id="BMUPeHZYva9qHIK3NDuLpQ">为什么引用 AndrewAltimit/exploits:</strong>该仓库没有 MDM/URL 过滤专项(经核对其 README 与目录,相关的是浏览器扩展供应链、浏览器原生后利用、Chrome/Firefox CVE、SCCM/RMM/EDR 等,目标对象与本题不符)。它真正可迁移的是<strong data-page-node-id="jTEEZsABtvIrXW2g6Km6HO">方法论与纪律</strong>:沙盒遏制(ContainmentGuard:强制回环/隔离,超出即拒)、攻击-检测成对交付(每个动作必配防御侧观测)、Mock 环境先行。本演习按同一纪律落地:隔离到 9011 演习端口、只碰自有地址、每个用例都带服务器与设备双观测点。</p>
 </div>
 
 <!-- ============ 1 ============ -->
-<h2><span class="no">1</span>授权声明与红线(先读)</h2>
-<div class="card">
-<h3>演习合法性前提(必须全部满足,任一不满足即中止)</h3>
-<ul>
-  <li><strong>资产归属:</strong>目标仅限自有受管设备 192.168.40.27 与自有服务器 192.168.40.90(本机);不触碰其它租户/班级设备、不直接攻击厂商云端 mdm 服务端(策略接口只能由设备自身按既定节奏拉取,演习不做任何重放/篡改/伪造)。</li>
-  <li><strong>人员授权:</strong>执行者为该 MDM 部署的 owner/受权审计人(与基线文档立场一致)。</li>
-  <li><strong>透明原则:</strong>全程保留服务器访问日志与设备侧观测,不做日志清理、进程伪装、审计规避。</li>
+<h2 data-page-node-id="XA6U069nhT5grw9gptuGaO"><span class="no" data-page-node-id="8ooXhLLy7Te0xdE0xHvkQS">1</span>授权声明与红线(先读)</h2>
+<div class="card" data-page-node-id="AxVd2cYG3wjAlvp9ZhdaNT">
+<h3 data-page-node-id="l0B7BsGDAh2FLC6CUdRD76">演习合法性前提(必须全部满足,任一不满足即中止)</h3>
+<ul data-page-node-id="wA5sQX1BSHs1DsZ5kixH7j">
+  <li data-page-node-id="ct5ET9aGj1TuxxBuEGSHq7"><strong data-page-node-id="YIhxU0N8lBBylsVA5mWDCH">资产归属:</strong>目标仅限自有受管设备 192.168.40.27 与自有服务器 192.168.40.90(本机);不触碰其它租户/班级设备、不直接攻击厂商云端 mdm 服务端(策略接口只能由设备自身按既定节奏拉取,演习不做任何重放/篡改/伪造)。</li>
+  <li data-page-node-id="lADyCFuREzFxJR1wEEgr8u"><strong data-page-node-id="7yvG6jLfY9ELC2U7csX6Nn">人员授权:</strong>执行者为该 MDM 部署的 owner/受权审计人(与基线文档立场一致)。</li>
+  <li data-page-node-id="H3plHTHtlLOA6db0OkADnL"><strong data-page-node-id="RXX2TkSvjx7Cw4RD6FavQf">透明原则:</strong>全程保留服务器访问日志与设备侧观测,不做日志清理、进程伪装、审计规避。</li>
 </ul>
-<h3>红线(本演习明确排除,与既定运维安全边界一致)</h3>
-<table>
-  <tr><th style="width:30%">排除项</th><th>原因 / 替代</th></tr>
-  <tr><td>运行 / 编译 exploits 仓库内任何二进制、Rust crate、CVE 载荷、C2/窃密模块</td><td>目标对象不符(面向桌面/云/EDR),且为武器化代码;本机不落地执行。方法层已足够。</td></tr>
-  <tr><td>浏览器引擎漏洞利用(CVE-2024-9680 / CVE-2026-2441 类)</td><td>即使成功也只是代码执行,不改变网络白名单判定;属越权攻击面,且无补丁确认前不可用于生产设备。</td></tr>
-  <tr><td>持久化 / 自启动 / 刷机 / Root / Xposed / ADB 恢复</td><td>与「不刷机、不动刀」约束冲突;会命中 blockapp 日检与 L4 违规锁。基线文档 §十四已逐条证伪。</td></tr>
-  <tr><td>ARP/DHCP 欺骗、TCP RST、DNS 劫持、策略包伪造</td><td>过不了响应签名 + md5 转存前后校验;且属中间人攻击面。基线文档 §十四 1/3/4。</td></tr>
-  <tr><td>任何指向第三方/公网的「放行测试」</td><td>演习只度量「40.90:9011 是否可达」这一布尔量;URL 里的域名串仅作为字符串样本,不解析不访问。</td></tr>
-  <tr><td>结果用于真实逃逸课堂管控</td><td>演习结论仅用于授权环境内的学习与自有配置自查。</td></tr>
+<h3 data-page-node-id="iPwxbJ9HzStjWssb806kHm">红线(本演习明确排除,与既定运维安全边界一致)</h3>
+<table data-page-node-id="9USl4IZWWhu0MqKhitpi6U">
+  <tr data-page-node-id="8oLxtRLvz8cZEW9Cem47rJ"><th style="width:30%" data-page-node-id="qmKeDAxdAkWOulswyt1U9i">排除项</th><th data-page-node-id="1NkoFhB55urdTPOHAIO0Fy">原因 / 替代</th></tr>
+  <tr data-page-node-id="6BdakDWrp09X93ik1WWhHS"><td data-page-node-id="aRnEBAhMFxpJOycjXnP8OB">运行 / 编译 exploits 仓库内任何二进制、Rust crate、CVE 载荷、C2/窃密模块</td><td data-page-node-id="zcG1NUykAp13eUEPVi6AmE">目标对象不符(面向桌面/云/EDR),且为武器化代码;本机不落地执行。方法层已足够。</td></tr>
+  <tr data-page-node-id="ShJRwGOLK6cbMCUF36NAfI"><td data-page-node-id="F9HD2NdJ0D4wVEUBrFEIai">浏览器引擎漏洞利用(CVE-2024-9680 / CVE-2026-2441 类)</td><td data-page-node-id="5APr6P0hZ3S0xiWxTbSgt8">即使成功也只是代码执行,不改变网络白名单判定;属越权攻击面,且无补丁确认前不可用于生产设备。</td></tr>
+  <tr data-page-node-id="Pxn2VGTIZtfJ51D0pjM7g2"><td data-page-node-id="He3QFQLVeFu2bBLh5EESlH">持久化 / 自启动 / 刷机 / Root / Xposed / ADB 恢复</td><td data-page-node-id="6ebS2IKr0Vn5zIfiEer75z">与「不刷机、不动刀」约束冲突;会命中 blockapp 日检与 L4 违规锁。基线文档 §十四已逐条证伪。</td></tr>
+  <tr data-page-node-id="KrkuGjjqsPyaWjAqkFPUQJ"><td data-page-node-id="lWCju4WipDUBdGPQQFt8FO">ARP/DHCP 欺骗、TCP RST、DNS 劫持、策略包伪造</td><td data-page-node-id="VTbBPz3SncePld96SmnSRK">过不了响应签名 + md5 转存前后校验;且属中间人攻击面。基线文档 §十四 1/3/4。</td></tr>
+  <tr data-page-node-id="UoU9vk4bzPm2UAf6ajGv5Z"><td data-page-node-id="836GQ417yi0NskoNa0YhP7">任何指向第三方/公网的「放行测试」</td><td data-page-node-id="zbTMwgGSCFbsejuBEq6Lkt">演习只度量「40.90:9011 是否可达」这一布尔量;URL 里的域名串仅作为字符串样本,不解析不访问。</td></tr>
+  <tr data-page-node-id="VnAXc9YktVRK8VNYc48sIU"><td data-page-node-id="vArLXxHRmeh33LThrcb11h">结果用于真实逃逸课堂管控</td><td data-page-node-id="JM6rmVYKxjcubUMiDV79ni">演习结论仅用于授权环境内的学习与自有配置自查。</td></tr>
 </table>
-<div class="callout red"><strong>判定规则:</strong>所有用例的观测对象是「服务器是否收到请求 + 设备浏览器表现」,二者必须成对取证。任何单侧观察(只截屏、只看日志)不计为证据。</div>
+<div class="callout red" data-page-node-id="d5NYvWbLBPAeO8vdURiqzj"><strong data-page-node-id="wstFMRW45GMl5FC1CGLx4m">判定规则:</strong>所有用例的观测对象是「服务器是否收到请求 + 设备浏览器表现」,二者必须成对取证。任何单侧观察(只截屏、只看日志)不计为证据。</div>
 </div>
 
 <!-- ============ 2 ============ -->
-<h2><span class="no">2</span>环境拓扑与角色</h2>
-<div class="card">
-<table>
-  <tr><th>角色</th><th>实体</th><th>备注</th></tr>
-  <tr><td>演习服务器(本机)</td><td><code>192.168.40.90:9011</code> + <code>127.0.0.1:9011</code></td><td>独立 Node 静态+日志服务器(零依赖),不占 9000/9001 生产端口;产出访问日志与观察回传 CSV。</td></tr>
-  <tr><td>生产 CI 服务</td><td><code>192.168.40.90:9001</code></td><td><strong>演习期间不部署、不注入、不改配置</strong>,保持 9-7 基线。部分历史对照用例可直接开 9001 页面,但记录需并入本次日志。</td></tr>
-  <tr><td>受管设备</td><td><code>192.168.40.27</code>(40 网段 WiFi,MDM 客户端)</td><td>唯一被测对象;浏览器打开演习页执行用例;操作人手动执行+观察。</td></tr>
-  <tr><td>对照热区</td><td>PC 热点 <code>192.168.137.1:9011</code>(可选)</td><td>基线文档 §二.4 确认 137 网段不受管,用于区分「过滤器拦截」与「服务端故障」。</td></tr>
-  <tr><td>证据源</td><td>演习访问日志 / observe 回传 / 设备截屏(带时间)</td><td>morgan 远程地址格式已在生产侧还原说明(文档 §七);演习侧自带 :remote-addr 等价物。</td></tr>
+<h2 data-page-node-id="HmYR1mVj98qzhmp6ojZEjh"><span class="no" data-page-node-id="aRed6iRyJgjV77lHWCy6Di">2</span>环境拓扑与角色</h2>
+<div class="card" data-page-node-id="bVlt75k5hFeBeuIfZZtIdS">
+<table data-page-node-id="f4XG4ruWJO2HDYXdRPu9O2">
+  <tr data-page-node-id="ZswdMUzKekHvcbVqFRuGzL"><th data-page-node-id="a3VgBE2Uv0tBachmSB3JMD">角色</th><th data-page-node-id="7yADKwpgXmqynbeTiodZgi">实体</th><th data-page-node-id="mqAQNc2E5KxWj6ol0Y4LAZ">备注</th></tr>
+  <tr data-page-node-id="dvFEFMcMXfoQzj59kf47wd"><td data-page-node-id="EBIThrf6JqvoGSUvePiDmq">演习服务器(本机)</td><td data-page-node-id="oN6yxsdvqS623CKN0xWxw7"><code data-page-node-id="K0p4PUb2X3xgEQGrq47ERP">192.168.40.90:9011</code> + <code data-page-node-id="DgyU3aj4pDlYarpIGYDg4R">127.0.0.1:9011</code></td><td data-page-node-id="nlYkMPZcDFVG9ur3ZMeFy3">独立 Node 静态+日志服务器(零依赖),不占 9000/9001 生产端口;产出访问日志与观察回传 CSV。</td></tr>
+  <tr data-page-node-id="PbFhTyceb2DynPTr9JF6vl"><td data-page-node-id="VUydQEbeQrQiT4Ylt7y18w">生产 CI 服务</td><td data-page-node-id="GowEd5qJlL7HTgCCvCHOxh"><code data-page-node-id="OZhAbLyqoCBezrnyIqJj7a">192.168.40.90:9001</code></td><td data-page-node-id="JOtB9hmrtdt7srlR2dOp7H"><strong data-page-node-id="5kEQEhXZUoVlbAG9q3Skdz">演习期间不部署、不注入、不改配置</strong>,保持 9-7 基线。部分历史对照用例可直接开 9001 页面,但记录需并入本次日志。</td></tr>
+  <tr data-page-node-id="dVF8h6VGKnd6oTSzqKzKSu"><td data-page-node-id="6dhDhKs7oXHTLwAmaeWs9p">受管设备</td><td data-page-node-id="uPP5mVGYGR3aCtTor5L5J4"><code data-page-node-id="LI9YB6gSoWhYr3l8SEMtNR">192.168.40.27</code>(40 网段 WiFi,MDM 客户端)</td><td data-page-node-id="a5ghH7HQyAnXlWrJNYaolo">唯一被测对象;浏览器打开演习页执行用例;操作人手动执行+观察。</td></tr>
+  <tr data-page-node-id="DmAqm2ag6KsvIHxy2cDNnz"><td data-page-node-id="jSvdSNLgzQqDwtWjjdA7nF">对照热区</td><td data-page-node-id="jYYInThW1U5AVTXarArglg">PC 热点 <code data-page-node-id="jECeZGfjQxaFAhOaWKT5rL">192.168.137.1:9011</code>(可选)</td><td data-page-node-id="oe5fHxUyBVCyxVBsIkzmTb">基线文档 §二.4 确认 137 网段不受管,用于区分「过滤器拦截」与「服务端故障」。</td></tr>
+  <tr data-page-node-id="iqPoZXRzPXjYelTY5r5K1o"><td data-page-node-id="zwDahtJgvNN1itA9wyhZA5">证据源</td><td data-page-node-id="TKPMpacl74UEpJk82PoiUC">演习访问日志 / observe 回传 / 设备截屏(带时间)</td><td data-page-node-id="5vlPcQGHNsM0JDriTPnIsj">morgan 远程地址格式已在生产侧还原说明(文档 §七);演习侧自带 :remote-addr 等价物。</td></tr>
 </table>
 </div>
 
 <!-- ============ 3 ============ -->
-<h2><span class="no">3</span>基线行为模型(引用,含置信度)</h2>
-<div class="card">
-<table>
-  <tr><th>#</th><th>模型陈述</th><th>置信度</th><th>来源(文档节)</th></tr>
-  <tr><td>B1</td><td>导航判定基于 <strong>URL 字符串</strong>,不基于解析后 host;裸 IP:PORT 被拦(即使 40.0/24 已在白名单单),字符串含已放行域名即放行</td><td><span class="pill hi">高</span></td><td>§二.1 / §10.1</td></tr>
-  <tr><td>B2</td><td>子资源/API 按<strong>同一字符串规则逐请求判定</strong>;@ userinfo 形式可达,干净形式被拦</td><td><span class="pill hi">高</span></td><td>§二.2(日志)</td></tr>
-  <tr><td>B3</td><td><code>fetch()</code> 对带 userinfo URL 直接抛错(<em>Request cannot be constructed…</em>);XHR(axios)剥离 userinfo 后照常发;带 userinfo 可加载;图片等会剥离→变干净→被拦。<strong>实测引擎:腾讯 X5 WebView(Chromium 89 基线)</strong>,fetch/XHR 的 userinfo 行为沿用 Blink 规范,可预期与基线文档一致,但须用 M 组逐条复核</td><td><span class="pill hi">高</span></td><td>§二.3(浏览器规范)+ 本演习 M 组</td></tr>
-  <tr><td>B4</td><td>明文 WebSocket 曾有放行先例(noVNC);137 热点网段原生可用(含 AI 流式)</td><td><span class="pill mid">中</span></td><td>§二.4(日志)</td></tr>
-  <tr><td>B5</td><td>过滤器存在<strong>非确定性 / 策略同步窗口</strong>的可能(11:05-11:07 全通 vs 11:23+ 全拦);可能被 13.7MB 文档崩溃掩盖</td><td><span class="pill mid">中·未定案</span></td><td>§二.5 / §四</td></tr>
-  <tr><td>B6</td><td>策略接口响应带 md5+签名、内存缓存、00:01 定时拉取 → 篡改/伪造/断网 fail-open 均不可行</td><td><span class="pill hi">高</span></td><td>§十一 / §十四</td></tr>
-  <tr><td>B7</td><td>设备强制面:ADB/USB 禁用、私有 DNS 禁、应用冻结、黑名单日检、定位采集;侧载/证书通道被封</td><td><span class="pill hi">高</span></td><td>§十一 / §十四</td></tr>
+<h2 data-page-node-id="j4EH4y0DEapGscUfuPAlh1"><span class="no" data-page-node-id="cjYlOc3bfHdWaV7EnRKuxY">3</span>基线行为模型(引用,含置信度)</h2>
+<div class="card" data-page-node-id="IFR1AdOPg3YQKnvrFGnPf5">
+<table data-page-node-id="2sP8lUr9YF7UEAaoJeJcju">
+  <tr data-page-node-id="izWWhX3EXDjprGJcVLqWGX"><th data-page-node-id="OJisw5suMC4ckIDZCi1aJ9">#</th><th data-page-node-id="6TddCuoyFgdUxqNNPiorAK">模型陈述</th><th data-page-node-id="wcF53nJqgRrPeCDUCZGMIp">置信度</th><th data-page-node-id="mThLYOUIQFwBEUHAFavYu5">来源(文档节)</th></tr>
+  <tr data-page-node-id="Y3XlbB4c6zsYjgwES89vy9"><td data-page-node-id="DE7WdBPy7IQnWF3qHS7nU9">B1</td><td data-page-node-id="ekoCBa4MXTBH7EwRNYcrCN">导航判定基于 <strong data-page-node-id="vTUs5RBlORx19lAVL7LHcN">URL 字符串</strong>,不基于解析后 host;裸 IP:PORT 被拦(即使 40.0/24 已在白名单单),字符串含已放行域名即放行</td><td data-page-node-id="E4mng9B8cBlCw2fyYmHDBT"><span class="pill hi" data-page-node-id="0bWaNLoZ3Hk6yKN4z4kHOa">高</span></td><td data-page-node-id="jOxVUC7GQWktIdEzZPiNOW">§二.1 / §10.1</td></tr>
+  <tr data-page-node-id="CJLzwv629eZzHQZKOFYw6O"><td data-page-node-id="8zQGX57gUkLHiFghxFjm6Z">B2</td><td data-page-node-id="JpYj3YkqcheAIh0kNFICdq">子资源/API 按<strong data-page-node-id="wQ7od4SmTCFMpRdX9w3CSU">同一字符串规则逐请求判定</strong>;@ userinfo 形式可达,干净形式被拦</td><td data-page-node-id="Q7mkgkj9MyrOsOQrNeaUDS"><span class="pill hi" data-page-node-id="EkkZwfBrmRW9oeW1SbLEF6">高</span></td><td data-page-node-id="bGmTEBZpVIZfp9Y1OecnEF">§二.2(日志)</td></tr>
+  <tr data-page-node-id="v54UC4lDI5Fm5zyMeDOCoD"><td data-page-node-id="tVaFlFGqPvyUXAqBIceBIO">B3</td><td data-page-node-id="f9LXb6xyinBJ2TOrrlwBRi"><code data-page-node-id="ghZLEvRm6tvcCaJr2uUyO1">fetch()</code> 对带 userinfo URL 直接抛错(<em data-page-node-id="CKKlmKaxPrSFjDwXWbhwRE">Request cannot be constructed…</em>);XHR(axios)剥离 userinfo 后照常发;带 userinfo 可加载;图片等会剥离→变干净→被拦。<strong data-page-node-id="HJ0nHFwMfF0mYKFovtN0Fb">实测引擎:腾讯 X5 WebView(Chromium 89 基线)</strong>,fetch/XHR 的 userinfo 行为沿用 Blink 规范,可预期与基线文档一致,但须用 M 组逐条复核</td><td data-page-node-id="rK0FQmP53Z7NyaQcmOxJ9O"><span class="pill hi" data-page-node-id="1hhxeZ5KpvpNHK8pDL85HY">高</span></td><td data-page-node-id="v8KSkEV2eNSM4GhietgjP7">§二.3(浏览器规范)+ 本演习 M 组</td></tr>
+  <tr data-page-node-id="bZF55DrsN1IXT8uSCkhGOE"><td data-page-node-id="JETFUKcCDGrOiYfghxFeKq">B4</td><td data-page-node-id="AyWGPzi2PgYTqaAMhjPDWM">明文 WebSocket 曾有放行先例(noVNC);137 热点网段原生可用(含 AI 流式)</td><td data-page-node-id="bcI1N14NwFCF7PSKDQmFnF"><span class="pill mid" data-page-node-id="kTzZYggthOLApAqqP95NqU">中</span></td><td data-page-node-id="tXPFySAhb3H2P0onLG1UvW">§二.4(日志)</td></tr>
+  <tr data-page-node-id="3V5Pv8LaFq6Dy2U4C4DCQk"><td data-page-node-id="o7EG3JzTRKXQoqM24UFw41">B5</td><td data-page-node-id="4W3xsxReDpdXqoieJElec1">过滤器存在<strong data-page-node-id="C7x0nmk7g9TyIzENDzBpsQ">非确定性 / 策略同步窗口</strong>的可能(11:05-11:07 全通 vs 11:23+ 全拦);可能被 13.7MB 文档崩溃掩盖</td><td data-page-node-id="YrJh3QVmq5kqkmYwANRtDg"><span class="pill mid" data-page-node-id="7Y6xQruH6U1AsT89E8CkAs">中·未定案</span></td><td data-page-node-id="EbDC8Zaj5LuKelCGJphBdg">§二.5 / §四</td></tr>
+  <tr data-page-node-id="hBS0MtMZmNU4C1y0iLIyMu"><td data-page-node-id="Szf3RH4JnNVeHjRRUby7jH">B6</td><td data-page-node-id="fHm5Hd0SATVUPdGhcbMdGl">策略接口响应带 md5+签名、内存缓存、00:01 定时拉取 → 篡改/伪造/断网 fail-open 均不可行</td><td data-page-node-id="64PCEkjGXakk420W1TbEgf"><span class="pill hi" data-page-node-id="dGACDsjWKBQ5DTIyVMbAD4">高</span></td><td data-page-node-id="CklXlousBCCgef4gdvPU4w">§十一 / §十四</td></tr>
+  <tr data-page-node-id="u4xeEu4lbXJ6YbbMFUy2LC"><td data-page-node-id="fASzIvHxNuGWFIHrUYBPZ1">B7</td><td data-page-node-id="zTQxXmv8DwrUXwsmaL00JM">设备强制面:ADB/USB 禁用、私有 DNS 禁、应用冻结、黑名单日检、定位采集;侧载/证书通道被封</td><td data-page-node-id="k9xqGwLqCGD130R51Q8TN7"><span class="pill hi" data-page-node-id="YcPJ7TgABpQiQGr7P8eoLh">高</span></td><td data-page-node-id="2grCmdNWNXNLbRTABd9HtO">§十一 / §十四</td></tr>
 </table>
-<div class="callout"><strong>演习核心价值:</strong>把 B1–B4 从「当天特定时间线的观察」升级为「受控可复现结论」,并对 B5 做定案实验;B6/B7 不重测(已高置信)。</div>
+<div class="callout" data-page-node-id="H0iqa91HG0Gp7f8zXjRDSf"><strong data-page-node-id="xUp8koj7vdWDAPYDFT3FoY">演习核心价值:</strong>把 B1–B4 从「当天特定时间线的观察」升级为「受控可复现结论」,并对 B5 做定案实验;B6/B7 不重测(已高置信)。</div>
 </div>
 
 <!-- ============ 4 ============ -->
-<h2><span class="no">4</span>仓库能力映射(采用 / 改编 / 排除)</h2>
-<div class="card">
-<table>
-  <tr><th>仓库模块</th><th>判定</th><th>理由与本演习的用法</th></tr>
-  <tr><td>ContainmentGuard 遏制纪律</td><td><span class="pill hi">采用</span></td><td>演习强制「9011 独立端口 + 仅自有 IP + 不落生产」;访问越界地址的用例直接删除。</td></tr>
-  <tr><td>Mock 环境先行 / 分阶段迭代</td><td><span class="pill hi">采用</span></td><td>本机 curl/Node 先行验证演习页可服务、日志可写,再上真机;结果先本地收敛再打补做 A/B。</td></tr>
-  <tr><td>浏览器扩展供应链(MV3)攻击面</td><td><span class="pill lo">排除</span></td><td>受管设备无扩展安装通道(interfaceManager 收口),且属终端对抗而非网络过滤器评估。</td></tr>
-  <tr><td>浏览器原生后利用 / WASM 载荷 / 浏览器 CVE</td><td><span class="pill lo">排除</span></td><td>武器化且不改变白名单判定;违反红线。</td></tr>
-  <tr><td>Evasion(Rust:睡眠混淆/间接调用/ETW/AMSI)、BYOVD、EDR 静默</td><td><span class="pill lo">排除</span></td><td>面向 Windows 端点的对抗技术;与既定「透明运维、不做审计规避」边界冲突。</td></tr>
-  <tr><td>C2、凭据窃取、RMM 滥用、横向移动、云身份、Snowflake/Databricks 链</td><td><span class="pill lo">排除</span></td><td>目标对象不符,且属高危害攻击面。</td></tr>
+<h2 data-page-node-id="yC6nwoU6WUxIjmSUMQTRLC"><span class="no" data-page-node-id="kTuwVAqIlVh2Wrx8UGFw5R">4</span>仓库能力映射(采用 / 改编 / 排除)</h2>
+<div class="card" data-page-node-id="ZTHRwtgc90GokPm7wAvIwR">
+<table data-page-node-id="iIFDkvcmSBE3TKhdva6Gra">
+  <tr data-page-node-id="jKVDHtOItxueYbQ6McC6bC"><th data-page-node-id="12B0SqtkEiJgnzFtoQf1CP">仓库模块</th><th data-page-node-id="mxgEUdLmmFle0bcjHnOtau">判定</th><th data-page-node-id="vd1U54Qju8H7xl0QkblfTm">理由与本演习的用法</th></tr>
+  <tr data-page-node-id="OR7B0namO1kwFyNB3DfaFZ"><td data-page-node-id="v93tOTrDLI8WeN4zLmm9Bx">ContainmentGuard 遏制纪律</td><td data-page-node-id="GzDGJPA2vmi0mVPFgcCbXy"><span class="pill hi" data-page-node-id="RsEnxKuq7JRY2O0MG01nRx">采用</span></td><td data-page-node-id="mXcG2tC2FKFSJ5nv1EhiPU">演习强制「9011 独立端口 + 仅自有 IP + 不落生产」;访问越界地址的用例直接删除。</td></tr>
+  <tr data-page-node-id="YIFUTV2uaouk4qgC7Dbeus"><td data-page-node-id="JX2lH7fcpqARhcVl7QqkWA">Mock 环境先行 / 分阶段迭代</td><td data-page-node-id="kUisy41473k8A5jDqc6K3n"><span class="pill hi" data-page-node-id="AVGWh1zBUwx5v2BRZtReAK">采用</span></td><td data-page-node-id="lx6Ikcmcw2zwWxiryR2GVt">本机 curl/Node 先行验证演习页可服务、日志可写,再上真机;结果先本地收敛再打补做 A/B。</td></tr>
+  <tr data-page-node-id="Znl8XOpfiO1NJXLqJ9BBNe"><td data-page-node-id="mEZk2IDF3A5vyNspqOPPwQ">浏览器扩展供应链(MV3)攻击面</td><td data-page-node-id="7njTGpyGvHXNVNAu0R1P1t"><span class="pill lo" data-page-node-id="9rxk89ClyVqBOKlEvCVLbL">排除</span></td><td data-page-node-id="WYk2837DBnS6IwnnTVeWCP">受管设备无扩展安装通道(interfaceManager 收口),且属终端对抗而非网络过滤器评估。</td></tr>
+  <tr data-page-node-id="UF6hGCTxxCR3No3S547Ceg"><td data-page-node-id="s0gZ6DkfcmcTHhnMoi4PRN">浏览器原生后利用 / WASM 载荷 / 浏览器 CVE</td><td data-page-node-id="XmKxQRcM8alMGm8n1dioIS"><span class="pill lo" data-page-node-id="vUGqVQZx51WsFoaCwqWFXZ">排除</span></td><td data-page-node-id="NkciSPZAunqCCrH1IHPfFE">武器化且不改变白名单判定;违反红线。</td></tr>
+  <tr data-page-node-id="Byny5VSmhXMVJf49TzM6uv"><td data-page-node-id="G8z1yw79y0EHmpouFlGAjg">Evasion(Rust:睡眠混淆/间接调用/ETW/AMSI)、BYOVD、EDR 静默</td><td data-page-node-id="uDQqtvrxqS7MFf5xttHr97"><span class="pill lo" data-page-node-id="eEVbgKkfyJvcaptpXGWaST">排除</span></td><td data-page-node-id="9I9gudKHGpwW3lG2ycCHJZ">面向 Windows 端点的对抗技术;与既定「透明运维、不做审计规避」边界冲突。</td></tr>
+  <tr data-page-node-id="gacb0w5EYrIeavsbnqAW9M"><td data-page-node-id="O27tDwnoxjUF8jJ77YnLFI">C2、凭据窃取、RMM 滥用、横向移动、云身份、Snowflake/Databricks 链</td><td data-page-node-id="AKbjYUqsiHg0lbBXZXGZWW"><span class="pill lo" data-page-node-id="Wmiio6zjksiiyEJ7bpLXi8">排除</span></td><td data-page-node-id="95EgvZcx73U3io9AxYHKHe">目标对象不符,且属高危害攻击面。</td></tr>
 </table>
-<div class="callout warn"><strong>结论先行:</strong>经映射,该仓库对本题的净贡献 = 方法论 2 条,载荷 0 条。浏览器层过滤的实测攻击面远小于仓库覆盖面——这正是值得写进演习报告的结论之一。</div>
+<div class="callout warn" data-page-node-id="XQ4sUYzABPFv50K4NylAF4"><strong data-page-node-id="AZzaojKxdxKFEWm82s3zob">结论先行:</strong>经映射,该仓库对本题的净贡献 = 方法论 2 条,载荷 0 条。浏览器层过滤的实测攻击面远小于仓库覆盖面——这正是值得写进演习报告的结论之一。</div>
 </div>
 
 <!-- ============ 5 ============ -->
-<h2><span class="no">5</span>演习总流程</h2>
-<div class="card">
-<ol>
-  <li><strong>准备(P0):</strong>本机启动演习服务器(见 README 启动节),<code>curl</code> 冒烟自检 9011;确认 9001 生产服务未受影响;设备接入 40 网段 WiFi。</li>
-  <li><strong>基线复测(P1):</strong>真机执行 <strong>N 组(导航层)</strong>用例,重建文档 §三 关键时间线样本(约 20 分钟)。</li>
-  <li><strong>子资源层(P2):</strong>真机打开 <code>case-sub.html</code>,页内自动探测 fetch/XHR/WS/img 的各类 URL 形态并回传,人工核对服务器日志。</li>
-  <li><strong>确定性定案(P3):</strong>按 §7 A/B 受控协议执行,目标:B5 定案为「确定性」或「策略同步窗口」并测出窗口量级。</li>
-  <li><strong>对照(P4):</strong>设备切 PC 热点 137.x 重跑 P1 代表性用例,区分过滤拦截与服务端故障。</li>
-  <li><strong>收敛(P5):</strong>按 §8 判定规则收敛每条用例,补证据(截屏/日志节选),填记录表。</li>
-  <li><strong>回滚(P6):</strong>停演习服务器;确认生产 9001 与设备状态无残留(文档 §七 基线核对)。</li>
-  <li><strong>交付(P7):</strong>产出:演习记录表与可复现证据链(日志/截屏/记录表归档)。</li>
+<h2 data-page-node-id="jZZpSCGXoO5BUwekOm84Wf"><span class="no" data-page-node-id="dD7Dmh9eOvHulhXdZkfEXT">5</span>演习总流程</h2>
+<div class="card" data-page-node-id="JqzEPHipuYadEV1EfdRVXR">
+<ol data-page-node-id="BUU1dkWWCIVAd3sDjUQSDi">
+  <li data-page-node-id="QFAIQP785jA89iTZVEfPbw"><strong data-page-node-id="f2TXY2ABDg4pXVAr9TkI33">准备(P0):</strong>本机启动演习服务器(见 README 启动节),<code data-page-node-id="5EcZ7D1Anyz5mdeacRGefC">curl</code> 冒烟自检 9011;确认 9001 生产服务未受影响;设备接入 40 网段 WiFi。</li>
+  <li data-page-node-id="pcRDQRiP5lLgK1tF6V29Cc"><strong data-page-node-id="icBq50y9FhRUv3AyXQ9IEC">基线复测(P1):</strong>真机执行 <strong data-page-node-id="wts1FJFyL1ukFhvwxEYPJB">N 组(导航层)</strong>用例,重建文档 §三 关键时间线样本(约 20 分钟)。</li>
+  <li data-page-node-id="plBf0yTJn4ALIIe8jjNoue"><strong data-page-node-id="gGvcgWxu4v3ptDy7LlutuI">子资源层(P2):</strong>真机打开 <code data-page-node-id="RqzuDvXqnzsjh7YBTgLw2f">case-sub.html</code>,页内自动探测 fetch/XHR/WS/img 的各类 URL 形态并回传,人工核对服务器日志。</li>
+  <li data-page-node-id="HhjVH5BAFNjVpToBDN8WQL"><strong data-page-node-id="lW9FOI7MCo20QoAtHaYlN3">确定性定案(P3):</strong>按 §7 A/B 受控协议执行,目标:B5 定案为「确定性」或「策略同步窗口」并测出窗口量级。</li>
+  <li data-page-node-id="FFLpviAA7L5lwYllBdKihB"><strong data-page-node-id="OTWv07q4qAKylAuVC4X2AL">对照(P4):</strong>设备切 PC 热点 137.x 重跑 P1 代表性用例,区分过滤拦截与服务端故障。</li>
+  <li data-page-node-id="M8OlyxbgirQyNCgF19CtM2"><strong data-page-node-id="svj2VjW2RTBX1xIoDf49f3">收敛(P5):</strong>按 §8 判定规则收敛每条用例,补证据(截屏/日志节选),填记录表。</li>
+  <li data-page-node-id="0hQQqNwG7n9ICcHf77m292"><strong data-page-node-id="qOzJUAQ2IsBTuESmxytAn8">回滚(P6):</strong>停演习服务器;确认生产 9001 与设备状态无残留(文档 §七 基线核对)。</li>
+  <li data-page-node-id="GUE1qr2xbhj8QElnhCzFxG"><strong data-page-node-id="uFSX3Jd82OpHPuQklmGYMr">交付(P7):</strong>产出:演习记录表与可复现证据链(日志/截屏/记录表归档)。</li>
 </ol>
 </div>
 
 <!-- ============ 6 ============ -->
-<h2><span class="no">6</span>用例矩阵(分层)</h2>
-<div class="card">
-<p class="small">执行约定:每条用例 = 设备浏览器动作 + 服务器日志命中情况 + 设备表现,三列证据。URL 中的 <code>SVCDOM</code> 指代放行名单中存在的域名字符串(如 service.example.com),<code>LABIP</code>=192.168.40.90,<code>LABPORT</code>=9011。所有目标均为本环境自有地址。</p>
+<h2 data-page-node-id="xzcyVe5T3MqTHToQLMyD2N"><span class="no" data-page-node-id="uWG5ohc9cMpFhSDhqf2s2Q">6</span>用例矩阵(分层)</h2>
+<div class="card" data-page-node-id="qHXFpfzdyAma3ahXHSLof2">
+<p class="small" data-page-node-id="E3DRLVXc5fgIiIzVcVXLNy">执行约定:每条用例 = 设备浏览器动作 + 服务器日志命中情况 + 设备表现,三列证据。URL 中的 <code data-page-node-id="Y4pVgzx1BKaazJCQU3bspn">SVCDOM</code> 指代放行名单中存在的域名字符串(如 service.example.com),<code data-page-node-id="lvIcqrxP33PtlzHWDJWjXI">LABIP</code>=192.168.40.90,<code data-page-node-id="2kQtx7ompteLQpEgB1XsPH">LABPORT</code>=9011。所有目标均为本环境自有地址。</p>
 
-<h3>6.1 N 组 · 导航层(顶层导航)</h3>
-<table>
-  <tr><th style="width:44px">编号</th><th>导航 URL 形态</th><th>假设(依模型)</th><th>证据/判定</th></tr>
-  <tr><td>N1</td><td><code>http://LABIP:LABPORT/</code> 裸 IP:PORT</td><td>被拦(字符串无放行域名)→ 服务器无日志</td><td>复现文档 §二.1</td></tr>
-  <tr><td>N2</td><td><code>http://SVCDOM@LABIP:LABPORT/</code> userinfo</td><td>放行(字符串含放行域名)→ 日志命中</td><td>复现 11:05-11:07 形态</td></tr>
-  <tr><td>N3</td><td><code>http://SVCDOM@LABIP/</code>(80 端口)</td><td>同上;观察是否与端口无关(纯字符串)</td><td>端口无关性佐证</td></tr>
-  <tr><td>N4</td><td><code>http://LABIP:LABPORT/…?x=SVCDOM</code> query 含域名</td><td>若纯字符串匹配 → 可能放行</td><td>探测「域名出现在任意位置即放行」</td></tr>
-  <tr><td>N5</td><td><code>http://LABIP:LABPORT/#SVCDOM</code> fragment 含域名</td><td>fragment 不发出 → 应被拦</td><td>验证判定发生在请求前(字符串=整串?)</td></tr>
-  <tr><td>N6</td><td><code>http://SVCDOM@LABIP:LABPORT@127.0.0.1:LABPORT/</code> 双@畸形</td><td>浏览器解析为 host=LABIP,userinfo=SVCDOM@LABIP:LABPORT? 观察实际行为</td><td>畸形串边界用例</td></tr>
-  <tr><td>N7</td><td>大小写/全角/URL 编码变体:<code>HTTP://</code>,<code>％2f</code>,punycode 形态</td><td>记录是否归一化(引擎强弱)</td><td>归一化能力证据</td></tr>
+<h3 data-page-node-id="kswNTVz1ysGArbVaA92GAo">6.1 N 组 · 导航层(顶层导航)</h3>
+<table data-page-node-id="FMijaxZrtAHRURYQqq6LzP">
+  <tr data-page-node-id="Mkgu1xa9WhlclkUfmUbR8O"><th style="width:44px" data-page-node-id="lolQ9Nddh4MuR6uMsvwtQF">编号</th><th data-page-node-id="65nr5AkNG5dNXCm4tyjYhW">导航 URL 形态</th><th data-page-node-id="Iz923vGOLB3RmEck3Ux26h">假设(依模型)</th><th data-page-node-id="oU7tG0INCEel7BFV97hWaW">证据/判定</th></tr>
+  <tr data-page-node-id="DSHCMB898DmlgeTndwyoG6"><td data-page-node-id="sQ6i3ZBTOsSDGX2g0JSeBD">N1</td><td data-page-node-id="E48ExyEAFpXmn2OAiuorhX"><code data-page-node-id="s7f6OyxKPibVQwRftuGo4o">http://LABIP:LABPORT/</code> 裸 IP:PORT</td><td data-page-node-id="7sqP0qxfp0LPKlwWTKbjkN">被拦(字符串无放行域名)→ 服务器无日志</td><td data-page-node-id="KqeBD9G4HqvlpyDdf9Yl9E">复现文档 §二.1</td></tr>
+  <tr data-page-node-id="16X4d1rcOEnADfys80UGhQ"><td data-page-node-id="yPyF8X1RbdZZKW2gM2kybq">N2</td><td data-page-node-id="pZ4XKDkfrBCu2PORn4f6MG"><code data-page-node-id="sfYq5qYARCRlKejeOAnUNd">http://SVCDOM@LABIP:LABPORT/</code> userinfo</td><td data-page-node-id="C1LsVWN1e4EJZKZnqkYCzy">放行(字符串含放行域名)→ 日志命中</td><td data-page-node-id="WnClrwA7j3FBnInkvEJtJx">复现 11:05-11:07 形态</td></tr>
+  <tr data-page-node-id="UnBZmhgMTvIUr8CV5OYDkk"><td data-page-node-id="Jqmco7WBBZQ2IA0qhUisvT">N3</td><td data-page-node-id="lJHKeK1sHpVXjr31eAE6ti"><code data-page-node-id="cZcqAMdvKlJV3uYiDaXzLy">http://SVCDOM@LABIP/</code>(80 端口)</td><td data-page-node-id="xKFZ20TxR8K3OQfXrBkBkQ">同上;观察是否与端口无关(纯字符串)</td><td data-page-node-id="JGydw7bhYJLqMUUQFXLLHZ">端口无关性佐证</td></tr>
+  <tr data-page-node-id="UlTr7A1sF4o5QIIRBua5RT"><td data-page-node-id="dJF14gp6dmu8YMLyXDQs92">N4</td><td data-page-node-id="N2Etwn1R0iQkU7L1oCP5xZ"><code data-page-node-id="nnMaHdQ7kMijDpOunV7Gss">http://LABIP:LABPORT/…?x=SVCDOM</code> query 含域名</td><td data-page-node-id="dzavY3kCMhx8rZnCeWM2rx">若纯字符串匹配 → 可能放行</td><td data-page-node-id="Lh8Jn1QktpqVRdj2UZ6Fd1">探测「域名出现在任意位置即放行」</td></tr>
+  <tr data-page-node-id="rmnhehOokB5Huxq9NfGy5t"><td data-page-node-id="ekMaxAgh635yKBUHUdc4X8">N5</td><td data-page-node-id="xKqA9CKdFWv74DafsKUYD3"><code data-page-node-id="er7V7F8ZnftbldJmvhFI9m">http://LABIP:LABPORT/#SVCDOM</code> fragment 含域名</td><td data-page-node-id="YWiUDBovO9zfgF5C4ZnTiX">fragment 不发出 → 应被拦</td><td data-page-node-id="zTtyg9BGjUjRycFhCkrDrc">验证判定发生在请求前(字符串=整串?)</td></tr>
+  <tr data-page-node-id="4Ka3RMziv772u17Iv8gU5B"><td data-page-node-id="jNYVlDnYwd0hkMic5jkLIt">N6</td><td data-page-node-id="S0F4O1JkNmPekEzHaHqDeC"><code data-page-node-id="KO4BLblpWWIWMafMt8liAC">http://SVCDOM@LABIP:LABPORT@127.0.0.1:LABPORT/</code> 双@畸形</td><td data-page-node-id="o6P9J9ykl8RRWEEG6agUuk">浏览器解析为 host=LABIP,userinfo=SVCDOM@LABIP:LABPORT? 观察实际行为</td><td data-page-node-id="YnPcmipODpjHtlkVTbSb5o">畸形串边界用例</td></tr>
+  <tr data-page-node-id="oSNFThex1PZqGimUcv5Avr"><td data-page-node-id="xDMoAF00JYqDOQD3dUIix3">N7</td><td data-page-node-id="P8O2ee9JjGfxGSGK7JWM5j">大小写/全角/URL 编码变体:<code data-page-node-id="dnYokrXI3TflgFWqt9pE3M">HTTP://</code>,<code data-page-node-id="1bZS2Efhsl22FyWEske1iX">％2f</code>,punycode 形态</td><td data-page-node-id="WGUwavziK3EY2R5ynMgbNg">记录是否归一化(引擎强弱)</td><td data-page-node-id="HDnDmQN2HKxS422mtxndyn">归一化能力证据</td></tr>
 </table>
 
-<h3>6.2 S 组 · 子资源/API 层(页内请求)</h3>
-<table>
-  <tr><th style="width:44px">编号</th><th>请求形态</th><th>假设(依模型 B2/B3)</th><th>证据/判定</th></tr>
-  <tr><td>S1</td><td>XHR → <code>http://LABIP:LABPORT/api/ping</code>(干净绝对)</td><td>被拦(服务器无日志)</td><td>基线 §二.2</td></tr>
-  <tr><td>S2</td><td>XHR → <code>http://SVCDOM@LABIP:LABPORT/api/ping</code></td><td>XHR 剥离 userinfo 后发出;若字符串在剥离前判定→放行;剥离后判定→被拦。11:05 观察支持放行</td><td>核心矛盾点之一</td></tr>
-  <tr><td>S3</td><td>fetch → 同上 userinfo</td><td>fetch 构造期抛错,不发请求(浏览器规范)</td><td>验证 B3</td></tr>
-  <tr><td>S4</td><td><code>new Image()</code> → userinfo</td><td>剥离 credentials→干净→被拦(11:52 图标空框)</td><td>复现</td></tr>
-  <tr><td>S5</td><td><code>&lt;script src&gt;</code> / <code>&lt;link&gt;</code> CSS → userinfo</td><td>是否同样被剥离(取决于资源类型加载器)</td><td>扩展 B3 覆盖面</td></tr>
-  <tr><td>S6</td><td>页面 <code>&lt;base href="http://SVCDOM@LABIP:LABPORT/"&gt;</code> + 相对路径资源</td><td>相对路径解析为 userinfo 基址→若放行则全套可达(文档 §五「脏文档+绝对干净 API」变体)</td><td>组合面验证</td></tr>
-  <tr><td>S7</td><td>WebSocket <code>ws://SVCDOM@LABIP:LABPORT/ws</code>(明文)</td><td>noVNC 先例→可能放行</td><td>验证 B4;注意 ws 握手日志</td></tr>
-  <tr><td>S8</td><td>Service Worker / manifest 无</td><td>不适用(页+静态;仅记录 SW 注册在受管环境是否被禁)</td><td>环境能力登记,不计结论</td></tr>
-  <tr><td>S9</td><td>blob:/data: 内联资源(图标/字体)</td><td>无网络请求→不受过滤器影响;仅受页面体积/渲染压力影响</td><td>对照文档 9.4MB dataURI 观察</td></tr>
+<h3 data-page-node-id="sRjnZck3yq6GcpnLglFFMI">6.2 S 组 · 子资源/API 层(页内请求)</h3>
+<table data-page-node-id="DwEEqchcCZABXw4LMuGGPB">
+  <tr data-page-node-id="JmRY7UUXLfStXuRo64btxA"><th style="width:44px" data-page-node-id="7TJCiZqhZ8HFa4ChGFoQaS">编号</th><th data-page-node-id="XM3Fy3eeimtgtU3gtBIYLe">请求形态</th><th data-page-node-id="0GpqGglCccDQy0DBAODbKc">假设(依模型 B2/B3)</th><th data-page-node-id="eut9f98CgBKDuT4Ynk5zOJ">证据/判定</th></tr>
+  <tr data-page-node-id="JUjQxFbCO2UwW31Fx4jYNN"><td data-page-node-id="99L3RmFm7vimpWg7HicBvZ">S1</td><td data-page-node-id="idmfjSYVxzoVEbEOx9KYmo">XHR → <code data-page-node-id="x4CmlcIQzbrpdZAyGDoLw9">http://LABIP:LABPORT/api/ping</code>(干净绝对)</td><td data-page-node-id="DNK5ZtGBjhVxDyJuAPe1X6">被拦(服务器无日志)</td><td data-page-node-id="7LCb6oiZGQzyogyQFBIsER">基线 §二.2</td></tr>
+  <tr data-page-node-id="GstfVeJBBL8NFE2oA3hGdM"><td data-page-node-id="I51FvPQdCmGVte5SgOcGf9">S2</td><td data-page-node-id="YsPNodn68lWKjA771dUkjm">XHR → <code data-page-node-id="utTjgFruyDnenf9Wayx78N">http://SVCDOM@LABIP:LABPORT/api/ping</code></td><td data-page-node-id="YrCmgkiqEhts93R8wuZNjz">XHR 剥离 userinfo 后发出;若字符串在剥离前判定→放行;剥离后判定→被拦。11:05 观察支持放行</td><td data-page-node-id="775itn10npvvirJBC7KBeQ">核心矛盾点之一</td></tr>
+  <tr data-page-node-id="PH1bliTuokFMfpRHPyAyaA"><td data-page-node-id="Sy2Ff6lx0u05xWob0AO8kQ">S3</td><td data-page-node-id="nHvoEu69B2IexERvaaaNYN">fetch → 同上 userinfo</td><td data-page-node-id="hDMcplurnE0U52lTMizHVE">fetch 构造期抛错,不发请求(浏览器规范)</td><td data-page-node-id="gee2jZZ3pKWtUKwDr1JlCw">验证 B3</td></tr>
+  <tr data-page-node-id="xd1MBAbjZSQXsXmX2AtqEB"><td data-page-node-id="omKY30tSxOVNvtHJncvIKU">S4</td><td data-page-node-id="Y95zfRUAy095bGlntrEfyM"><code data-page-node-id="Et4aFEZVIlfkNDO70BEg9y">new Image()</code> → userinfo</td><td data-page-node-id="h5ucq0A3SUE8fR8Cmag2Z2">剥离 credentials→干净→被拦(11:52 图标空框)</td><td data-page-node-id="7eukPSzl1aHitBCceNSna4">复现</td></tr>
+  <tr data-page-node-id="lRc4o7845O1llllBoWtqSy"><td data-page-node-id="C5RzVC3MTQHUIfjZA6LW7a">S5</td><td data-page-node-id="Lt8v8OMk6f0mxuI5itIhOL"><code data-page-node-id="YC2Qx1qrWmxs3ZZ1NoCPXz">&lt;script src&gt;</code> / <code data-page-node-id="vcd1Pe6pEdNv9Jp4yWRU62">&lt;link&gt;</code> CSS → userinfo</td><td data-page-node-id="Xeb3gJxN2fIPrIIttrAXPf">是否同样被剥离(取决于资源类型加载器)</td><td data-page-node-id="pJ6cxX11UX2QofnGOFdGYt">扩展 B3 覆盖面</td></tr>
+  <tr data-page-node-id="ttwLJ5JgcWrpdAsXFeXaso"><td data-page-node-id="9gQzZptWQc7Y9N55LNFf87">S6</td><td data-page-node-id="BwGzQY2bnDZHyVJRhATMI0">页面 <code data-page-node-id="myzQtxlyqT4S2FLlzTR181">&lt;base href="http://SVCDOM@LABIP:LABPORT/"&gt;</code> + 相对路径资源</td><td data-page-node-id="xWYrFdg5OxihVDcO9Y3C6s">相对路径解析为 userinfo 基址→若放行则全套可达(文档 §五「脏文档+绝对干净 API」变体)</td><td data-page-node-id="XWLKLElJvsAGWSWUADjl0k">组合面验证</td></tr>
+  <tr data-page-node-id="PFzonLUu7gjGCDjxiAaeae"><td data-page-node-id="dZVaBbrvEt59qi6deNqze7">S7</td><td data-page-node-id="0fQixnksN6lbRpKePNnbU0">WebSocket <code data-page-node-id="V8QjEs8ipt2jn065ufNcCL">ws://SVCDOM@LABIP:LABPORT/ws</code>(明文)</td><td data-page-node-id="es6o6Vo7ZSMjqYYO14vqAs">noVNC 先例→可能放行</td><td data-page-node-id="UB4NyxMCMPjgVpg6eSAwkN">验证 B4;注意 ws 握手日志</td></tr>
+  <tr data-page-node-id="fT54Do2km9EkqsaAU8bnd5"><td data-page-node-id="iCKHPu0ulxvD1K5rXpp9HK">S8</td><td data-page-node-id="VU0IiP5p8HAcVDbPKGkvXU">Service Worker / manifest 无</td><td data-page-node-id="J2I2ME1URqgOJKTqX3uETf">不适用(页+静态;仅记录 SW 注册在受管环境是否被禁)</td><td data-page-node-id="nQU2WZy3PDjXFhD2psUGGX">环境能力登记,不计结论</td></tr>
+  <tr data-page-node-id="i324WUheqdkXcA7Z0Yzfrh"><td data-page-node-id="U4UFrvhUsTN9IczSNDS6Hp">S9</td><td data-page-node-id="u4IHs6qVPQzeeTYH7oSF0h">blob:/data: 内联资源(图标/字体)</td><td data-page-node-id="5gvXFUGIqRZ7ZCvtMqORS6">无网络请求→不受过滤器影响;仅受页面体积/渲染压力影响</td><td data-page-node-id="medwYhqm5Q8fpDO6NHwbyu">对照文档 9.4MB dataURI 观察</td></tr>
 </table>
 
-<h3>6.3 D 组 · 确定性 A/B(对应 §7 协议)</h3>
-<table>
-  <tr><th style="width:44px">编号</th><th>对照条件</th><th>目的</th></tr>
-  <tr><td>D-A</td><td>页面以 <code>http://SVCDOM@LABIP:LABPORT/pageA</code> 进入,无 base,页内混合 userinfo 与干净绝对 API 各一条</td><td>复刻 11:05-11:07「全通」条件</td></tr>
-  <tr><td>D-B</td><td>页面以干净形式进入(或带 base),资源全为干净绝对 URL</td><td>复刻 11:23+「全拦」条件</td></tr>
-  <tr><td>D-C</td><td>页面小体积(&lt;300KB)vs 大体积(≥8MB)同形态</td><td>剥离「文档过大→渲染崩溃→JS 未执行」混淆变量(§四①)</td></tr>
+<h3 data-page-node-id="kNL1fWKA2itBC5iitssPTb">6.3 D 组 · 确定性 A/B(对应 §7 协议)</h3>
+<table data-page-node-id="Az0kZNnAGmlOEu9sovzc45">
+  <tr data-page-node-id="mE8bnejyZwbcFqmzxz0ILm"><th style="width:44px" data-page-node-id="ainUGQOXPpZJ0XtUzsdP0Z">编号</th><th data-page-node-id="Gpbi3MKhxOheeVVUbLS5FK">对照条件</th><th data-page-node-id="mZMcFCzEU43w8HfHVrzVbC">目的</th></tr>
+  <tr data-page-node-id="7TVyNpGucbLuXYa7h5wKLy"><td data-page-node-id="yGO6megjwZ0s3Ag1PfQLIt">D-A</td><td data-page-node-id="O5RhYBhcliAmFXXiQGPKYI">页面以 <code data-page-node-id="JFcmIv9b1xjEjGMa9aQAty">http://SVCDOM@LABIP:LABPORT/pageA</code> 进入,无 base,页内混合 userinfo 与干净绝对 API 各一条</td><td data-page-node-id="2UDGHjS8CyfaoE8uhaMDnN">复刻 11:05-11:07「全通」条件</td></tr>
+  <tr data-page-node-id="vjyNsXGdGY2Ktbvr36sGy8"><td data-page-node-id="9bhcMGGW012XYaWQCepQTv">D-B</td><td data-page-node-id="sgnF1Hk1qQyn1AS62nBffL">页面以干净形式进入(或带 base),资源全为干净绝对 URL</td><td data-page-node-id="MPZ8xsxJDGYmBgfMLLKiv7">复刻 11:23+「全拦」条件</td></tr>
+  <tr data-page-node-id="3939Xju5T3dC0D5VATc4Lp"><td data-page-node-id="BjGg6I84o9gdm6rYJh65Un">D-C</td><td data-page-node-id="Tsjb2qvWi4qSXnhUACz5GP">页面小体积(&lt;300KB)vs 大体积(≥8MB)同形态</td><td data-page-node-id="wVcsbKFuXdgN6XeC9qtu0T">剥离「文档过大→渲染崩溃→JS 未执行」混淆变量(§四①)</td></tr>
 </table>
 
-<h3>6.4 M 组 · 浏览器引擎登记(X5 WebView,Chromium 89 基线)</h3>
-<table>
-  <tr><th style="width:44px">编号</th><th>登记项</th><th>目的/预期</th></tr>
-  <tr><td>M1</td><td>UA 抓取(演习页顶部展示 + 服务器日志记录):识别 <code>X5/</code>、<code>TBS/</code>、<code>Chrome/89… wv</code>、<code>Version/4.0</code> 等标记</td><td>确认本次实际运行的是 X5 内核还是「X5 加载失败回退系统 WebView」;每轮记录,防止引擎漂移污染结论</td></tr>
-  <tr><td>M2</td><td>X5 能力基线:fetch()/XHR 对 userinfo URL 的抛错/剥离行为(对照 B3)</td><td>在 X5 上复核 S2/S3,确认与 Chromium 89 规范一致</td></tr>
-  <tr><td>M3</td><td>WebSocket 握手(明文 ws://)是否可用;X5 网络栈对 WS 的代理/过滤可见性</td><td>验证 B4;注意 X5 若自带网络层需确认日志可达性</td></tr>
-  <tr><td>M4</td><td>远程调试通道:ADB 已禁 → chrome://inspect / WebView 远程调试预期不可用;X5 调试包需提权不适用</td><td>证据采集只能走「截屏 + 服务器日志」双通道,本登记用于锁定采集手段</td></tr>
-  <tr><td>M5</td><td>Service Worker / 缓存 / base 标签在 X5 的行为(静态页内验证)</td><td>评估是否存在引擎级差异导致的额外可达面(预期与 Blink 一致)</td></tr>
-  <tr><td>M6</td><td>证书/安全:userinfo 仅限 http 明文场景;https+私有 CA 不在本演习范围(X5 无证书安装通道,基线 §十四.3)</td><td>锁定本演习仅测 http:// 形态,不引入证书面</td></tr>
+<h3 data-page-node-id="inzEtDrOHraxdPPcrNRuDV">6.4 M 组 · 浏览器引擎登记(X5 WebView,Chromium 89 基线)</h3>
+<table data-page-node-id="esNKuvrwrxf4xLscZesc7F">
+  <tr data-page-node-id="SVuO0mtgY1W0yW3NLHPoDY"><th style="width:44px" data-page-node-id="0qfBSlQqitoIZYr4zn4AVe">编号</th><th data-page-node-id="A2ztsdsiBZOE5yfDy4v07u">登记项</th><th data-page-node-id="5DraczmS9XCRDudHm0z8u2">目的/预期</th></tr>
+  <tr data-page-node-id="94Em24zV77cEFAwNv8lZ21"><td data-page-node-id="ochhlFc9k7wtnJRer5s2eA">M1</td><td data-page-node-id="LHr4yl2DIFlKjVVAAudEIF">UA 抓取(演习页顶部展示 + 服务器日志记录):识别 <code data-page-node-id="gHWObPxjvozGEHSA4wP0RM">X5/</code>、<code data-page-node-id="k18Su1XXDXRgs3qURFBCok">TBS/</code>、<code data-page-node-id="EeHMgaoEyCrvfBA5PoHLNU">Chrome/89… wv</code>、<code data-page-node-id="4KQm5mSwVWaW6xCeyJdk3V">Version/4.0</code> 等标记</td><td data-page-node-id="jLfkqyHJDLy1IDKnuKPQEf">确认本次实际运行的是 X5 内核还是「X5 加载失败回退系统 WebView」;每轮记录,防止引擎漂移污染结论</td></tr>
+  <tr data-page-node-id="xzw4BxeqnPFJdPwZpFtv0n"><td data-page-node-id="BGPyOFQ5H2dcIrFQC8bKzZ">M2</td><td data-page-node-id="EoSmRF5tLzQ1VaSQooGBOI">X5 能力基线:fetch()/XHR 对 userinfo URL 的抛错/剥离行为(对照 B3)</td><td data-page-node-id="lqzO0JNlShUos5j8T2kGT3">在 X5 上复核 S2/S3,确认与 Chromium 89 规范一致</td></tr>
+  <tr data-page-node-id="GWTRN5VOr7AlqG53IaAdJh"><td data-page-node-id="Az3soP28MfShduWzWjnzy9">M3</td><td data-page-node-id="T7VpcOF6feoHcFmukiqbuE">WebSocket 握手(明文 ws://)是否可用;X5 网络栈对 WS 的代理/过滤可见性</td><td data-page-node-id="JGzfYur0Ru1BFTiyshbiIo">验证 B4;注意 X5 若自带网络层需确认日志可达性</td></tr>
+  <tr data-page-node-id="7VNnR2BY2iokkProcLvLLX"><td data-page-node-id="4j660UgiY2N223FkHtfQls">M4</td><td data-page-node-id="OF7GvBBh9IKkqbXdnmmcHn">远程调试通道:ADB 已禁 → chrome://inspect / WebView 远程调试预期不可用;X5 调试包需提权不适用</td><td data-page-node-id="B0Six1qjT6mGhJcDW5NM7s">证据采集只能走「截屏 + 服务器日志」双通道,本登记用于锁定采集手段</td></tr>
+  <tr data-page-node-id="ADIv98gO0IEUBMN92jghnf"><td data-page-node-id="WeoqrqzfBFzQ1snZLazOxo">M5</td><td data-page-node-id="NaNCZCA6oKxE6Dm1owNXlP">Service Worker / 缓存 / base 标签在 X5 的行为(静态页内验证)</td><td data-page-node-id="rk7SSTIpUta3dP4WkzKDPi">评估是否存在引擎级差异导致的额外可达面(预期与 Blink 一致)</td></tr>
+  <tr data-page-node-id="5dF19xtsUySsG5N1WyHE1y"><td data-page-node-id="3WL9glxoqEsYCMSxaoCyum">M6</td><td data-page-node-id="zjk0KDgIqGN0lKDsQyOnhm">证书/安全:userinfo 仅限 http 明文场景;https+私有 CA 不在本演习范围(X5 无证书安装通道,基线 §十四.3)</td><td data-page-node-id="hDxRslJyj2OookCKBZg1I9">锁定本演习仅测 http:// 形态,不引入证书面</td></tr>
 </table>
 </div>
 
 <!-- ============ 7 ============ -->
-<h2><span class="no">7</span>A/B 受控协议(B5 定案)</h2>
-<div class="card">
-<p>目的:判定过滤器是<strong>确定性</strong>(同形态同结果)还是存在<strong>策略同步窗口</strong>(随策略拉取周期变化)。基线 §四 要求「同一分钟内 A/B 交替」。</p>
-<ol>
-  <li><strong>轮次:</strong>连续 5 轮,每轮 60s:第 0-25s 执行 D-A,第 25-50s 执行 D-B,第 50-60s 留空观察;轮间不重置浏览器(保留 cookie/缓存现实性)。</li>
-  <li><strong>时序对齐:</strong>本机与设备对时;服务器日志本身带时间戳,设备动作记录到秒(截屏带时间水印或手记)。</li>
-  <li><strong>结果编码:</strong>每轮每形态记 <code>通/拦</code>;同时记录策略拉取周期参考点(设备端日志 00:01 周期 + 手动触发拉取周期,见文档附录时间线)。</li>
-  <li><strong>收敛规则:</strong>
-    <ul>
-      <li>5/5 一致 → 判定「确定性」,采纳该形态结论;</li>
-      <li>出现 ≥1 次翻转 → 判定「存在同步窗口/非确定因素」,追加 2 轮并定位翻转是否贴合策略拉取时刻;</li>
-      <li>全程全拦且与体积无关 → 支持基线回滚后现状(9-7 基线轻量版),历史「全通」归因于当时内联注入形态或同步窗口。</li>
+<h2 data-page-node-id="Q6yPPWHO9d8w9PysAPCjDz"><span class="no" data-page-node-id="MR14DMd5n5QIvPEhtBqo38">7</span>A/B 受控协议(B5 定案)</h2>
+<div class="card" data-page-node-id="lkPWCvTxbqJGu0yE1x5BXG">
+<p data-page-node-id="BRXrlaAeoALlzL0y6MLsFZ">目的:判定过滤器是<strong data-page-node-id="uo99NlpCWiXzOy2IlIqEvy">确定性</strong>(同形态同结果)还是存在<strong data-page-node-id="xa79rOvdhqJZ6eMr2mTFLR">策略同步窗口</strong>(随策略拉取周期变化)。基线 §四 要求「同一分钟内 A/B 交替」。</p>
+<ol data-page-node-id="Mcbzw3Cd2x4JyRqsWopmd6">
+  <li data-page-node-id="seO2ESAFMEdDWVxrx6aJbH"><strong data-page-node-id="VZtrqbhku7jcHyZsHO8gsH">轮次:</strong>连续 5 轮,每轮 60s:第 0-25s 执行 D-A,第 25-50s 执行 D-B,第 50-60s 留空观察;轮间不重置浏览器(保留 cookie/缓存现实性)。</li>
+  <li data-page-node-id="bF2PW4QzAEC3BygFEnTAj7"><strong data-page-node-id="wythiL8zC0yqOGZxlSc1s9">时序对齐:</strong>本机与设备对时;服务器日志本身带时间戳,设备动作记录到秒(截屏带时间水印或手记)。</li>
+  <li data-page-node-id="G1GeRMYJg4AaLp6iTpEPrk"><strong data-page-node-id="cqeBphfbqObjGAY0ZAjrhf">结果编码:</strong>每轮每形态记 <code data-page-node-id="luKhs8OqDU816x6NN63na7">通/拦</code>;同时记录策略拉取周期参考点(设备端日志 00:01 周期 + 手动触发拉取周期,见文档附录时间线)。</li>
+  <li data-page-node-id="NYcF2nnnvpDPGSCaauegVf"><strong data-page-node-id="1Suzp4tfuedJyVnFF47zKo">收敛规则:</strong>
+    <ul data-page-node-id="CPTPjEVIHuS6G1iAkeNEm7">
+      <li data-page-node-id="H0uWlAAmhzsw4rNFFd9PR9">5/5 一致 → 判定「确定性」,采纳该形态结论;</li>
+      <li data-page-node-id="fCGN06WQ1jpkjZengNBXVB">出现 ≥1 次翻转 → 判定「存在同步窗口/非确定因素」,追加 2 轮并定位翻转是否贴合策略拉取时刻;</li>
+      <li data-page-node-id="QKF0Mn8GCWEIMTRSaO8XY9">全程全拦且与体积无关 → 支持基线回滚后现状(9-7 基线轻量版),历史「全通」归因于当时内联注入形态或同步窗口。</li>
     </ul>
   </li>
-  <li><strong>对照组:</strong>同轮次内,137 热点下同页面应全通——用于排除服务端故障假象。</li>
+  <li data-page-node-id="JmlX6VQBAjOqR26DZg8DQH"><strong data-page-node-id="VEYbfFojUslXduvHFZeae4">对照组:</strong>同轮次内,137 热点下同页面应全通——用于排除服务端故障假象。</li>
 </ol>
 </div>
 
 <!-- ============ 8 ============ -->
-<h2><span class="no">8</span>记录与验收</h2>
-<div class="card">
-<ul>
-  <li><strong>记录载体:</strong><code>records/result.csv</code>(用例矩阵逐条:编号/动作/服务器日志命中 Y-N/设备表现/结论/证据引用)+ 每关键用例 1-2 张带时间截屏。</li>
-  <li><strong>验收标准:</strong>N1-N7、S1-S9、D-A/B/C 全部至少一轮;A/B 5 轮完成并按 §7.4 收敛;P4 对照组完成。</li>
-  <li><strong>证据包:</strong>演习访问日志、observe.csv、截屏、本方案与基线文档 §三/§十 引用段落,统一归档备查。</li>
-  <li><strong>退出条件:</strong>任何违反 §1 红线的尝试 → 立即终止该用例并在记录中标红,不纳入结论。</li>
+<h2 data-page-node-id="o1EP8TuRSnnC1TGfeuFzBa"><span class="no" data-page-node-id="AJcrJkF4SKhmGYA60eCtmA">8</span>记录与验收</h2>
+<div class="card" data-page-node-id="gTsOvcEPYxwV0tWwqYPQGJ">
+<ul data-page-node-id="s8ilUROklMQP5O8OK5c76M">
+  <li data-page-node-id="2deltwF2k6B4ZGwUB4VcmG"><strong data-page-node-id="fEeEKo96vUAxb5y39aXEgE">记录载体:</strong><code data-page-node-id="6k85XuunWE2JyQOZlBxR5d">records/result.csv</code>(用例矩阵逐条:编号/动作/服务器日志命中 Y-N/设备表现/结论/证据引用)+ 每关键用例 1-2 张带时间截屏。</li>
+  <li data-page-node-id="8L34fYJpLzwSytX7uWOJcd"><strong data-page-node-id="LUFRfFKMtJMDyDfxNwAy9I">验收标准:</strong>N1-N7、S1-S9、D-A/B/C 全部至少一轮;A/B 5 轮完成并按 §7.4 收敛;P4 对照组完成。</li>
+  <li data-page-node-id="VSrRENdDlC5FBJIAe9n14C"><strong data-page-node-id="sh5W4Qlr4QzdX9HXUCzoYu">证据包:</strong>演习访问日志、observe.csv、截屏、本方案与基线文档 §三/§十 引用段落,统一归档备查。</li>
+  <li data-page-node-id="JoFs5AbDPxf0cFYtrTtOsY"><strong data-page-node-id="H3ZxkESgTu01IMmj8ZzYBA">退出条件:</strong>任何违反 §1 红线的尝试 → 立即终止该用例并在记录中标红,不纳入结论。</li>
 </ul>
 </div>
 
 <!-- ============ 9 ============ -->
-<h2><span class="no">9</span>附录</h2>
-<div class="card">
-<ul>
-  <li><strong>快速启动:</strong><code>node server/lab-server.mjs</code>(或 <code>start.cmd</code>)→ 本机 <code>http://127.0.0.1:9011/</code> 冒烟 → 设备浏览器开 <code>http://SVCDOM@192.168.40.90:9011/</code>(N2 形态)开始。</li>
-  <li><strong>配套文件:</strong>README.md(运行手册)/ server/lab-server.mjs / pages/ 各用例页 / records/result.csv(模板)。</li>
-  <li><strong>参照文档:</strong>资料库《EBMD MDM 过滤器行为模型 —— 实测知识与证据(2026-09-08)》(nodeId Q9Ct3IxpiDMiYNJvl7gTZC);exploits 仓库 README(仅方法引用)。</li>
-  <li><strong>风险缓解:</strong>演习端口与生产隔离;日志可整目录删除;演习页无任何对外请求;本机不下载/执行仓库任何载荷。</li>
+<h2 data-page-node-id="Ew8cznqXF2oCHrT0ZrugsG"><span class="no" data-page-node-id="HpZczhkiP1zLiFynIzhy3Q">9</span>附录</h2>
+<div class="card" data-page-node-id="vfPnvLVMmz4Oic7Czh7cak">
+<ul data-page-node-id="vzh4Hx3PIgpsERxWfRk2NW">
+  <li data-page-node-id="YJ08uJJnFkEFoGVpkrd2h1"><strong data-page-node-id="yUF8pAKoqyWPWdUQ1ZrNwE">快速启动:</strong><code data-page-node-id="GDnaGxg4BfRtu21tcSTT5F">node server/lab-server.mjs</code>(或 <code data-page-node-id="zM1nHbuPpugBf9JRj2sOQe">start.cmd</code>)→ 本机 <code data-page-node-id="H1a77bYAYcU4yuGfvznG6j">http://127.0.0.1:9011/</code> 冒烟 → 设备浏览器开 <code data-page-node-id="qdImCoSXqDCQoc5jY0hzpg">http://SVCDOM@192.168.40.90:9011/</code>(N2 形态)开始。</li>
+  <li data-page-node-id="9AHcvg0pNJgTBiTKHr5F02"><strong data-page-node-id="NLjzY03L6yezC5twrULDgk">配套文件:</strong>README.md(运行手册)/ server/lab-server.mjs / pages/ 各用例页 / records/result.csv(模板)。</li>
+  <li data-page-node-id="BBGFMe5fnMym2394UcdZWm"><strong data-page-node-id="MbL8Gy50As3upamchr003U">参照文档:</strong>资料库《EBMD MDM 过滤器行为模型 —— 实测知识与证据(2026-09-08)》(nodeId Q9Ct3IxpiDMiYNJvl7gTZC);exploits 仓库 README(仅方法引用)。</li>
+  <li data-page-node-id="BjWVjtSJJtzhZcbSitCnO9"><strong data-page-node-id="Ki25i81t543aQmC2ZTXJYV">风险缓解:</strong>演习端口与生产隔离;日志可整目录删除;演习页无任何对外请求;本机不下载/执行仓库任何载荷。</li>
 </ul>
 </div>
 
-<footer>MDM 浏览器层过滤全面测试演习 · 方案 v1.0 · 2026-09-08 · 仅限授权自有环境执行</footer>
+<footer data-page-node-id="2GvjlUt41Q43bwotc2oSes">MDM 浏览器层过滤全面测试演习 · 方案 v1.0 · 2026-09-08 · 仅限授权自有环境执行</footer>
 </div>
 </body>
 </html>
