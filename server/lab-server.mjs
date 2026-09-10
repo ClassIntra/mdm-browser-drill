@@ -104,6 +104,14 @@ function serve(req, res) {
 
   if (p === '/favicon.ico') { res.writeHead(204); return res.end(); }
 
+  // 1x1 透明 PNG 探针(H 组子资源被动加载用):返回真实图片,确保 onload 可判「到达」
+  if (/^\/px[0-9]*\.png$/.test(p)) {
+    logReq(req, 200, `PX case=${clean(url.searchParams.get('case'))}`);
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==', 'base64');
+    res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' });
+    return res.end(png);
+  }
+
   // 静态页
   let file = path.join(ROOT, p === '/' ? 'index.html' : p);
   if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {

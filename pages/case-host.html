@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H 组 · 宿主层被动相对请求探针</title>
+<style>
+  body{font:15px/1.8 "Microsoft YaHei",sans-serif;margin:0;background:#f4f6fa;color:#202a3c}
+  .box{max-width:920px;margin:16px auto;background:#fff;border:1px solid #dde4ef;border-radius:12px;padding:18px 22px}
+  h1{font-size:19px;margin:0 0 4px} .sub{color:#6b7a94;font-size:13px;margin-bottom:12px}
+  .ua{background:#f0f7ff;border:1px solid #cfe0f7;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:12.5px;word-break:break-all}
+  .warn{background:#fff6e5;border-left:4px solid #e6a23c;padding:9px 12px;border-radius:0 8px 8px 0;font-size:13.5px;margin:10px 0}
+  .key{background:#eef7ff;border-left:4px solid #2f6bff;padding:9px 12px;border-radius:0 8px 8px 0;font-size:13.5px;margin:10px 0}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:10px 0}
+  th,td{border:1px solid #dde4ef;padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#edf2fa}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;word-break:break-all}
+  .ok{color:#1a7f37;font-weight:600} .bad{color:#c0392b;font-weight:600} .wait{color:#8a6d3b}
+  pre{background:#0f172a;color:#e2e8f0;padding:10px;border-radius:8px;font-size:11.5px;overflow:auto;max-height:240px}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>H 组 · 宿主层被动相对请求探针</h1>
+  <div class="sub">本页经 <b>域名形态</b>通道加载（保证可进入）。页内自动发出四类请求，用于判定「当前宿主 WebView 内是否有 host 层过滤器」。</div>
+
+  <div class="ua">本页 UA：<br><b id="ua"></b></div>
+
+  <div class="key">
+    <b>单变量对照设计</b>（H3 / H4 物理等价，仅 IP 字符串不同）：<br>
+    · H3 阳性：<code>http://192.168.40.90:9011/px.png</code> → 在黑名单 → <b>预期被拦</b><br>
+    · H4 阴性：<code>http://100.99.237.111:9011/px.png</code> → 同一台机器、同一端口、同一文件，IP 不在黑名单 → <b>预期放行</b>
+  </div>
+
+  <div class="warn">
+    <b>判读表</b>（以服务端 access.log 落账为准）：<br>
+    · H3 被拦 + H4 到达 = <b>该宿主有 host 层过滤器</b><br>
+    · H3 也到达 = <b>该宿主无过滤器</b>（或过滤器不查子资源）<br>
+    · H1/H2 结果用于判断「相对路径是否被查」——若相对路径也拦，说明过滤器在 URL 解析后判断，与输入形态无关
+  </div>
+
+  <h2 style="font-size:15px">自动探针（页面加载即触发）</h2>
+  <table id="tbl"></table>
+
+  <h2 style="font-size:15px">原始结果</h2>
+  <pre id="log">（等待探针）</pre>
+</div>
+
+<script>
+(function () {
+  var DOM_BASE = 'http://192-168-40-90.nip.io:9011';  // 域名形态通道（保证本页可加载、回传可到达）
+  var BL_IP    = '192.168.40.90';    // 黑名单成员
+  var CK_IP    = '100.99.237.111';   // 同一台机器，不在黑名单（Tailscale 地址）
+
+  var tbl   = document.getElementById('tbl');
+  var logEl = document.getElementById('log');
+  document.getElementById('ua').textContent = navigator.userAgent;
+  var lines = [];
+  function say(s) { lines.push(s); logEl.textContent = lines.join('\n'); }
+
+  function addRow(id, form, expect) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td style="width:56px">' + id + '</td><td><code>' + form + '</code></td>'
+                 + '<td style="width:150px">' + expect + '</td>'
+                 + '<td style="width:130px" class="wait" id="s_' + id + '">…</td>';
+    tbl.appendChild(tr);
+  }
+  function setRes(id, txt, cls) {
+    var el = document.getElementById('s_' + id);
+    if (el) { el.textContent = txt; el.className = cls; }
+  }
+
+  // 图片探针：onload = 到达（放行）；onerror = 未到达（被拦 或 网络不可达）
+  // 注意：跨源图片 onerror 无法区分「被拦」与「网络不可达」，
+  //       因此 H3/H4 的绝对 IP 对比改用 XHR(可读 status/区分错误类型) 而非 img。
+  function imgProbe(id, url, note) {
+    var im = new Image();
+    var done = false;
+    im.onload  = function(){ if(done)return; done=true; setRes(id,'loaded',  'ok');  say(id + ' loaded  ← 到达'); report(id,'loaded',note); };
+    im.onerror = function(){ if(done)return; done=true; setRes(id,'onerror', 'bad'); say(id + ' onerror ← 未到达'); report(id,'onerror',note); };
+    im.src = url + (url.indexOf('?')<0?'?':'&') + 'case=' + id + '&r=' + Math.random();
+    setTimeout(function(){ if(!done){ setRes(id,'timeout','wait'); say(id + ' timeout'); report(id,'timeout',note); } }, 8000);
+  }
+
+  // XHR 探针：能区分 200(到达) / 网络错误(ERR) / 超时(TIMEOUT)，且服务端必然落账
+  function xhrProbe(id, url, note, expect) {
+    var done = false;
+    function fin(txt, cls, res) {
+      if (done) return; done = true;
+      setRes(id, txt, cls); say(id + ' ' + txt); report(id, res, note);
+    }
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', url + (url.indexOf('?')<0?'?':'&') + 'case=' + id + '&r=' + Math.random(), true);
+      x.timeout = 6000;
+      x.onload    = function(){ fin('OK ' + x.status, 'ok',  'http' + x.status); };
+      x.onerror   = function(){ fin('ERR(未到达)', 'bad', 'err'); };
+      x.ontimeout = function(){ fin('TIMEOUT', 'wait', 'timeout'); };
+      x.send();
+    } catch (e) { fin('EXC ' + e.name, 'bad', 'exc'); }
+  }
+
+  function report(id, result, note) {
+    var u = DOM_BASE + '/api/observe?case=' + id + '&result=' + result
+          + '&note=' + encodeURIComponent(note || '')
+          + '&ua=' + encodeURIComponent(navigator.userAgent) + '&r=' + Math.random();
+    try { var x = new XMLHttpRequest(); x.open('GET', u, true); x.send(); } catch (e) {}
+    try { new Image().src = u; } catch (e) {}
+  }
+
+  function runAll() {
+    tbl.innerHTML = '<tr><th>编号</th><th>形态</th><th>预期</th><th>页内观测</th></tr>';
+    lines = []; logEl.textContent = '';
+    report('H0', 'fired', 'H组v2开始 base=' + DOM_BASE + ' ua=' + navigator.userAgent);
+
+    // H1: 相对路径图片（同源，解析到本页 host = nip.io 域名，非黑名单）
+    addRow('H1', 'img "/px1.png"（相对路径·同源）', '相对路径 → 放行');
+    imgProbe('H1', '/px1.png', 'img 相对路径同源');
+
+    // H2: 相对路径 XHR（同源）
+    addRow('H2', 'XHR "/api/ping?case=H2"（相对·同源）', '相对路径 → 放行');
+    xhrProbe('H2', '/api/ping', 'xhr 相对路径同源', 'ok');
+
+    // H5★核心对照: 同源绝对路径（本页 host 的绝对写法，指向与 H1 同一服务器）
+    // 与 H1 的差异仅在「相对 vs 绝对」写法,用于判断引擎是否对绝对 URL 另做处理
+    addRow('H5', 'XHR 绝对 http://192-168-40-90.nip.io:9011/api/ping', '同源绝对 → 预期放行');
+    xhrProbe('H5', DOM_BASE + '/api/ping', 'xhr 同源绝对路径', 'ok');
+
+    // H3★阳性: 绝对 IP 直连 —— 黑名单（用 XHR，服务端必落账）
+    addRow('H3', 'XHR http://192.168.40.90:9011/api/ping', '黑名单 → <b>预期拦</b>');
+    xhrProbe('H3', 'http://' + BL_IP + ':9011/api/ping', 'xhr 绝对IP黑名单');
+
+    // H4★阴性对照: 绝对 IP 直连 —— 同一台机器、非黑名单（Tailscale 地址）
+    addRow('H4', 'XHR http://100.99.237.111:9011/api/ping', '同机非黑名单 → <b>预期放行</b>');
+    xhrProbe('H4', 'http://' + CK_IP + ':9011/api/ping', 'xhr 绝对IP同机非黑名单');
+
+    // H6: 裸 IP 但指向非同机（预期不可达，用于确认「不可达」的表征长什么样）
+    addRow('H6', 'XHR http://192.168.40.199:9011/api/ping', '非黑名单·不可达 → 对照 ERR');
+    xhrProbe('H6', 'http://192.168.40.199:9011/api/ping', 'xhr 绝对IP非黑名单不可达');
+  }
+
+  window.runAll = runAll;
+  runAll();
+})();
+</script>
+</body>
+</html>

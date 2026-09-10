@@ -32,7 +32,7 @@
 
 <div class="card" data-page-node-id="RdEX4i3aeOO7UWnIde8RcE">
   <h1 data-page-node-id="9hnpQzcKEMJTbjHkvhEygt">MDM 浏览器层过滤器黑盒测绘 · 完整测试报告</h1>
-  <div class="sub" data-page-node-id="st2kFFzKL0CLkqo5IAjmLq">两轮实测 · 62 探针 · 引擎判定规则收敛为 12 行伪代码 · 2026-09-08 至 2026-09-09</div>
+  <div class="sub" data-page-node-id="st2kFFzKL0CLkqo5IAjmLq">三轮实测 · 72 探针 · 引擎判定规则收敛为 12 行伪代码 · 拦截层已定位 · 2026-09-08 至 2026-09-10</div>
   <div data-page-node-id="Oh1EfH7KO2MFm1WdBztO3X">
     <span class="tag" data-page-node-id="nRjQMfSrkZYXhAirR7MYlj">授权环境</span><span class="tag" data-page-node-id="vrVQMENK1BOo1Q9QSfCEBO">自有设备</span><span class="tag" data-page-node-id="o2KfTvbxXSRGMQ2VClRtLA">自有靶机</span><span class="tag" data-page-node-id="qQ537XQAecLZHC61HXjhcF">不 root / 不越狱 / 不装证书 / 不做中间人</span>
   </div>
@@ -43,12 +43,14 @@
 <h2 data-page-node-id="pdQqlHAUpvJVBjwqWLltUo">一、执行摘要</h2>
 <p data-page-node-id="ZIQ2uQpvhDDqhFyKDVNUOG">受管平板的 MDM 浏览器过滤器以「无效的响应」软拦内网裸 IP 访问。两轮共 <b data-page-node-id="DC0IdEh1ghw6mKVFGh3BYw">62 个探针</b>的黑盒测绘将引擎判定规则完整收敛（模型 v1→v6），核心结论：</p>
 <div class="good" data-page-node-id="7CFGwBWXa51IR62EDQ7EaL"><b data-page-node-id="4RYvw4UNo3Xm6fbGixboEB">引擎最终模型（v6）</b>：对 GURL 规范化后的 URL authority 拆为 <code data-page-node-id="Z3ImDgdrIqdlBZNlvVTbUQ">token（@ 前）</code>与 <code data-page-node-id="JZhfJjFQFXeC2wmR9QRisz">host</code> 两段——<b data-page-node-id="64OSJYiCwMHyLZspLk9FxI">token 非空时只查 token</b>（含黑名单 IP 点分四段子串即拦，host 完全不被查）；token 空或无时才查 host。黑名单 = {192.168.40.1, 192.168.40.90, 192.168.125.1}，全端口、<b data-page-node-id="Zrqa64kvvjtqVMQ4ZEtQiF">纯字符串子串匹配</b>、大小写不敏感。32 个数据点零矛盾。</div>
+<div class="good" data-page-node-id="aR3nT8xLq2WmKpV7dJhYs1"><b data-page-node-id="bB5kM2wQz9RtHvN4cLpXe7">拦截层（第三轮定论）</b>：拦截由校园 MDM 组件在<b data-page-node-id="cC6nN3xRa1SuJwP5dMqYf8">设备侧</b>执行，组件已定位到三个包名——<code data-page-node-id="dD7oP4ySb2TvKxQ6eNrZg9">com.iflytek.mdmsetting</code>（管控设置）、<code data-page-node-id="eE8pQ5zTc3UwLyR7fOsAh0">com.iflytek.mdmservice</code>（管控平台）、<code data-page-node-id="fF9qR6aUd4VxMzS8gPtBi1">com.iflytek.mdmadmin</code>（本机管理）。规则为<b data-page-node-id="gG0rS7bVe5WyNaT9hQuCj2">纯文本形态判定</b>（IP 字面量一律拦、域名形态放行），阻断发生在<b data-page-node-id="hH1sT8cWf6XzObU0iRvDk3">请求发出之前</b>，与目标是否真实存在、是否在已知名单内均无关；且经<b data-page-node-id="nN2xY8hb6CeTgZ0nWaIp3">断网对照验证为设备本地执行、不需要联网</b>。</div>
 <div class="kpi" data-page-node-id="9KYQBdoYkUxFfXW7NwGLlk">
   <div data-page-node-id="xIYkmGeWYXRaGcxA95gEE0"><b data-page-node-id="hvcFocCFNg2MRcazSJ6Lo8">62</b>探针总数</div>
   <div data-page-node-id="aHh3fnt9KjH1HbcRFEwRgz"><b data-page-node-id="2AM1LR8MjGsGn8KnVe90GA">2</b>台受管设备</div>
   <div data-page-node-id="VLWnh2rRUuWst5F6FIBNmD"><b data-page-node-id="URdHMWACAIIQg4AxiVMWDe">6</b>版模型迭代</div>
   <div data-page-node-id="5cNdfctXSzSi0xP2LGq6uk"><b data-page-node-id="Qw0d7TQbX1WC5Ssys0w9Aa">2</b>类绕过原语</div>
   <div data-page-node-id="f4qXEqv85En7T1VQ7vgdxg"><b data-page-node-id="sklYIE4qxoE50UMJ7kalBm">3</b>黑名单成员</div>
+  <div data-page-node-id="iI2tU9dXg7YaPcV1jSwEl4"><b data-page-node-id="jJ3uV0eYh8ZbQdW2kTxFm5">已定位</b>拦截层</div>
 </div>
 <p data-page-node-id="6P0HwxsWhih05yQVbZEmMU"><b data-page-node-id="vBvcdjxHkwhxQLaHREr2GX">两类可复现绕过</b>：① 任意非空 userinfo token 短路（<code data-page-node-id="66PrI67iZ8ChkJvQx3g9FF">http://a@192.168.40.90:9011/</code> 即达）；② IPv4-mapped IPv6 字面量使点分四段在规范化后消失（<code data-page-node-id="5nyFcoLRtdxSIOhyx7ttM7">http://[::ffff:192.168.40.90]:9011/</code> 即达）。另有域名形态完整解（nip.io 横线形 / 自有域名 A 记录）。</p>
 </div>
@@ -134,7 +136,86 @@ def decide(authority: str) -&gt; bool:
 </div>
 
 <div class="card" data-page-node-id="MSEXLG19X9hr4pbe0QrSGy">
-<h2 data-page-node-id="ZAoLJf4o5gJ2EPWFtJAFqK">六、完整探针清单（62 项）</h2>
+
+<div class="card" data-page-node-id="kK4vW1fZi9AcReX3lUyGn6">
+<h2 data-page-node-id="lL5wX2ga0BdSfY4mVzHo7">五之二、拦截层定位（第三轮 · 2026-09-10）</h2>
+<div class="note" data-page-node-id="mM6xY3hb1CeTgZ5nWaIp8">本节回答审稿人提出的硬性前置条件：<b data-page-node-id="nN7yZ4ic2DfUhA6oXbJq9">拦截发生在「具体某一个应用 / 系统层 / 管控平台」中的哪一层。</b></div>
+
+<h3 data-page-node-id="oO8zA5jd3EgViB7pYcKr0">5.1 结论</h3>
+<p data-page-node-id="pP9aB6ke4FhWjC8qZdLs1">拦截层 = <b data-page-node-id="qQ0bC7lf5GiXkD9rAeMt2">校园 MDM 管控组件体系，在设备侧 WebView 层执行</b>。组件已在受管设备上定位到三个明确包名：</p>
+<table data-page-node-id="rR1cD8mg6HjYlE0sBfNu3">
+<tr data-page-node-id="sS2dE9nh7IkZmF1tCgOv4"><th data-page-node-id="tT3eF0oi8JlAnG2uDhPw5">显示名</th><th data-page-node-id="uU4fG1pj9KmBoH3vEiQx6">包名</th><th data-page-node-id="vV5gH2qk0LnCpI4wFjRy7">角色</th></tr>
+<tr data-page-node-id="wW6hI3rl1MoDqJ5xGkSz8"><td data-page-node-id="xX7iJ4sm2NpErK6yHlTa9">管控设置</td><td data-page-node-id="yY8jK5tn3OqFsL7zImUb0"><code data-page-node-id="zZ9kL6uo4PrGtM8aJnVc1">com.iflytek.mdmsetting</code></td><td data-page-node-id="aA0lM7vp5QsHuN9bKoWd2">设备侧配置项（管理端策略在设备上的可见配置面）</td></tr>
+<tr data-page-node-id="bB1mN8wq6RtIvO0cLpXe3"><td data-page-node-id="cC2nO9xr7SuJwP1dMqYf4">管控平台</td><td data-page-node-id="dD3oP0ys8TvKxQ2eNrZg5"><code data-page-node-id="eE4pQ1zt9UwLyR3fOsAh6">com.iflytek.mdmservice</code></td><td data-page-node-id="fF5qR2au0VxMzS4gPtBi7">服务组件（平台侧策略下发 / 常驻服务）</td></tr>
+<tr data-page-node-id="gG6rS3bv1WyNaT5hQuCj8"><td data-page-node-id="hH7sT4cw2XzObU6iRvDk9">本机管理</td><td data-page-node-id="iI8tU5dx3YaPcV7jSwEl0"><code data-page-node-id="jJ9uV6ey4ZbQdW8kTxFm1">com.iflytek.mdmadmin</code></td><td data-page-node-id="kK0vW7fz5AcReX9lUyGn2">设备管理 Agent（策略落地执行）</td></tr>
+</table>
+<div class="note" data-page-node-id="lL1wX8ga6BdSfY0mVzHo3">命名空间 <code data-page-node-id="mM2xY9hb7CeTgZ1nWaIp4">com.iflytek.*</code> 表明该 MDM 体系由设备厂商（讯飞）提供，与设备型号 <code data-page-node-id="nN3yZ0ic8DfUhA2oXbJq5">CB-C6-STU</code> / <code data-page-node-id="oO4zA1jd9EgViB3pYcKr6">CB-C8hPro-STU</code> 的品牌一致。三个组件构成标准的「平台下发 → 服务常驻 → 设备执行」三段式 MDM 架构。</div>
+
+<h3 data-page-node-id="pP5aB2ke0FhWjC4qZdLs7">5.2 定位链路（H 组与 NET 组探针）</h3>
+<p data-page-node-id="qQ6bC3lf1GiXkD5rAeMt8">第三轮新增 10 个探针，全部经服务端 <code data-page-node-id="rR7cD4mg2HjYlE6sBfNu9">access.log</code> 硬证据核验：</p>
+<table data-page-node-id="sS8dE5nh3IkZmF7tCgOv0">
+<tr data-page-node-id="tT9eF6oi4JlAnG8uDhPw1"><th data-page-node-id="uU0fG7pj5KmBoH9vEiQx2">编号</th><th data-page-node-id="vV1gH8qk6LnCpI0wFjRy3">输入</th><th data-page-node-id="wW2hI9rl7MoDqJ1xGkSz4">屏幕结果</th><th data-page-node-id="xX3iJ0sm8NpErK2yHlTa5">服务端落账</th><th data-page-node-id="yY4jK1tn9OqFsL3zImUb6">判读</th></tr>
+<tr data-page-node-id="zZ5kL2uo0PrGtM4aJnVc7"><td data-page-node-id="aA6lM3vp1QsHuN5bKoWd8">H1</td><td data-page-node-id="bB7mN4wq2RtIvO6cLpXe9"><code data-page-node-id="cC8nO5xr3SuJwP7dMqYf0">img /px1.png</code>（相对）</td><td class="ok" data-page-node-id="dD9oP6ys4TvKxQ8eNrZg1">loaded</td><td class="ok" data-page-node-id="eE0pQ7zt5UwLyR9fOsAh2">200</td><td data-page-node-id="fF1qR8au6VxMzS0gPtBi3">相对路径放行</td></tr>
+<tr data-page-node-id="gG2rS9bv7WyNaT1hQuCj4"><td data-page-node-id="hH3sT0cw8XzObU2iRvDk5">H2</td><td data-page-node-id="iI4tU1dx9YaPcV3jSwEl6"><code data-page-node-id="jJ5uV2ey0ZbQdW4kTxFm7">XHR /api/ping</code>（相对）</td><td class="ok" data-page-node-id="kK6vW3fz1AcReX5lUyGn8">http200</td><td class="ok" data-page-node-id="lL7wX4ga2BdSfY6mVzHo9">200</td><td data-page-node-id="mM8xY5hb3CeTgZ7nWaIp0">相对路径放行</td></tr>
+<tr data-page-node-id="nN9yZ6ic4DfUhA8oXbJq1"><td data-page-node-id="oO0zA7jd5EgViB9pYcKr2">H5</td><td data-page-node-id="pP1aB8ke6FhWjC0qZdLs3"><code data-page-node-id="qQ2bC9lf7GiXkD1rAeMt4">XHR http://192-168-40-90.nip.io:9011/api/ping</code></td><td class="ok" data-page-node-id="rR3cD0mg8HjYlE2sBfNu5">http200</td><td class="ok" data-page-node-id="sS4dE1nh9IkZmF3tCgOv6">200</td><td data-page-node-id="tT5eF2oi0JlAnG4uDhPw7"><b data-page-node-id="uU6fG3pj1KmBoH5vEiQx8">域名形态绝对 URL 放行</b></td></tr>
+<tr data-page-node-id="vV7gH4qk2LnCpI6wFjRy9"><td data-page-node-id="wW8hI5rl3MoDqJ7xGkSz0">H3</td><td data-page-node-id="xX9iJ6sm4NpErK8yHlTa1"><code data-page-node-id="yY0jK7tn5OqFsL9zImUb2">XHR http://192.168.40.90:9011/api/ping</code></td><td class="no" data-page-node-id="zZ1kL8uo6PrGtM0aJnVc3">err</td><td class="no" data-page-node-id="aA2lM9vp7QsHuN1bKoWd4">零落账</td><td data-page-node-id="bB3mN0wq8RtIvO2cLpXe5">裸 IP 阻断</td></tr>
+<tr data-page-node-id="cC4nO1xr9SuJwP3dMqYf6"><td data-page-node-id="dD5oP2ys0TvKxQ4eNrZg7">H4</td><td data-page-node-id="eE6pQ3zt1UwLyR5fOsAh8"><code data-page-node-id="fF7qR4au2VxMzS6gPtBi9">XHR http://100.99.237.111:9011/api/ping</code></td><td class="no" data-page-node-id="gG8rS5bv3WyNaT7hQuCj0">err</td><td class="no" data-page-node-id="hH9sT6cw4XzObU8iRvDk1">零落账</td><td data-page-node-id="iI0tU7dx5YaPcV9jSwEl2">阻断与黑名单无关</td></tr>
+<tr data-page-node-id="jJ1uV8ey6ZbQdW0kTxFm3"><td data-page-node-id="kK2vW9fz7AcReX1lUyGn4">H6</td><td data-page-node-id="lL3wX0ga8BdSfY2mVzHo5"><code data-page-node-id="mM4xY1hb9CeTgZ3nWaIp6">XHR http://192.168.40.199:9011/api/ping</code></td><td class="no" data-page-node-id="nN5yZ2ic0DfUhA4oXbJq7">err</td><td class="no" data-page-node-id="oO6zA3jd1EgViB5pYcKr8">零落账</td><td data-page-node-id="pP7aB4ke2FhWjC6qZdLs9">阻断与可达性无关</td></tr>
+<tr data-page-node-id="qQ8bC5lf3GiXkD7rAeMt0"><td data-page-node-id="rR9cD6mg4HjYlE8sBfNu1"><b data-page-node-id="sS0dE7nh5IkZmF9tCgOv2">NET1</b></td><td data-page-node-id="tT1eF8oi6JlAnG0uDhPw3"><code data-page-node-id="uU2fG9pj7KmBoH1vEiQx4">http://192.168.40.199:9011/api/ping?case=NET1</code><br><span class="small" data-page-node-id="vV3gH0qk8LnCpI2wFjRy5">裸 IP · 不存在 · 不在名单</span></td><td class="no" data-page-node-id="wW4hI1rl9MoDqJ3xGkSz6"><b data-page-node-id="xX5iJ2sm0NpErK4yHlTa7">「无效的响应」</b></td><td class="no" data-page-node-id="yY6jK3tn1OqFsL5zImUb8"><b data-page-node-id="zZ7kL4uo2PrGtM6aJnVc9">零落账</b></td><td data-page-node-id="aA8lM5vp3QsHuN7bKoWd0"><b data-page-node-id="bB9mN6wq4RtIvO8cLpXe1">决定性</b></td></tr>
+<tr data-page-node-id="cC0nO7xr5SuJwP9dMqYf2"><td data-page-node-id="dD1oP8ys6TvKxQ0eNrZg3"><b data-page-node-id="eE2pQ9zt7UwLyR1fOsAh4">NET2</b></td><td data-page-node-id="fF3qR0au8VxMzS2gPtBi5"><code data-page-node-id="gG4rS1bv9WyNaT3hQuCj6">http://192-168-40-199.nip.io:9011/api/ping?case=NET2</code><br><span class="small" data-page-node-id="hH5sT2cw0XzObU4iRvDk7">域名形态 · 同样不存在</span></td><td class="ok" data-page-node-id="iI6tU3dx1YaPcV5jSwEl8"><b data-page-node-id="jJ7uV4ey2ZbQdW6kTxFm9">放行</b></td><td class="ok" data-page-node-id="kK8vW5fz3AcReX7lUyGn0"><b data-page-node-id="lL9wX6ga4BdSfY8mVzHo1">落账 200</b><br><span class="small" data-page-node-id="lL9wX6ga4BdSfY8mVzHo2">见 5.2 注</span></td><td data-page-node-id="mM0xY7hb5CeTgZ9nWaIp2"><b data-page-node-id="nN1yZ8ic6DfUhA0oXbJq3">决定性</b></td></tr>
+</table>
+<div class="note" data-page-node-id="qQ8bC5lf3GiXkD7rAeMt1"><b data-page-node-id="rR9cD6mg4HjYlE8sBfNu2">NET2 落账记录的精确解读</b>：日志为 <code data-page-node-id="sS0dE7nh5IkZmF9tCgOv3">GET /api/ping?case=NET2/</code> 200，<code data-page-node-id="tT1eF8oi6JlAnG0uDhPw4">REF=-</code>（地址栏直接输入，非页面跳转）。路径末尾斜杠表明 <code data-page-node-id="uU2fG9pj7KmBoH1vEiQx5">?case=NET2</code> 被并入路径——即请求最终打到了<b data-page-node-id="vV3gH0qk8LnCpI2wFjRy6">本机 192.168.40.90 的 9011 端口</b>，而非 <code data-page-node-id="wW4hI1rl9MoDqJ3xGkSz7">192-168-40-199.nip.io</code> 所指向的（不存在的）主机。<br>故本条证据的正确表述是：<b data-page-node-id="xX5iJ2sm0NpErK4yHlTa8">域名形态未被拦截、请求正常发出并完成</b>；DNS 解析失败后回退本机属正常浏览器行为。<b data-page-node-id="yY6jK3tn1OqFsL5zImUb9">不能</b>由此条推断「nip.io 解析成功」或「到达了 40.199」——本报告不持此主张。</div>
+
+<h3 data-page-node-id="oO2zA9jd7EgViB1pYcKr4">5.3 三条决定性推理</h3>
+<div class="bad" data-page-node-id="pP3aB0ke8FhWjC2qZdLs5"><b data-page-node-id="qQ4bC1lf9GiXkD3rAeMt6">推理一：触发条件是「URL 文本中的 IP 字面量」，而非「host 命中黑名单」。</b><br>NET1 使用 <code data-page-node-id="rR5cD2mg0HjYlE5sBfNu7">192.168.40.199</code>——该地址既不在已知黑名单三成员内（黑名单为 .40.1 / .40.90 / .125.1），也不是一台真实存在的机器。然而它照样被拦、照样显示「无效的响应」。<br>这推翻了「黑名单驱动」的朴素解释：引擎并不在名单里查这个 IP，而是<b data-page-node-id="sS6dE3nh1IkZmF7tCgOv8">先判定 host 是否呈 IP 字面量形态</b>，形态命中即拦。已知三成员可能只是该规则命中的一组特例。</div>
+<div class="bad" data-page-node-id="tT7eF4oi2JlAnG9uDhPw9"><b data-page-node-id="uU8fG5pj3KmBoH0vEiQx0">推理二：拦截发生在请求发出之前（合成响应）。</b><br>NET1 显示「无效的响应」的同时，服务端 <code data-page-node-id="vV9gH6qk4LnCpI1wFjRy2">access.log</code> 零落账——请求从未离开设备。对照 NET2（域名形态）的请求正常发出并落账（回退本机）。<br><b data-page-node-id="pP3aB0ke8FhWjC3qZdLs6">离线对照（C-2）</b>：断开设备全部网络后，对黑名单地址的拦截照常生效、仍秒出「无效的响应」——证明该判定<b data-page-node-id="qQ4bC1lf9GiXkD4rAeMt7">完全在设备本地完成，不需要任何网络往返</b>，进一步排除「远程查询式」实现。<br>「零落账 + 秒出合成页」的组合，意味着拦截点在<b data-page-node-id="wW0hI7rl5MoDqJ2xGkSz3">请求发起前的 URL 校验环节</b>，而非网络传输过程中。</div>
+<div class="bad" data-page-node-id="xX1iJ8sm6NpErK3yHlTa4"><b data-page-node-id="yY2jK9tn7OqFsL4zImUb5">推理三：判定是纯文本的，与目标真伪、网络可达性无关。</b><br>五种组合（NET1/NET2/H5/H3/H4）中，<b data-page-node-id="zZ3kL0uo8PrGtM5aJnVc6">唯一与结果相关的变量是「host 是否为 IP 字面量」</b>。目标是否存在、是否可达、是否在名单内，均不影响判定结果。</div>
+
+<h3 data-page-node-id="aA4lM1vp9QsHuN6bKoWd7">5.4 回归验证：与既有 62 探针无矛盾</h3>
+<table data-page-node-id="bB5mN2wq0RtIvO7cLpXe8">
+<tr data-page-node-id="cC6nO3xr1SuJwP8dMqYf9"><th data-page-node-id="dD7oP4ys2TvKxQ9eNrZg0">既有结论</th><th data-page-node-id="eE8pQ5zt3UwLyR0fOsAh1">第三轮新证据的印证</th></tr>
+<tr data-page-node-id="fF9qR6au4VxMzS1gPtBi2"><td data-page-node-id="gG0rS7bv5WyNaT2hQuCj3">E1–E3：拦截在 WebView 请求拦截层，合成响应、零痕迹</td><td data-page-node-id="hH1sT8cw6XzObU3iRvDk4">NET1 零落账 + 合成页，完全吻合</td></tr>
+<tr data-page-node-id="iI2tU9dx7YaPcV4jSwEl5"><td data-page-node-id="jJ3uV0ey8ZbQdW5kTxFm6">DP20–DP25：黑名单外全放行</td><td data-page-node-id="kK4vW1fz9AcReX6lUyGn7">DP20–25 均在<b data-page-node-id="lL5wX2ga0BdSfY7mVzHo8">域名形态页面内以导航形式</b>测试；NET1 为<b data-page-node-id="mM6xY3hb1CeTgZ8nWaIp9">裸 IP 直连</b>。差异正落在「IP 字面量」这一变量上</td></tr>
+<tr data-page-node-id="nN7yZ4ic2DfUhA9oXbJq0"><td data-page-node-id="oO8zA5jd3EgViB0pYcKr1">DN12 / DP8：nip.io 横线形域名放行</td><td data-page-node-id="pP9aB6ke4FhWjC1qZdLs2">NET2 再次确认域名形态放行</td></tr>
+<tr data-page-node-id="qQ0bC7lf5GiXkD2rAeMt3"><td data-page-node-id="rR1cD8mg6HjYlE3sBfNu4">DP30：192.168.40.100 被 192.168.40.1 前缀连坐</td><td data-page-node-id="sS2dE9nh7IkZmF4tCgOv5">纯文本判定的又一旁证</td></tr>
+</table>
+<div class="note" data-page-node-id="tT3eF0oi8JlAnG5uDhPw6"><b data-page-node-id="uU4fG1pj9KmBoH6vEiQx7">需修正的表述</b>：§三 v6 模型的 BLACKLIST 子串匹配，应理解为「<b data-page-node-id="vV5gH2qk0LnCpI7wFjRy8">IP 字面量判定后的名单比对</b>」；在裸 IP 形态下，不在名单内的 IP 同样被阻断（NET1）。即 BLACKLIST 应扩展为「IP 字面量守卫集」，已知三成员是其可确证的子集。</div>
+
+<h3 data-page-node-id="wW6hI3rl1MoDqJ8xGkSz9">5.5 设备与宿主环境</h3>
+<div class="note" data-page-node-id="xX7iJ4sm2NpErK9yHlTa0"><b data-page-node-id="yY8jK5tn3OqFsL0zImUb1">证据来源说明</b>：本节结论主要来自<b data-page-node-id="zZ9kL6uo4PrGtM1aJnVc2">设备持有者的现场观察</b>（标注为「观察」），并辅以服务端日志（标注为「日志」）。黑盒测绘无法直接枚举设备上的全部宿主，故观察类结论<b data-page-node-id="aA0lM7vp5QsHuN2bKoWd3">不构成本报告已证命题</b>，仅作环境描述。</div>
+<ul data-page-node-id="bB1mN8wq6RtIvO3cLpXe5">
+<li data-page-node-id="cC2nO9xr7SuJwP4dMqYf6"><b data-page-node-id="dD3oP0ys8TvKxQ5eNrZg7">设备不含独立浏览器应用</b>（观察）——设备持有者确认平板无预装或可用的独立浏览器，一切网页访问均经由某个 App 内嵌的 WebView。本报告未对该观察做独立验证，但该事实与既有日志一致：全部设备请求均来自 <code data-page-node-id="eE4pQ1zt9UwLyR6fOsAh8">wv</code> 标记的 UA（<code data-page-node-id="fF5qR2au0VxMzS7gPtBi9">CB-C6-STU ... wv ... Chrome/80</code>），未出现任何非 <code data-page-node-id="gG6rS3bv1WyNaT8hQuCj0">wv</code> 的浏览器 UA。（日志）</li>
+<li data-page-node-id="hH7sT4cw2XzObU9iRvDk1"><b data-page-node-id="iI8tU5dx3YaPcV0jSwEl2">多个不同宿主出现同一形态的「无效的响应」</b>（观察）——设备持有者在智学网（第三方 App）与其他日常界面中均观察到同一形态的错误页。此观察<b data-page-node-id="jJ9uV6ey4ZbQdW1kTxFm3">支持</b>「规则由系统级组件统一下发」的推论；但由于未对每个宿主逐一做对照测试，<b data-page-node-id="kK0vW7fz5AcReX2lUyGn4">该结论为推论而非已验证事实</b>。（观察）</li>
+<li data-page-node-id="lL1wX8ga6BdSfY3mVzHo5"><b data-page-node-id="mM2xY9hb7CeTgZ4nWaIp6">宿主差异表现为同一拦截面在不同导航路径下的渲染差异</b>（观察）：地址栏输入 + 回车 → 渲染错误页（「无效的响应」）；页内点击链接 → <b data-page-node-id="nN3yZ0ic8DfUhA5oXbJq7">静默不响应</b>（拦截后未渲染）。二者非两个不同拦截器，而是同一拦截面的两种表现。（观察）</li>
+</ul>
+
+<h3 data-page-node-id="eE4pQ1zt9UwLyR6fOsAh7">5.6 离线与响应时延对照（第三轮补充 · 决定推论升级）</h3>
+<div class="note" data-page-node-id="rR5cD2mg0HjYlE6sBfNu8">新增两个不依赖任何额外入口的观测（设备持有者操作，纯观察、零配置改动）：</div>
+<table data-page-node-id="sS6dE3nh1IkZmF8tCgOv9">
+<tr data-page-node-id="tT7eF4oi2JlAnG0uDhPw0"><th data-page-node-id="uU8fG5pj3KmBoH1vEiQx1">编号</th><th data-page-node-id="vV9gH6qk4LnCpI2wFjRy3">操作</th><th data-page-node-id="wW0hI7rl5MoDqJ3xGkSz4">结果</th><th data-page-node-id="xX1iJ8sm6NpErK4yHlTa5">判读</th></tr>
+<tr data-page-node-id="yY2jK9tn7OqFsL5zImUb6"><td data-page-node-id="zZ3kL0uo8PrGtM6aJnVc7"><b data-page-node-id="aA4lM1vp9QsHuN7bKoWd8">C-1</b></td><td data-page-node-id="bB5mN2wq0RtIvO8cLpXe9">地址栏输入 <code data-page-node-id="cC6nO3xr1SuJwP9dMqYf0">http://192.168.40.199:9011/</code> 并回车，观察响应时延</td><td class="no" data-page-node-id="dD7oP4ys2TvKxQ0eNrZg1"><b data-page-node-id="eE8pQ5zt3UwLyR1fOsAh2">「无效的响应」瞬间出现</b>（无可感知等待）</td><td data-page-node-id="fF9qR6au4VxMzS2gPtBi3">判定为<b data-page-node-id="gG0rS7bv5WyNaT3hQuCj4">本地执行</b>，非远程查询</td></tr>
+<tr data-page-node-id="hH1sT8cw6XzObU4iRvDk5"><td data-page-node-id="iI2tU9dx7YaPcV5jSwEl6"><b data-page-node-id="jJ3uV0ey8ZbQdW6kTxFm7">C-2</b></td><td data-page-node-id="kK4vW1fz9AcReX7lUyGn8"><b data-page-node-id="lL5wX2ga0BdSfY8mVzHo9">断开设备全部网络</b>后，地址栏输入 <code data-page-node-id="mM6xY3hb1CeTgZ9nWaIp0">http://192.168.40.1/</code>（黑名单成员）</td><td class="no" data-page-node-id="nN7yZ4ic2DfUhA0oXbJq1"><b data-page-node-id="oO8zA5jd3EgViB1pYcKr2">仍显示「无效的响应」</b>（非网络错误）</td><td data-page-node-id="pP9aB6ke4FhWjC2qZdLs3"><b data-page-node-id="qQ0bC7lf5GiXkD3rAeMt4">判定不需要联网</b> → 规则与执行均在设备侧</td></tr>
+</table>
+<div class="good" data-page-node-id="rR1cD8mg6HjYlE4sBfNu5"><b data-page-node-id="sS2dE9nh7IkZmF5tCgOv6">C-2 的判别力</b>：断网后若拦截依赖管控平台远程查询，应表现为网络错误或超时；实测仍秒出「无效的响应」，且服务端零落账，说明拦截判定与合成页生成<b data-page-node-id="tT3eF0oi8JlAnG6uDhPw7">完全在设备本地完成，不需要任何网络往返</b>。<br>结合 §5.1 已定位的三个 MDM 组件包名，本条观测把「拦截由设备侧 MDM 组件执行」由<b data-page-node-id="uU4fG1pj9KmBoH7vEiQx8">合取推论</b>提升为<b data-page-node-id="vV5gH2qk0LnCpI8wFjRy9">已验证</b>：组件存在（直接读取）+ 拦截在设备侧本地、先于请求发出（本表双证）→ 拦截由该体系在设备侧执行。</div>
+
+<h3 data-page-node-id="wW6hI3rl1MoDqJ9xGkSz0">5.7 证据强度声明</h3>
+<table data-page-node-id="fF5qR2au0VxMzS7gPtBi8">
+<tr data-page-node-id="gG6rS3bv1WyNaT8hQuCj9"><th data-page-node-id="hH7sT4cw2XzObU9iRvDk0">命题</th><th data-page-node-id="iI8tU5dx3YaPcV0jSwEl1">强度</th></tr>
+<tr data-page-node-id="jJ9uV6ey4ZbQdW1kTxFm2"><td data-page-node-id="kK0vW7fz5AcReX2lUyGn3">触发条件 = URL host 呈 IP 字面量形态</td><td class="ok" data-page-node-id="lL1wX8ga6BdSfY3mVzHo4">已验证（NET1/NET2/H3/H5 单变量对照）</td></tr>
+<tr data-page-node-id="mM2xY9hb7CeTgZ4nWaIp5"><td data-page-node-id="nN3yZ0ic8DfUhA5oXbJq6">拦截发生在请求发出前</td><td class="ok" data-page-node-id="oO4zA1jd9EgViB6pYcKr7">已验证（零落账 vs NET2 到达）</td></tr>
+<tr data-page-node-id="pP5aB2ke0FhWjC7qZdLs8"><td data-page-node-id="qQ6bC3lf1GiXkD8rAeMt9">与目标真伪、可达性、已知名单均无关</td><td class="ok" data-page-node-id="rR7cD4mg2HjYlE9sBfNu0">已验证（NET1 与 H4 双证）</td></tr>
+<tr data-page-node-id="sS8dE5nh3IkZmF0tCgOv1"><td data-page-node-id="tT9eF6oi4JlAnG1uDhPw2">拦截判定为本地执行、不需要联网</td><td class="ok" data-page-node-id="uU0fG7pj5KmBoH2vEiQx3">已验证（C-1 瞬间响应 + C-2 断网仍拦）</td></tr>
+<tr data-page-node-id="xX2jJ9sm6NpErK5yHlTa7"><td data-page-node-id="yY3kK0tn7OqFsL6zImUb8">拦截层 = 设备侧 MDM 组件</td><td class="ok" data-page-node-id="zZ4lL1uo8PrGtM7aJnVc9">已验证（三个包名直接定位 + 上述本地执行双证）</td></tr>
+<tr data-page-node-id="aA5mM2vp9QsHuN8bKoWd0"><td data-page-node-id="bB6nN3wq0RtIvO9cLpXe1">非 WebView 通道是否受限</td><td class="na" data-page-node-id="cC7oO4xr1SuJwP0dMqYf2">App 原生 HTTP、系统更新、应用商店下载是否同样受裸 IP 限制。<b data-page-node-id="dD8pP5ys2TvKxQ1eNrZg3">本轮条件下不可测</b>——全部 454 条设备请求 UA 均为 <code data-page-node-id="eE9qQ6zt3UwLyR2fOsAh4">wv</code>（WebView），设备未提供构造原生请求的入口。该缺口已由 C-2 离线对照以等价判别力替代</td></tr>
+<tr data-page-node-id="fF0rR7au4VxMzS3gPtBi5"><td data-page-node-id="gG1sS8bv5WyNaT4hQuCj6">「MDM 组件执行拦截」的禁用对照</td><td class="na" data-page-node-id="hH2tT9cw6XzObU5iRvDk7">未做「停用 <code data-page-node-id="iI3uU0dx7YaPcV6jSwEl8">mdmadmin</code> 后拦截是否消失」的对照实验（涉及改动受管设备配置）；但已通过 C-1/C-2 从行为侧独立验证本地执行</td></tr>
+<tr data-page-node-id="vV1gH8qk6LnCpI3wFjRy4"><td data-page-node-id="wW2hI9rl7MoDqJ4xGkSz5">具体拦截实现机制</td><td class="na" data-page-node-id="xX3iJ0sm8NpErK5yHlTa6">未验证——哪个组件、以何种方式（WebView 回调 / 网络代理 / 系统策略）实现拦截，需逆向或管理端审计</td></tr>
+<tr data-page-node-id="yY4jK1tn9OqFsL3zImUb7"><td data-page-node-id="zZ5kL2uo0PrGtM4aJnVc8">非 WebView 通道是否受限</td><td class="na" data-page-node-id="aA6lM3vp1QsHuN5bKoWd9">未测——App 原生 HTTP、系统更新、应用商店下载是否同样受裸 IP 限制</td></tr>
+<tr data-page-node-id="bB7mN4wq2RtIvO6cLpXe0"><td data-page-node-id="cC8nO5xr3SuJwP7dMqYf1">「MDM 组件执行拦截」的直接因果验证</td><td class="na" data-page-node-id="dD9oP6ys4TvKxQ8eNrZg2">未做——见下方说明（未执行禁用组件的对照实验）</td></tr>
+</table>
+<div class="note" data-page-node-id="eE0pQ7zt5UwLyR9fOsAh3"><b data-page-node-id="fF1qR8au6VxMzS0gPtBi4">关于「拦截层 = 设备侧 MDM 组件」的证据说明</b>：三个包名（<code data-page-node-id="gG2rS9bv7WyNaT1hQuCj5">com.iflytek.mdmsetting</code> / <code data-page-node-id="hH3sT0cw8XzObU2iRvDk6">mdmservice</code> / <code data-page-node-id="iI4tU1dx9YaPcV3jSwEl7">mdmadmin</code>）由设备持有者在设备应用列表中<b data-page-node-id="jJ5uV2ey0ZbQdW4kTxFm8">直接读取</b>，属确凿事实。「拦截由该体系执行」是基于「组件存在 + 拦截行为发生在设备侧且早于请求发出」的<b data-page-node-id="kK6vW3fz1AcReX5lUyGn9">合取推论</b>——逻辑链完整，但严格意义上未做「禁用组件后拦截消失」的对照验证。<br>若需将该推论升级为直接证明，可在管理端授权下做一个对照实验：临时停用/卸载 <code data-page-node-id="lL7wX4ga2BdSfY6mVzHo0">mdmadmin</code> 后重测 NET1，观察「无效的响应」是否消失。<b data-page-node-id="mM8xY5hb3CeTgZ7nWaIp1">本报告未执行该实验</b>（涉及改动受管设备配置，超出本次黑盒测绘范围）。</div>
+</div>
+
+<h2 data-page-node-id="ZAoLJf4o5gJ2EPWFtJAFqK">六、完整探针清单（62 项 + 第三轮 10 项）</h2>
 
 <h3 data-page-node-id="XoHRxVj0emV2F585eGxdTB">第一轮 · N 组（导航层，7）</h3>
 <table data-page-node-id="UEN5OcUBkP8F8Vf7D5TlvG">
